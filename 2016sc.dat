@@ -7,7 +7,7 @@
   22
 #number of years of retained fishery data
 37
-#years when have fishery data these years are the survey years (fishery year-1)
+#years for fishery data these years are the survey years (fishery year-1)
 1978 1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014
 #nsamples weight for retained fishery length comps needmatrix each year and new, old shell - last three years 
  200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200
@@ -34,7 +34,7 @@
 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200 200
 #number of years of survey data
 38
-#years when have survey data
+#years for survey data
 1978 1979 1980 1981 1982 1983 1984 1985 1986 1987 1988 1989 1990 1991 1992 1993 1994 1995 1996 1997 1998 1999 2000 2001 2002 2003 2004 2005 2006 2007 2008 2009 2010 2011 2012 2013 2014 2015
 #number of years of survey length data
 38
@@ -663,7 +663,7 @@
 27	41	23	68	120	106	167	270	368	492	541	643	650	795	1040	1264	1226	1044	865	649	394	230
 
 #fishery catch retained males 1978-1999
-#year  catch in numbers is first then  catch in lbs
+#retained catch in numbers
  40209498
  50016937
   44622122
@@ -702,7 +702,7 @@
 41926542
 55029808
 55029808
-# numbers were estimated by dividing wght by avg weight of crab 1.4 harvest, 1.3 cdq
+# retained catch in pounds 
 52272347
 75025406
 66933183
@@ -741,7 +741,7 @@
 53983286
 67941587
 67941587
-#Catch from observer reports 
+# Discard Catch from observer reports 
 # females
 269403
 335113
@@ -781,7 +781,7 @@
 962956 
 2494594
 2494594
-#males
+#discard catch males
 14073324.3
 17505927.95
 15617742.7
@@ -820,7 +820,7 @@
 33090976
 33430131
 33430131
-#groundfish bycatch numbers by geartype almost all is trawl
+#trawl bycatch numbers by geartype almost all is trawl
 #hook and line, groundfish pot, trawl
 13182600
 10530000
@@ -835,8 +835,7 @@
 2354140
 2732580
 2090000
-#new bycatch data from Mondragon July 2009
-8055539.
+8055539
 11322144.11
 13005649.49
 8358618.602
@@ -861,7 +860,7 @@
 410461.2673
 515910.6573
 515910.6573
-#survey numbers by year male+female millions of crab 1978-1979 old data
+# survey numbers by year male+female millions of crab 1978-1979 old data
 4644.7
 12895.3
 7776.575005

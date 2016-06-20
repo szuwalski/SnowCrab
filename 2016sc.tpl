@@ -527,7 +527,6 @@ PARAMETER_SECTION
   number surv2_like
   number surv3_like
   number surv10_like
-   number surv_like_nowt
   number sexr_like
   number like_initsmo
   number like_q
@@ -2147,7 +2146,6 @@ FUNCTION evaluate_the_objective_function
   len_like_srv.initialize();
   len_like10_ind.initialize();
   len_like10_nmfs.initialize();
-  
   sel_like=0.;
   fpen=.0;
   like_initsmo=0.0;
@@ -2156,7 +2154,6 @@ FUNCTION evaluate_the_objective_function
   surv_like=.0;
   surv2_like=0.0;
   surv3_like=0.0;
-  surv_like_nowt.initialize();
   catch_like1=.0;
   catch_like2=.0;
   catch_likef=.0;
@@ -2456,6 +2453,7 @@ FUNCTION evaluate_the_objective_function
     biom_tmp(2,yrs_srv1(i))=mspbio_srv1(yrs_srv1(i));
   }
 //likelihood for survey biomass by sex
+//  This loop allows for increasing the weight onthe survey biomass through a constant specified in the control file (should be set to 1)
   for(i=1;i<=nobs_srv1;i++)
     {
      cv_srv1(1,yrs_srv1(i))=like_wght(5)*cv_srv1o(1,i);
@@ -2463,9 +2461,6 @@ FUNCTION evaluate_the_objective_function
      cv_srv1_nowt(1,yrs_srv1(i))=cv_srv1o(1,i);
      cv_srv1_nowt(2,yrs_srv1(i))=cv_srv1o(2,i);
     }
-
-   for(k=1;k<=2;k++)
-    surv_like_nowt += norm2(elem_div( log(obs_srv1_spbiom(k)(yrs_srv1)+p_const )-log(biom_tmp(k)(yrs_srv1)+p_const ),sqrt(2)*sqrt(log(elem_prod(cv_srv1_nowt(k)(yrs_srv1),cv_srv1_nowt(k)(yrs_srv1))+1.0))));
 
 //this fits mature biomass separate male and female
     surv_like += norm2(elem_div( log(obs_srv1_spbiom(1)(yrs_srv1)+p_const )-log(biom_tmp(1)(yrs_srv1)+p_const ),sqrt(2)*sqrt(log(elem_prod(cv_srv1(1)(yrs_srv1),cv_srv1(1)(yrs_srv1))+1.0))));
@@ -2803,1125 +2798,168 @@ REPORT_SECTION
   Find_F35();
   Find_OFL();
 
-//  report << "Estimated numbers of female crab: seq(3,15) " << endl;
-//  report << natlength(1) << endl;
-//  report << "Estimated numbers of male crab: seq(3,15) " << endl;
-//  report << natlength(2) << endl;
-    tmpp1=0.0;
-    tmpp2=0.0;
-    tmpp3=0.0;
-    tmpp4=0.0;
-
-  report << Fout << endl;
-
-  report << "Estimated numbers of immature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-       report <<  i<<" "<<natlength_inew(1,i) << endl;
-       }
-  report << "Estimated numbers of immature old shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-       report <<  i<<" "<<natlength_iold(1,i) << endl;
-       }
-  report << "Estimated numbers of mature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-       report <<  i<<" "<<natlength_mnew(1,i) << endl;
-       }
-  report << "Estimated numbers of mature old shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-       report <<  i<<" "<<natlength_mold(1,i) << endl;
-       }
-
-  report << "Estimated numbers of immature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-        report << i<<" "<<natlength_inew(2,i) << endl;
-      }
- report << "Estimated numbers of immature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-        report << i<<" "<<natlength_iold(2,i) << endl;
-      }
- report << "Estimated numbers of mature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-        report << i<<" "<<natlength_mnew(2,i) << endl;
-      }
- report << "Estimated numbers of mature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-        report << i<<" "<<natlength_mold(2,i) << endl;
-      }
- report << "Observed numbers of immature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(1,1,1,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
- report << "Observed numbers of mature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,1,1,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
- report << "Observed numbers of mature old shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,2,1,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
- report << "Observed numbers of immature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(1,1,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
- report << "Observed numbers of immature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(1,2,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
- report << "Observed numbers of mature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,1,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
- report << "Observed numbers of mature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-           report<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,2,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
-      }
-
-  report << "Observed Survey Numbers by length females:  'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-        report<<yrs_srv1_length(i)<<" " << obs_srv1_num(1,yrs_srv1_length(i)) << endl;
-      }
-
-  report << "Observed Survey Numbers by length males: 'year', '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-        report<<yrs_srv1_length(i)<<" " << obs_srv1_num(2,yrs_srv1_length(i))<< endl;
-      }
-  report << "Predicted Survey Numbers by length females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-       report<<yrs_srv1_length(i)<<" "  << pred_srv1(1,yrs_srv1_length(i)) << endl;
-      }
-  report << "Predicted Survey Numbers by length males: 'year', '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i <= nobs_srv1_length; i++)
-      {
-         report<<yrs_srv1_length(i)<<" "  << pred_srv1(2,yrs_srv1_length(i)) << endl;
-       }
-  report << "Predicted pop Numbers by length females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-       report<<i<<" "<< natlength(1,i)<< endl;
-      }
-  report << "Predicted pop Numbers by length males: 'year', '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-     for(i=styr;i<=endyr;i++)
-      {
-         report<<i<<" "<< natlength(2,i)<< endl;
-       }
-
-  report<<"observed number of males greater than 101 mm: seq(1978,"<<endyr<<")"<<endl;
-  report<<obs_lmales<<endl;
-  report<<"observed biomass of males greater than 101 mm: seq(1978,"<<endyr<<")"<<endl;
-  report<<obs_lmales_bio<<endl;
-  report<<"pop estimate numbers of males >101: seq(1978,"<<endyr<<")"<<endl;
-        report<<legal_males<<endl;
-      report<<"estimated population biomass of males > 101: seq(1978,"<<endyr<<") "<<endl;
-      report<<legal_males_bio<<endl;
-      report<<"estimated survey numbers of males > 101: seq(1978,"<<endyr<<") "<<endl;
-      report<<legal_srv_males<<endl;
-      report<<"estimated survey biomass of males > 101: seq(1978,"<<endyr<<") "<<endl;
-      report<<legal_srv_males_bio<<endl;
-  report << "Observed survey biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_biom(styr,endyr)<<endl;
-  report << "predicted survey biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << pred_srv1_bioms(1)+pred_srv1_bioms(2)<<endl;
-  //survey numbers
-    for(k=1;k<=2;k++)
-    {
-     for(i=styr;i<=endyr;i++)
-      {
-       tmpo(k,i)=sum(obs_srv1_num(k,i));
-       tmpp(k,i)=sum(pred_srv1(k,i));
-      }
-     }
-  report << "Observed survey numbers female: seq(1978,"<<endyr<<")"<<endl;
-  report << tmpo(1)<<endl;
-  report << "Observed survey numbers male: seq(1978,"<<endyr<<")"<<endl;
-  report << tmpo(2)<<endl;
-  report << "predicted survey numbers female: seq(1978,"<<endyr<<")"<<endl;
-  report << tmpp(1)<<endl;
-  report << "predicted survey numbers male: seq(1978,"<<endyr<<")"<<endl;
-  report << tmpp(2)<<endl;
-  report << "Observed survey female spawning biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_spbiom(1)<<endl;
-  report << "Observed survey male spawning biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_spbiom(2)<<endl;
-  report << "Observed survey female new spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_spnum(1,1)<<endl;
-  report << "Observed survey female old spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_spnum(2,1)<<endl;
-  report << "Observed survey male new spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_spnum(1,2)<<endl;
-  report << "Observed survey male old spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_spnum(2,2)<<endl;
-  report << "Observed survey female biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_bioms(1)<<endl;
-  report << "Observed survey male biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_srv1_bioms(2)<<endl;
-  report << "natural mortality immature females, males: 'FemM','MaleM'" << endl;
-  report << M << endl;
-  report << "natural mortality mature females, males: 'FemMm','MaleMm'" << endl;
-  report << M_matn << endl;
-  report << "natural mortality mature old shell females, males: 'FemMmo','MaleMmo'" << endl;
-  report << M_mato << endl;
-  report << "Predicted Biomass: seq(1978,"<<endyr<<")" << endl;
-  report << pred_bio << endl;
-  report << "Predicted total population numbers: seq(1978,"<<endyr<<") "<<endl;
-  report <<popn<<endl;
-//  report << "Predicted Exploitable Biomass: seq(1978,"<<endyr<<") " << endl;
-//  report << explbiom << endl;
-  report << "Female Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio << endl;
-  report << "Male Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio << endl;
-  report << "Total Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio+mspbio << endl;
-  report << "Female Spawning Biomass at fish time: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_fishtime << endl;
-  report << "Male Spawning Biomass at fish time: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio_fishtime << endl;
-  report << "Total Spawning Biomass at fish time: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_fishtime+mspbio_fishtime << endl;
-  report << "Mating time Female Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_matetime << endl;
-  report << "Mating time Male Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio_matetime << endl;
-  report << "Mating time Male old shell Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio_old_matetime << endl;
-  report << "Mating time female new shell Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_new_matetime << endl;
-  report << "Mating time Total Spawning Biomass : seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_matetime+mspbio_matetime << endl;
-  report << "Mating time effective Female Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << efspbio_matetime << endl;
-  report << "Mating time effective Male Spawning Biomass(old shell only): seq(1978,"<<endyr<<") " << endl;
-  report << emspbio_matetime << endl;
-  report << "Mating time Total effective Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << efspbio_matetime+emspbio_matetime << endl;
-  report << "Mating time male Spawning numbers: seq(1978,"<<endyr<<") " << endl;
-  report << mspnum_matetime << endl;
-  report << "Mating time Female Spawning numbers: seq(1978,"<<endyr<<") " << endl;
-  report << efspnum_matetime << endl;
-  report << "Mating time Male Spawning numbers(old shell only): seq(1978,"<<endyr<<") " << endl;
-  report << emspnum_old_matetime << endl;
-  report << "ratio Mating time Female Spawning numbers to male old shell mature numbers : seq(1978,"<<endyr<<") " << endl;
-  report << elem_div(efspnum_matetime,emspnum_old_matetime) << endl;
-  report << "Mating time effective Female new shell Spawning biomass: seq(1978,"<<endyr<<") " << endl;
-  report <<efspbio_new_matetime << endl;
-  report << "Mating time Female new shell Spawning numbers: seq(1978,"<<endyr<<") " << endl;
-  report << fspnum_new_matetime << endl;
-  report << "ratio Mating time Female new shell Spawning numbers to male old shell mature numbers : seq(1978,"<<endyr<<") " << endl;
-  report << elem_div(fspnum_new_matetime,emspnum_old_matetime) << endl;
-  report << "Predicted Female survey Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << pred_srv1_bioms(1) << endl;
-  report << "Predicted Male survey Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << pred_srv1_bioms(2)<< endl;
-  report << "Predicted Female survey mature Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_srv1 << endl;
-  report << "Predicted Male survey mature Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio_srv1<< endl;
-  report << "Predicted total survey mature Biomass: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_srv1+mspbio_srv1<< endl;
-  report << "Predicted Female survey new mature numbers: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_srv1_num(1) << endl;
-  report << "Predicted Female survey old mature numbers: seq(1978,"<<endyr<<") " << endl;
-  report << fspbio_srv1_num(2) << endl;
-  report << "Predicted Male survey new mature numbers: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio_srv1_num(1)<< endl;
-  report << "Predicted Male survey old mature numbers: seq(1978,"<<endyr<<") " << endl;
-  report << mspbio_srv1_num(2)<< endl;
-//2009 bsfrf study
-  report << "Observed industry survey mature biomass: seq(1,4) " << endl;
-  report << obs_srv2_spbiom(1,1)<<" "<<obs_srv2_spbiom(1,2)<<" "<<obs_srv2_spbiom(2,1)<<" "<<obs_srv2_spbiom(2,2)<<endl;
-  report << "Predicted industry survey mature biomass: seq(1,4) " << endl;
-  report << fspbio_srv2_ind<<" "<<mspbio_srv2_ind<<" "<<fspbio_srv2_nmfs<<" "<<mspbio_srv2_nmfs<<endl;
-  report << "Observed Prop industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<(obs_p_srv2_len(1,1,1)+obs_p_srv2_len(1,1,2))<<endl;
-  report << "Observed Prop industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<(obs_p_srv2_len(1,2,1)+obs_p_srv2_len(1,2,2))<<endl;
-  report << "Observed Prop industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<obs_p_srv2_len(2,1,1)+obs_p_srv2_len(2,1,2)<<endl;
-  report << "Observed Prop industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<obs_p_srv2_len(2,2,1)+obs_p_srv2_len(2,2,2)<<endl;
-  report << "Predicted Prop industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv2_len_ind(1)<<endl;
-  report << "Predicted Prop industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv2_len_ind(2)<<endl;
-  report << "Predicted Prop industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv2_len_nmfs(1)<<endl;
-  report << "Predicted Prop industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv2_len_nmfs(2)<<endl;
-//2010 bsfrf study   
-  report << "Observed 2010 industry survey mature biomass: seq(1,4) " << endl;
-  report << obs_srv10_spbiom(1,1)<<" "<<obs_srv10_spbiom(1,2)<<" "<<obs_srv10_spbiom(2,1)<<" "<<obs_srv10_spbiom(2,2)<<endl;
-  report << "Predicted 2010 industry survey mature biomass: seq(1,4) " << endl;
-  report << fspbio_srv10_ind<<" "<<mspbio_srv10_ind<<" "<<fspbio_srv10_nmfs<<" "<<mspbio_srv10_nmfs<<endl;
-  report << "Observed Prop 2010 industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<(obs_p_srv10_len(1,1,1)+obs_p_srv10_len(1,1,2))<<endl;
-  report << "Observed Prop 2010 industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<(obs_p_srv10_len(1,2,1)+obs_p_srv10_len(1,2,2))<<endl;
-  report << "Observed Prop 2010 industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<obs_p_srv10_len(2,1,1)+obs_p_srv10_len(2,1,2)<<endl;
-  report << "Observed Prop 2010 industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<obs_p_srv10_len(2,2,1)+obs_p_srv10_len(2,2,2)<<endl;
-  report << "Predicted Prop 2010 industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv10_len_ind(1)<<endl;
-  report << "Predicted Prop 2010 industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv10_len_ind(2)<<endl;
-  report << "Predicted Prop 2010 industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv10_len_nmfs(1)<<endl;
-  report << "Predicted Prop 2010 industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<pred_p_srv10_len_nmfs(2)<<endl;
-
-
-
-   report << "Observed Prop fishery ret new males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i<=nobs_fish; i++)
-        {
-          report << yrs_fish(i) << " " << obs_p_fish_ret(1,i)<< endl;
-         }
-    report << "Predicted length prop fishery ret new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-   //report<<pred_p_fish<<endl;
-       for (i=1; i<=nobs_fish; i++)
-        {
-          ii=yrs_fish(i);  
-          report <<  ii  <<  " "  <<  pred_p_fish_fit(1,ii)  << endl;
-         }
-  report << "Observed Prop fishery ret old males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i<=nobs_fish; i++)
-        {
-          report << yrs_fish(i) << " " << obs_p_fish_ret(2,i)<< endl;
-         }
-    report << "Predicted length prop fishery ret old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-   //report<<pred_p_fish<<endl;
-       for (i=1; i<=nobs_fish; i++)
-        {
-          ii=yrs_fish(i);  
-          report <<  ii  <<  " "  <<  pred_p_fish_fit(2,ii)  << endl;
-         }
-
-  report << "Observed Prop fishery total new males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i<=nobs_fish_discm; i++)
-        {
-          report << yrs_fish_discm(i) << " " << obs_p_fish_tot(1,i) << endl;
-         }
-    report << "Predicted length prop fishery total new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-   //report<<pred_p_fish<<endl;
-       for (i=1; i<=nobs_fish_discm; i++)
-        {
-          ii=yrs_fish_discm(i);  
-          report <<  ii  <<  " "  <<  pred_p_fish(1,ii)  << endl;
-         }
-  report << "Observed Prop fishery total old males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i<=nobs_fish_discm; i++)
-        {
-          report << yrs_fish_discm(i) << " " << obs_p_fish_tot(2,i) << endl;
-         }
-    report << "Predicted length prop fishery total old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-   //report<<pred_p_fish<<endl;
-       for (i=1; i<=nobs_fish_discm; i++)
-        {
-          ii=yrs_fish_discm(i);  
-          report <<  ii  <<  " "  <<  pred_p_fish(2,ii)  << endl;
-         }
-  report << "Observed Prop fishery discard new males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i<=nobs_fish_discm; i++)
-        {
-          report << yrs_fish_discm(i) << " " << obs_p_fish_discm(1,i) << endl;
-         }
-
-  report << "Observed Prop fishery discard old males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-      for (i=1; i<=nobs_fish_discm; i++)
-        {
-          report << yrs_fish_discm(i) << " " << obs_p_fish_discm(2,i)<< endl;
-         }
-
-    report << "Observed length prop fishery discard all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-    for (i=1; i<=nobs_fish_discf; i++)
-    {
-      report <<  yrs_fish_discf(i)  <<  " "  <<  obs_p_fish_discf(i)  << endl;
-    }
-    report << "Predicted length prop fishery discard all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-    for (i=1; i<=nobs_fish_discf; i++)
-    {
-      ii=yrs_fish_discf(i);  
-      report <<  ii  <<  " "  <<  pred_p_fish_discf(ii)  << endl;
-    }
-
-    report << "Predicted length prop trawl females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_trawl; i++)
-        {
-          ii=yrs_trawl(i);  
-          report <<  ii  <<  " "  <<  pred_p_trawl(1,ii)  << endl;
-         }
-    report << "Observed length prop trawl females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_trawl; i++)
-        {  
-           report <<  yrs_trawl(i)  <<  " "  <<  obs_p_trawl(1,i)  << endl;
-         }
-    report << "Predicted length prop trawl males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_trawl; i++)
-        {
-          ii=yrs_trawl(i);  
-          report <<  ii  <<  " "  <<  pred_p_trawl(2,ii)  << endl;
-         }
-    report << "Observed length prop trawl males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_trawl; i++)
-        {  
-           report <<  yrs_trawl(i)  <<  " "  <<  obs_p_trawl(2,i)  << endl;
-         }
-
-//  report << "Observed length Prop fishery males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  //    for (i=1; i<=nobs_fish; i++)
-  //      {
-  //        report << yrs_fish(i) << " " << obs_p_fish(2,i) << endl;
-  //       }
-//    report << "Predicted length prop fishery males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-   //report<<pred_p_fish<<endl;
-   //    for (i=1; i<=nobs_fish; i++)
-  //      {
-    //      ii=yrs_fish(i);  
-    //      report <<  ii  <<  " "  <<  pred_p_fish(2,ii)  << endl;
-    //     }
- report << "Observed Length Prop survey immature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);
-              report << ii <<" " <<obs_p_srv1_len(1,1,1,i) << endl;
-           }
-  report << "Predicted length prop survey immature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);  
-             report << ii << " " << pred_p_srv1_len_new(1,1,ii) << endl;
-          }
-  report << "Observed Length Prop survey immature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);
-              report << ii <<" " <<obs_p_srv1_len(1,2,1,i) << endl;
-           }
-  report << "Predicted length prop survey immature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);  
-             report << ii << " " << pred_p_srv1_len_old(1,1,ii) << endl;
-          }
- 
-  report << "Observed Length Prop survey immature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             report << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(1,1,2,i) << endl;
-          }
-  report << "Predicted length prop survey immature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);  
-             report << ii << " " << pred_p_srv1_len_new(1,2,ii) << endl;
-         }
- report << "Observed Length Prop survey immature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
- for (i=1; i<=nobs_srv1_length; i++)
- {
-   report << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(1,2,2,i) << endl;
- }
- report << "Predicted length prop survey immature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
- for (i=1; i<=nobs_srv1_length; i++)
- {
-   ii=yrs_srv1_length(i);  
-   report << ii << " " << pred_p_srv1_len_old(1,2,ii) << endl;
- }
- report << "Observed Length Prop survey mature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);
-              report << ii <<" " <<obs_p_srv1_len(2,1,1,i) << endl;
-           }
-  report << "Predicted length prop survey mature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);  
-             report << ii << " " << pred_p_srv1_len_new(2,1,ii) << endl;
-          }
-  report << "Observed Length Prop survey mature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);
-              report << ii <<" " <<obs_p_srv1_len(2,2,1,i) << endl;
-           }
-  report << "Predicted length prop survey mature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);  
-             report << ii << " " << pred_p_srv1_len_old(2,1,ii) << endl;
-          }
- 
-  report << "Observed Length Prop survey mature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             report << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(2,1,2,i) << endl;
-          }
-  report << "Predicted length prop survey mature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-       for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);  
-             report << ii << " " << pred_p_srv1_len_new(2,2,ii) << endl;
-         }
- report << "Observed Length Prop survey mature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
- for (i=1; i<=nobs_srv1_length; i++)
- {
-   report << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(2,2,2,i) << endl;
- }
- report << "Predicted length prop survey mature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
- for (i=1; i<=nobs_srv1_length; i++)
- {
-   ii=yrs_srv1_length(i);  
-   report << ii << " " << pred_p_srv1_len_old(2,2,ii) << endl;
- }
- report << "Observed Length Prop survey all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);
-              report << ii <<" " <<obs_p_srv1_len(1,1,1,i)+obs_p_srv1_len(2,1,1,i)+obs_p_srv1_len(2,2,1,i)<< endl;
-              tmpp4+=obs_p_srv1_len(1,1,1,i)+obs_p_srv1_len(2,1,1,i)+obs_p_srv1_len(2,2,1,i);
-                         }
- report << "Predicted length prop survey all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
- for (i=1; i<=nobs_srv1_length; i++)
- {
-   ii=yrs_srv1_length(i);  
-   report << ii << " " << pred_p_srv1_len_new(1,1,ii)+pred_p_srv1_len_new(2,1,ii)+pred_p_srv1_len_old(2,1,ii) << endl;
-    tmpp1+=pred_p_srv1_len_new(1,1,ii)+pred_p_srv1_len_new(2,1,ii)+pred_p_srv1_len_old(2,1,ii);
-    }
- report << "Observed Length Prop survey all males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-         for (i=1; i<=nobs_srv1_length; i++)
-          {
-             ii=yrs_srv1_length(i);
-              report << ii <<" " <<obs_p_srv1_len(1,1,2,i)+obs_p_srv1_len(1,2,2,i)+obs_p_srv1_len(2,1,2,i)+obs_p_srv1_len(2,2,2,i)<< endl;
-         tmpp2+=obs_p_srv1_len(1,1,2,i)+obs_p_srv1_len(1,2,2,i)+obs_p_srv1_len(2,1,2,i)+obs_p_srv1_len(2,2,2,i);
-                        }
- report << "Predicted length prop survey all males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
- for (i=1; i<=nobs_srv1_length; i++)
- {
-   ii=yrs_srv1_length(i);  
-   report << ii << " " << pred_p_srv1_len_new(1,2,ii)+pred_p_srv1_len_new(2,2,ii)+pred_p_srv1_len_old(2,2,ii) << endl;
-  tmpp3+=pred_p_srv1_len_new(1,2,ii)+pred_p_srv1_len_new(2,2,ii)+pred_p_srv1_len_old(2,2,ii);
-    }
-  report << "Sum of predicted prop survey all females: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-            report <<tmpp1<<endl;
-  report << "Sum of predicted prop survey all males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-            report <<tmpp3<<endl;
-  report << "Sum of Observed prop survey all females: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-            report <<tmpp4<<endl;
-  report << "Sum of Observed prop survey all males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-            report <<tmpp2<<endl;
-                
-
-// report << "Observed Length Prop fishery new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-//         for (i=1; i<=nobs_fish_length; i++)
-//          {
-//             report << yrs_fish_length(i) <<" " <<obs_p_fish_len(1,i) << endl;
-//          }
-//  report << "Predicted length prop fishery new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-//       for (i=1; i<=nobs_fish_length; i++)
-//          {
-//             ii=yrs_fish_length(i);  
-//             report << ii << " " << pred_p_fish_discm(1,ii) << endl;
-//         }
-//          
-//  report << "Observed mean length at age females:  'year','3','4','5','6','7','8','9','10','11','12','13','14','15'" << endl;
-//        for(i=1;i<=nyrs_mlen; i++)
-//  {
-//                   ii=yrs_mlen(i);
-//                 report << ii << " " << mean_length_obs(1,i) << endl;
-//  }
-//  report << "Observed mean length at age males:  'year','3','4','5','6','7','8','9','10','11','12','13','14','15'" << endl;
-//        for(i=1;i<=nyrs_mlen; i++)
-//  {
-//                  ii=yrs_mlen(i); 
-//                report << ii << " " << mean_length_obs(2,i) << endl;
-//  }
-  report << "Predicted mean postmolt length females:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << mean_length(1) << endl;
-  report << "Predicted mean postmolt length males:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << mean_length(2)<<endl; 
-  report<< "sd mean length females:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  report<<sd_mean_length(1)<<endl;
-  report<< "sd mean length males:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  report<<sd_mean_length(2)<<endl;
-  report << "af: 'females <36.1'" << endl;
-  report << af << endl;
-  report << "am: 'males <36.1'" << endl;
-  report << am << endl;
-  report << "bf: 'females  <36.1'" << endl;
-//  report << bf << endl;  
-//  report << (intyf-af)/36.1 << endl;
-  report << "bm: 'males <36.1'" << endl;
-  report << bm << endl;
-//  report << (inty-am)/36.1 << endl;
-//  report << "af1: 'females >36.1'" << endl;
-//  report << af1 << endl;
-//  report << "am1: 'males >36.1'" << endl;
-//  report << a1 << endl;
-//  report << "bf: 'females  >36.1'" << endl;
-//  report << bf1 << endl;  
-//  report << (intyf-af1)/36.1 << endl;
-  report << "bm: 'males >36.1'" << endl;
-  report << b1 << endl;
-//  report << (inty-a1)/36.1 << endl;
-    report << "Predicted probability of maturing females:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << maturity_est(1)<<endl; 
-  report << "Predicted probability of maturing males:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << maturity_est(2)<<endl; 
-  report<<"molting probs female: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  report<<moltp(1)<<endl;
-  report<<"molting probs male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report<<moltp(2)<<endl;
-  report <<"Molting probability mature males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<moltp_mat(2)<<endl;
-  report << "observed pot fishery cpue 1979 fishery to endyr fishery: seq(1979,"<<endyr<<")" << endl;
-  report <<cpue(1979,endyr)<<endl;
-  report << "predicted pot fishery cpue 1978 to endyr-1 survey: seq(1978,"<<endyr-1<<")" << endl;
-  report <<cpue_pred(1978,endyr-1)<<endl;
-  report << "observed retained catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << catch_ret(styr,endyr-1) << endl;
-  report << "predicted retained catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << pred_catch_ret(styr,endyr-1)<<endl;
-  report << "predicted retained new catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << (catch_male_ret_new*wtm)(styr,endyr-1)<<endl;
-  report << "predicted retained old catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << (catch_male_ret_old*wtm)(styr,endyr-1)<<endl;
-  report << "observed retained+discard male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << obs_catchtot_biom(styr,endyr-1) << endl;
-  report << "predicted retained+discard male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << pred_catch(styr,endyr-1) << endl;
-  report << "predicted retained+discard new male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << (catch_lmale_new*wtm)(styr,endyr-1) << endl;
-  report << "predicted retained+discard old male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << (catch_lmale_old*wtm)(styr,endyr-1) << endl;
-  report << "observed discard male mortality biomass: seq(1979,"<<endyr<<")"<<endl;
-  // report << (obs_catchtot_biom-catch_ret)(styr,endyr-1) <<endl;
-  report << "predicted discard male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  report << pred_catch(styr,endyr-1) -pred_catch_ret(styr,endyr-1)<< endl;
-  report << "observed female discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-  report << obs_catchdf_biom(styr,endyr-1) << endl;
-  report << "predicted female discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-  report << pred_catch_disc(1)(styr,endyr-1) << endl;
-  report << "observed male discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-  report << obs_catchdm_biom(styr,endyr-1) << endl;
-//  report << "predicted male discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-//  report << pred_catch_disc(2)(styr,endyr-1) << endl;
-  report << "observed trawl catch biomass: seq(1978,"<<endyr<<")"<<endl;
-  report << obs_catcht_biom<<endl;
-  report << "predicted trawl catch biomass: seq(1978,"<<endyr<<")"<<endl;
-  report <<pred_catch_trawl<<endl;
-  report << "estimated retained catch div. by male spawning biomass at fishtime: seq(1979,"<<endyr<<")" << endl;
-  report <<elem_div(pred_catch_ret,mspbio_fishtime)(styr,endyr-1) << endl;
-  report << "estimated total catch div. by male spawning biomass at fishtime: seq(1979,"<<endyr<<")" << endl;
-  report <<elem_div(pred_catch,mspbio_fishtime)(styr,endyr-1) << endl;
-  report << "estimated total catch of males >101 div. by males >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  report <<elem_div(pred_catch_gt101(styr,endyr-1),bio_males_gt101(styr,endyr-1)) << endl;
-  report << "estimated total catch numbers of males >101 div. by males numbers >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  report <<elem_div(pred_catch_no_gt101(styr,endyr-1),num_males_gt101(styr,endyr-1)) << endl;
-  report << "estimated total catch numbers of males >101 div. by survey estimate males numbers >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-     for(i=styr;i<endyr;i++)
-        {
-         obs_tmp(i) = obs_lmales(i-(styr-1));
-        }
-  report <<elem_div(pred_catch_no_gt101(styr,endyr-1),obs_tmp(styr,endyr-1)*mfexp(-M_matn(2)*(7/12))) << endl;
-     for(i=styr;i<endyr;i++)
-        {
-         obs_tmp(i) = obs_lmales_bio(i-(styr-1));
-        }
-
-  report << "estimated total catch biomass of males >101 div. by survey estimate male biomass >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  report <<elem_div(pred_catch_gt101(styr,endyr-1),obs_tmp(styr,endyr-1)*mfexp(-M_matn(2)*(7/12)) ) << endl;
-
-  report << "estimated total catch biomass div. by survey estimate male mature biomass at fishtime: seq(1979,"<<endyr<<")" << endl;
-  report <<elem_div(pred_catch(styr,endyr-1),((obs_srv1_spbiom(2))(styr,endyr-1))*mfexp(-M_matn(2)*(7/12))) << endl;
-  report << "estimated annual total fishing mortality: seq(1979,"<<endyr<<")" << endl;
-  report << mfexp(log_avg_fmort+fmort_dev)(styr,endyr-1) << endl;
-//  report << "estimated target annual fishing mortality rate: seq(1978,"<<endyr<<")" << endl;
-//  report <<ftarget<<endl;
-  report <<"retained F: seq(1978,"<<endyr<<")" << endl;
-         for(i=styr;i<=endyr;i++){
-          report <<F_ret(1,i)(22)<<" ";
-         }
-  report<<endl;
-//  report <<"predicted ghl: seq(1978,"<<endyr<<")" << endl;
-//  report <<pred_catch_target<<endl;
-  report <<"ghl: seq(1978,"<<endyr<<")" << endl;
-  report <<catch_ghl/2.2<<endl;
-    report << "estimated annual fishing mortality females pot: seq(1979,"<<endyr<<")" << endl;
-  report << fmortdf(styr,endyr-1) <<endl;
-  report << "estimated annual fishing mortality trawl bycatch: seq(1979,"<<endyr<<")" << endl;
-  report << fmortt(styr,endyr-1) <<endl;
-//  report << "initial number of recruitments female: seq(1963,1977)" << endl;
-//  for(i=styr-nirec; i<=styr-1; i++)
-//  {
-//    report << mfexp(mean_log_rec(1)+rec_dev(1,i))<<" ";
-//  }
-//  report <<endl<< "initial number of recruitments male: seq(1963,1977)" << endl;
-//  for(i=styr-nirec; i<=styr-1; i++)
-//  {
-//    report << mfexp(mean_log_rec(2)+rec_dev(2,i))<<" ";
-//  } 
-//recruits in the model are 1978 to 2004, the 1978 recruits are those that enter the population
-//in spring of 1979, before the 1979 survey - since using the survey as the start of the year
-// in the model spring 1979 is stil 1978.  the last recruits are 2003 that come in spring 2004
-  report << "estimated number of recruitments female: seq(1979,"<<endyr<<")" << endl;
-  for(i=styr; i<=endyr-1; i++)
-  {
-    report << mfexp(mean_log_rec(1)+rec_devf(i))<<" ";
-  }
-  report <<endl<< "estimated number of recruitments male: seq(1979,"<<endyr<<")" << endl;
-  for(i=styr; i<=endyr-1; i++)
-  {
-    report << mfexp(mean_log_rec(2)+rec_devf(i))<<" ";
-  }
-  for(i=1;i<=median_rec_yrs;i++)report<<2*median_rec<<" ";
-  report<<endl;
-  report<<"distribution of recruits to length bins: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  report<<rec_len<<endl;
-  report<<"fishery total selectivity new shell 50% parameter: seq(1979,"<<endyr<<")"<<endl;
-  report <<mfexp(log_avg_sel50_mn+log_sel50_dev_mn)(styr,endyr-1)<<endl;
-  report <<"fishery total selectivity old shell 50% parameter: seq(1979,"<<endyr<<")"<<endl;
-  report <<mfexp(log_avg_sel50_mo+log_sel50_dev_mo)(styr,endyr-1)<<endl;
-  report << "selectivity fishery total new males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel(1) << endl;
-  report << "selectivity fishery total old males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel(2) << endl;
-  report << "selectivity fishery ret new males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_fit(1) << endl;
-  report << "selectivity fishery ret old males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_fit(2) << endl;
-  report <<"retention curve males new: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<sel_ret(1,endyr-1)<<endl;
-  report <<"retention curve males old: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<sel_ret(2,endyr-1)<<endl;
-  report << "selectivity discard females: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<sel_discf<<endl;
-  report << "selectivity trawl females:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<sel_trawl(1)<<endl;
-  report << "selectivity trawl males:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report <<sel_trawl(2)<<endl;
-  report << "selectivity survey females 1978 1981: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv1(1) << endl;
-  report << "selectivity survey males 1978 1981: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv1(2) << endl;
-  report << "selectivity survey females 1982 to 1988: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv2(1) << endl;
-  report << "selectivity survey males 1982 to 1988: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv2(2) << endl;
-  report << "selectivity survey females 1989 to endyr: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv3(1) << endl;
-  report << "selectivity survey males 1989 to endyr: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv3(2) << endl;
-  report << "selectivity industry survey females 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srvind(1) << endl;
-  report << "selectivity industry survey males 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srvind(2) << endl;
-  report << "selectivity nmfs industry survey females 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srvnmfs(1) << endl;
-  report << "selectivity nmfs industry survey males 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srvnmfs(2) << endl;
-  report << "selectivity industry survey females 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv10ind(1) << endl;
-  report << "selectivity industry survey males 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv10ind(2) << endl;
-  report << "selectivity nmfs industry survey females 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv10nmfs(1) << endl;
-  report << "selectivity nmfs industry survey males 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv10nmfs(2) << endl;
-
-    report << "numbers of mature females by age and length: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-
-    for(i=styr;i<=endyr;i++){
-  report << natlength_mnew(1,i)<<endl;
-
-  }
-  report << "numbers of mature males by age and length: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  for(i=styr;i<=endyr;i++){
-  report << natlength_mnew(2,i)<<endl;
-  }
-  report << "pred_sexr population: seq(1978,"<<endyr<<")" << endl;
-  report << predpop_sexr <<endl;
-  report << "obs_sexr_srv1 from lengths: seq(1978,"<<endyr<<")" << endl;
-  report << obs_sexr_srv1_l<<endl; 
-  report << "pred_sexr survey: seq(1978,"<<endyr<<")" << endl;
-  report << preds_sexr <<endl;
-  report <<"likelihood: 'rec_like','sexr_like','change_sel_like','len_like_ret','len_like_tot','len_like_fem','len_like_surv','len_like_trawl', 'fpen',  'catch_like tot','catch ret', 'catch fem','catch trawl', 'surv_like','surv_like_nowt','like_initnum','like_initsmo','total likelihood'"<<endl;
-  report <<rec_like<<"  "<<sexr_like<<"  "<<sel_like_50m<<"  "
-           <<like_wght(1)*len_like(1)<<" "<<like_wght(2)*len_like(2)<<" "<<like_wght(3)*len_like(3)<<" "<<like_wght(4)*len_like(4)<<" "<<like_wght(7)*len_like(5)<<" "<< " "
-           <<fpen<<" "<<wght_total_catch*catch_like1<<" "<<like_wght(6)*catch_like2<<" "<<wght_female_potcatch*catch_likef<<" "<<like_wght(6)*0.01*catch_liket<<" "<<surv_like<<" "<<surv_like_nowt<<" "<<like_initnum<<" "<<like_initsmo<<" "<<like_mat<<" "<<f<<endl;
-  report <<"likelihood: 'rec_like','len_like_ret','len_like_tot','len_like_fem','len_like_surv','len_like_trawl', 'fpen','catch_like discard','catch ret', 'catch fem','catch trawl', 'surv_like','like_initnum','like_initsmo','like_natm','like_maturity','like_q','total likelihood'"<<endl;
-  report <<rec_like<<"  "<<like_wght(1)*len_like(1)<<" "<<like_wght(2)*len_like(2)<<" "<<like_wght(3)*len_like(3)<<" "<<like_wght(4)*len_like(4)
-           <<" "<<like_wght(7)*len_like(5)<<" "<<len_like(6)<<" "<<len_like(7)<<" "<<fpen
-           <<" "<<wght_total_catch*catch_like1<<" "<<like_wght(6)*catch_like2<<" "<<like_wght(6)*30.0*catch_likef<<" "<<like_wght(6)*catch_liket
-           <<" "<<surv_like<<" "<<surv2_like<<" "<<surv3_like<<" "<<like_initnum<<" "<<like_initsmo<<" "<<like_natm<<" "<<like_mat<<" "<<like_q<<" "<<like_af+like_bf+like_am+like_bm<<" "<<cpue_like<<" "<<f<<endl;
-  report <<"offset for survey lengths"<<endl;
-  report <<offset(4)<<endl;
-  report <<"survey length likelihoods: 'immature new female','immature new male','immature old female','immature old male','mature new female','mature new male','mature old female','mature old male'"<<endl;
-  report <<len_like_srv<<endl;
-  report <<"likelihood weights: 'retained length','total catch length','female catch','survey length','survey biomass','catch biomass','trawl length'"<<endl;
-  report <<like_wght<<"  "<<like_wght_mbio<<endl;
-  report <<"likelihood weights:  'rec devs','sex ratio','fishery 50%','fmort phase 1','fmort phase>1','fmort devs'"<<endl;
-  report <<like_wght_rec<<"  "<<like_wght_sexr<<"  "<<like_wght_sel50<<"  "<<like_wght_fph1<<"  "<<like_wght_fph2<<"  "<<like_wght_fdev<<endl;
-  report <<"likes bayesian: 'like_natm','like_mmat','like_af','like_bf','like_am','like_bm'"<<endl;
-  report <<like_natm<<" "<<like_mmat<<" "<<like_af<<" "<<like_bf<<" "<<like_am<<" "<<like_bm<<endl;
-  report<<"length - length transition matrix Females:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report<<len_len(1)<<endl;  
-  report<<"length - length transition matrix Males:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report<<len_len(2)<<endl;  
-  report<<"effective N survey lengths immature new shell female "<<endl;
-  report<<effn_srv1(1,1,1)<<endl;
-  report<<" effective N survey lengths mature new shell female "<<endl;
-  report<<effn_srv1(2,1,1)<<endl;
-  report<<" effective N survey lengths mature old shell female "<<endl;
-  report<<effn_srv1(2,2,1)<<endl;
-  report<<" effective N survey lengths immature new shell male "<<endl;
-  report<<effn_srv1(1,1,2)<<endl;
-  report<<" effective N survey lengths immature old shell male "<<endl;
-  report<<effn_srv1(1,2,2)<<endl;
-  report<<" effective N survey lengths mature new shell male "<<endl;
-  report<<effn_srv1(2,1,2)<<endl;
-  report<<" effective N survey lengths mature old shell male "<<endl;
-  report<<effn_srv1(2,2,2)<<endl;
-  report<<" effective N retained lengths new, old shell "<<endl;
-  report<<effn_fish_ret<<endl;
-  report<<" effective N total lengths new, old shell"<<endl;
-  report<<effn_fish_tot<<endl;
-  report<<"male new shell total pot fishery exploitation rates"<<endl;
-  report<<1-mfexp(-1.0*F(1))<<endl;
-  report<<"male old shell total pot fishery exploitation rates"<<endl;
-  report<<1-mfexp(-1.0*F(2))<<endl;
-  report<<"numbers new shell males at time of pop fishery"<<endl;
-  report<<natl_new_fishtime(2)<<endl;
-  report<<"numbers old shell males at time of pop fishery"<<endl;
-  report<<natl_old_fishtime(2)<<endl;
-  report<<"total catch in numbers new shell males"<<endl;
-  report<<catch_lmale_new<<endl;
-  report<<"total catch in numbers old shell males"<<endl;
-  report<<catch_lmale_old<<endl;
-  report<<"retained catch in numbers new shell males"<<endl;
-  report<<catch_male_ret_new<<endl;
-  report<<"retained catch in numbers old shell males"<<endl;
-  report<<catch_male_ret_old<<endl;
-  report<<"observed retained catch new shell males"<<endl;
-  for (i=1; i<=nobs_fish; i++) 
-   {
-   report<<yrs_fish(i)<<" "<<obs_p_fish_ret(1,i)*catch_numbers(yrs_fish(i))<<endl;
-   }
-  report<<"observed retained catch old shell males"<<endl;
-  for (i=1; i<=nobs_fish; i++) 
-   {
-   report<<yrs_fish(i)<<" "<<obs_p_fish_ret(2,i)*catch_numbers(yrs_fish(i))<<endl;
-   }
-  report<<"observed total catch new shell males"<<endl;
-     for (i=1; i<=nobs_fish_discm; i++)
-        {
-          report << yrs_fish_discm(i) << " " <<obs_p_fish_tot(1,i)*catch_tot(yrs_fish_discm(i))<<endl;
-        }
-  report<<"observed total catch old shell males"<<endl;
-     for (i=1; i<=nobs_fish_discm; i++)
-        {
-          report << yrs_fish_discm(i) << " " <<obs_p_fish_tot(2,i)*catch_tot(yrs_fish_discm(i))<<endl;
-        }
-  //compute GHL 
-   for(i=2000;i<=endyr;i++)
-   {
-
-    hrate=0.1+(((mspbio_srv1(i)+fspbio_srv1(i))*2.2-230.4)*(0.125/691.2));
-    if((mspbio_srv1(i)+fspbio_srv1(i))<=(230.4/2.2)) hrate=0.0;
-    if((mspbio_srv1(i)+fspbio_srv1(i))>(921.6/2.2)) hrate=0.225;
-    ghl=hrate*2.2*mspbio_srv1(i);
- //get numbers by dividing by average weight of crabs greater than 102 from 2003 survey
-    ghl_number=ghl/1.27;
-  // cap of 58% of exploitable males = new shell>101 + 25% of old shell>101
-    if((1000.*ghl_number)> (0.58*(legal_srv_males_n(i)+(0.25*legal_srv_males_o(i)))))
-        {
-         ghl_number = (0.58*(legal_srv_males_n(i)+(0.25*legal_srv_males_o(i))))/1000.;
-         ghl = ghl_number*1.27;
-        }
-
-  report <<"year, harvest rate, GHL in 1000 tons then 1000's of crabs: 'year','hrate','ghl','ghl_nos'";
-  report <<i<<"  "<<hrate<<"  "<<ghl<<"  "<<ghl_number<<endl;
-  report <<" estimated survey mature female biomass "<<fspbio_srv1(i)<<endl;
-  report <<" estimated survey mature male biomass "<<mspbio_srv1(i)<<endl;
-  report <<"number of estimated survey new males > 101mm "<<legal_srv_males_n(i)<<endl;
-  report <<"number of estimated survey old males > 101mm "<<legal_srv_males_o(i)<<endl;
-
-   }
-//stuff for input to projection model
-  report<<"#number of length bins"<<endl;
-  report<<nlenm<<endl;
-  report<<"#Nat mort immature female/male"<<endl;
-  report<<M<<endl;
-  report<<"#nat mort mature new shell female/male"<<endl;
-  report<<M_matn<<endl;
-  report<<"#nat mort mature old shell female/male"<<endl;
-  report<<M_mato<<endl;
-  report<<"#constant recruitment"<<endl;
-  report<<"1000000"<<endl;
-  report<<"#average of last 4 years sel total male new old shell"<<endl;
-  report<<(sel(1,endyr-4)+sel(1,endyr-3)+sel(1,endyr-2)+sel(1,endyr-1))/4.0<<endl;
-  report<<(sel(1,endyr-4)+sel(2,endyr-3)+sel(2,endyr-2)+sel(2,endyr-1))/4.0<<endl;
-  report<<"#average of last 4 years sel retained curve male new old shell"<<endl;
-  report<<(sel_fit(1,endyr-3)+sel_fit(1,endyr-2)+sel_fit(1,endyr-1))/3.0<<endl;
-  report<<(sel_fit(2,endyr-3)+sel_fit(2,endyr-2)+sel_fit(2,endyr-1))/3.0<<endl;
-  report<<"#trawl selectivity female male"<<endl;
-  report<<sel_trawl<<endl;
-  report<<"#female pot discard selectivity"<<endl;
-  report<<sel_discf(2009)<<endl;
-  report<<"#maturity curve new shell female male"<<endl;
-  report<<maturity_est(1)<<endl;
-  report<<maturity_est(2)<<endl;
-//  report<<maturity_average(1)<<endl;
-//  report<<maturity_logistic<<endl;
-  report<<"#maturity curve old shell female male"<<endl;
-  report<<maturity_old_average<<endl;
-  report<<"#molting probability immature female male"<<endl;
-  report<<moltp<<endl;
-  report<<"#molting probability mature female male"<<endl;
-  report<<moltp_mat<<endl;
-  report<<"#prop recruits to new shell"<<endl;
-  report<<proprecn<<endl;
-  report<<"#distribution of recruits to length bins"<<endl;
-  report<<rec_len<<endl;
-  report<<"#time of catch in fraction of year from survey - 7 months"<<endl;
-  report<<catch_midpt(endyr)<<endl;
-  report<<"#number at length new shell females males at time of fishery endyr from model"<<endl;
-  report<<natl_new_fishtime(1,endyr)<<endl;
-  report<<natl_new_fishtime(2,endyr)<<endl;
-  report<<"#number at length old shell females males at time of fishery endyr from model"<<endl;
-  report<<natl_old_fishtime(1,endyr)<<endl;
-  report<<natl_old_fishtime(2,endyr)<<endl;
-  report<<"#last year male spawning biomass"<<endl;
-  report<<mspbio(endyr)<<endl;
-  report<<"#last year female spawning biomass"<<endl;
-  report<<fspbio(endyr)<<endl;
-  report<<"#last year male spawning biomass at matingtime"<<endl;
-  report<<mspbio_matetime(endyr-1)<<endl;
-  report<<"#last year female spawning biomass at matingtime"<<endl;
-  report<<fspbio_matetime(endyr-1)<<endl;
-  report<<"#numbers at length immature new shell female male last year"<<endl;
-  report<<natlength_inew(1,endyr)<<endl;
-  report<<natlength_inew(2,endyr)<<endl;
-  report<<"#numbers at length immature old shell female male last year"<<endl;
-  report<<natlength_iold(1,endyr)<<endl;
-  report<<natlength_iold(2,endyr)<<endl;
-  report<<"#numbers at length mature new shell female male last year"<<endl;
-  report<<natlength_mnew(1,endyr)<<endl;
-  report<<natlength_mnew(2,endyr)<<endl;
-  report<<"#numbers at length mature old shell female male last year"<<endl;
-  report<<natlength_mold(1,endyr)<<endl;
-  report<<natlength_mold(2,endyr)<<endl;
-  report<<"#weight at length female juvenile"<<endl;
-  report<<wtf(1)<<endl;
-  report<<"#weight at length female mature"<<endl;
-  report<<wtf(2)<<endl;
-  report<<"#weight at length male"<<endl;
-  report<<wtm<<endl;
-  report<<"#length-length transition matrix"<<endl;
-  report<<len_len<<endl;
-  report<<"#female discard pot fishing F"<<endl;
-  report<<fmortdf(endyr-1)<<endl;
-  report<<"#trawl fishing F female male"<<endl;
-  report<<fmortt(endyr-1)<<endl;
-  report<<"#number of recruits from the model styr to endyr-1"<<endl;
-  report<<endyr-styr<<endl;
-  report <<"#recruitments female, male start year to endyr-1 from model" << endl;
-  for(i=styr; i<endyr; i++)
-  {
-    report << mfexp(mean_log_rec(1)+rec_dev(1,i))<<" ";
-  }
-  report <<endl<< "#recruitments male, male start year+1 to endyr-1 from model" << endl;
-  for(i=styr; i<endyr; i++)
-  {
-    report << mfexp(mean_log_rec(2)+rec_dev(2,i))<<" ";
-  }
-  report<<endl;
-  report<<"#male spawning biomass at matetime for endyr-5 to endyr-1 for spawner recruit curve to estimate recruitments"<<endl;
-  report<<mspbio_matetime(endyr-5,endyr-1)<<endl;
-  report<<"#male spawning biomass at matetime for str year to endyr-1 for spawner recruit curve to estimate recruitments"<<endl;
-  report<<mspbio_matetime(styr,endyr-1)<<endl;
-  report <<"#selectivity survey males 1989 to endyr: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  report << sel_srv3(2) << endl;
-
 //  report<<"#fraction males morphometrically mature in the pot fishery catch-made up not used"<<endl;
 //  report<<catch_fracmature<<endl;
   // this writes gradients for each parameter at each phase and at end "gradients.dat"
-      save_gradients(gradients);
+   save_gradients(gradients);
 
 //Rout section 
     if (last_phase())
   {
 //  R_out << "Estimated numbers of immature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
 //
-    R_out << "$A" << endl;
+    R_out << "$Estimated numbers of immature new shell female crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
        R_out <<  i<<" "<<natlength_inew(1,i) << endl;
        }
 //  R_out << "Estimated numbers of immature old shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$B" << endl;
+  R_out << "$Estimated numbers of immature old shell female crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
        R_out <<  i<<" "<<natlength_iold(1,i) << endl;
        }
 //  R_out << "Estimated numbers of mature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$C" << endl;
+  R_out << "$Estimated numbers of mature new shell female crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
        R_out <<  i<<" "<<natlength_mnew(1,i) << endl;
        }
 //  R_out << "Estimated numbers of mature old shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$D" << endl;
+  R_out << "$Estimated numbers of mature old shell female crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
        R_out <<  i<<" "<<natlength_mold(1,i) << endl;
        }
 
 //  R_out << "Estimated numbers of immature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$E" << endl;
+  R_out << "$Estimated numbers of immature new shell male crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
         R_out << i<<" "<<natlength_inew(2,i) << endl;
       }
 // R_out << "Estimated numbers of immature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$F" << endl;
+  R_out << "$Estimated numbers of immature old shell male crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
         R_out << i<<" "<<natlength_iold(2,i) << endl;
       }
 // R_out << "Estimated numbers of mature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$G" << endl;
+  R_out << "$Estimated numbers of mature new shell male crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
         R_out << i<<" "<<natlength_mnew(2,i) << endl;
       }
  //  R_out << "Estimated numbers of mature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$H" << endl;
+  R_out << "$Estimated numbers of mature old shell male crab" << endl;
      for(i=styr;i<=endyr;i++)
       {
         R_out << i<<" "<<natlength_mold(2,i) << endl;
       }
  //  R_out << "Observed numbers of immature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$I" << endl;
+  R_out << "$Observed numbers of immature new shell female crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(1,1,1,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
  //  R_out << "Observed numbers of mature new shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$J" << endl;
+  R_out << "$Observed numbers of mature new shell female crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,1,1,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
  //  R_out << "Observed numbers of mature old shell female crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$K" << endl;
+  R_out << "$Observed numbers of mature old shell female crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,2,1,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
  //  R_out << "Observed numbers of immature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$L" << endl;
+  R_out << "$Observed numbers of immature new shell male crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(1,1,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
  //  R_out << "Observed numbers of immature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$M" << endl;
+  R_out << "$Observed numbers of immature old shell male crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(1,2,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
  //  R_out << "Observed numbers of mature new shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$N" << endl;
+  R_out << "$Observed numbers of mature new shell male crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,1,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
  //  R_out << "Observed numbers of mature old shell male crab by length: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$O" << endl;
+  R_out << "$Observed numbers of mature old shell male crab" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
            R_out<<yrs_srv1_length(i)<<" "<<obs_p_srv1_len(2,2,2,i)*obs_srv1t(yrs_srv1_length(i))<<endl;
       }
 
   //  R_out << "Observed Survey Numbers by length females:  'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$P" << endl;
+  R_out << "$Observed survey numbers female" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
         R_out<<yrs_srv1_length(i)<<" " << obs_srv1_num(1,yrs_srv1_length(i)) << endl;
       }
 
   //  R_out << "Observed Survey Numbers by length males: 'year', '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$Q" << endl;
+  R_out << "$Observed survey numbers male" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
         R_out<<yrs_srv1_length(i)<<" " << obs_srv1_num(2,yrs_srv1_length(i))<< endl;
       }
   //  R_out << "Predicted Survey Numbers by length females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$R" << endl;
+  R_out << "$Predicted survey numbers female" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
        R_out<<yrs_srv1_length(i)<<" "  << pred_srv1(1,yrs_srv1_length(i)) << endl;
       }
   //  R_out << "Predicted Survey Numbers by length males: 'year', '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$S" << endl;
+  R_out << "$Predicted survey numbers male" << endl;
       for (i=1; i <= nobs_srv1_length; i++)
       {
          R_out<<yrs_srv1_length(i)<<" "  << pred_srv1(2,yrs_srv1_length(i)) << endl;
        }
   //  R_out << "Predicted pop Numbers by length females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$T" << endl;
+  R_out << "$Predicted population numbers female" << endl;
      for(i=styr;i<=endyr;i++)
       {
        R_out<<i<<" "<< natlength(1,i)<< endl;
       }
   //  R_out << "Predicted pop Numbers by length males: 'year', '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$U" << endl;
+  R_out << "$Predicted population numbers male" << endl;
      for(i=styr;i<=endyr;i++)
       {
          R_out<<i<<" "<< natlength(2,i)<< endl;
        }
 
   //  R_out<<"observed number of males greater than 101 mm: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$V" << endl;
+  R_out << "$Observed number males greater than 101mm" << endl;
   R_out<<obs_lmales<<endl;
   //  R_out<<"observed biomass of males greater than 101 mm: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$W" << endl;
+  R_out << "$Observed biomass males greater than 101mm" << endl;
   R_out<<obs_lmales_bio<<endl;
   //  R_out<<"pop estimate numbers of males >101: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$X" << endl;
+  R_out << "$Population numbers male" << endl;
         R_out<<legal_males<<endl;
       //  R_out<<"estimated population biomass of males > 101: seq(1978,"<<endyr<<") "<<endl;
-  R_out << "$Y" << endl;
+  R_out << "$Population biomass male" << endl;
       R_out<<legal_males_bio<<endl;
       //  R_out<<"estimated survey numbers of males > 101: seq(1978,"<<endyr<<") "<<endl;
-  R_out << "$Z" << endl;
+  R_out << "$Estimated survey numbers male" << endl;
       R_out<<legal_srv_males<<endl;
       //  R_out<<"estimated survey biomass of males > 101: seq(1978,"<<endyr<<") "<<endl;
-  R_out << "$AA" << endl;
+  R_out << "$Estimated survey biomass male" << endl;
       R_out<<legal_srv_males_bio<<endl;
   //  R_out << "Observed survey biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AB" << endl;
+  R_out << "$Observed survey biomass" << endl;
   R_out << obs_srv1_biom(styr,endyr)<<endl;
   //  R_out << "predicted survey biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AC" << endl;
+  R_out << "$Predicted survey biomass" << endl;
   R_out << pred_srv1_bioms(1)+pred_srv1_bioms(2)<<endl;
   //survey numbers
     for(k=1;k<=2;k++)
@@ -3933,221 +2971,221 @@ REPORT_SECTION
       }
      }
   //  R_out << "Observed survey numbers female: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AD" << endl;
+  R_out << "$Observed survey numbers female" << endl;
   R_out << tmpo(1)<<endl;
   //  R_out << "Observed survey numbers male: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AE" << endl;
+  R_out << "$Observed survey numbers male" << endl;
   R_out << tmpo(2)<<endl;
   //  R_out << "predicted survey numbers female: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AF" << endl;
+  R_out << "$Predicted survey numbers female" << endl;
   R_out << tmpp(1)<<endl;
   //  R_out << "predicted survey numbers male: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AG" << endl;
+  R_out << "$Predicted survey numbers male" << endl;
   R_out << tmpp(2)<<endl;
   //  R_out << "Observed survey female spawning biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AH" << endl;
+  R_out << "$Observed survey female spawning biomass" << endl;
   R_out << obs_srv1_spbiom(1)<<endl;
   //  R_out << "Observed survey male spawning biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AI" << endl;
+  R_out << "$Observed survey male spawning biomass" << endl;
   R_out << obs_srv1_spbiom(2)<<endl;
   //  R_out << "Observed survey female new spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AJ" << endl;
+  R_out << "$bserved survey female new spawning numbers" << endl;
   R_out << obs_srv1_spnum(1,1)<<endl;
   //  R_out << "Observed survey female old spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AK" << endl;
+  R_out << "$Observed survey female old spawning numbers" << endl;
   R_out << obs_srv1_spnum(2,1)<<endl;
   //  R_out << "Observed survey male new spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AL" << endl;
+  R_out << "$Observed survey male new spawning numbers" << endl;
   R_out << obs_srv1_spnum(1,2)<<endl;
   //  R_out << "Observed survey male old spawning numbers: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AM" << endl;
+  R_out << "$Observed survey male old spawning numbers" << endl;
   R_out << obs_srv1_spnum(2,2)<<endl;
   //  R_out << "Observed survey female biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AN" << endl;
+  R_out << "$Observed survey female biomass" << endl;
   R_out << obs_srv1_bioms(1)<<endl;
   //  R_out << "Observed survey male biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$AO" << endl;
+  R_out << "$Observed survey male biomass" << endl;
   R_out << obs_srv1_bioms(2)<<endl;
   //  R_out << "natural mortality immature females, males: 'FemM','MaleM'" << endl;
-  R_out << "$AP" << endl;
+  R_out << "$natural mortality immature" << endl;
   R_out << M << endl;
   //  R_out << "natural mortality mature females, males: 'FemMm','MaleMm'" << endl;
-  R_out << "$AQ" << endl;
+  R_out << "$atural mortality mature" << endl;
   R_out << M_matn << endl;
   //  R_out << "natural mortality mature old shell females, males: 'FemMmo','MaleMmo'" << endl;
-  R_out << "$AR" << endl;
+  R_out << "$natural mortality mature old shell" << endl;
   R_out << M_mato << endl;
   //  R_out << "Predicted Biomass: seq(1978,"<<endyr<<")" << endl;
-  R_out << "$AS" << endl;
+  R_out << "$Predicted Biomass" << endl;
   R_out << pred_bio << endl;
   //  R_out << "Predicted total population numbers: seq(1978,"<<endyr<<") "<<endl;
-  R_out << "$AT" << endl;
+  R_out << "$Predicted total population numbers" << endl;
   R_out <<popn<<endl;
 //  //  R_out << "Predicted Exploitable Biomass: seq(1978,"<<endyr<<") " << endl;
 //  R_out << explbiom << endl;
 //  R_out << "Female Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$AU" << endl;
+  R_out << "$Female Spawning Biomass" << endl;
   R_out << fspbio << endl;
   //  R_out << "Male Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$AV" << endl;
+  R_out << "$Mature Male Biomass" << endl;
   R_out << mspbio << endl;
   //  R_out << "Total Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$AW" << endl;
+  R_out << "$Total Spawning Biomass" << endl;
   R_out << fspbio+mspbio << endl;
   //  R_out << "Female Spawning Biomass at fish time: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$AX" << endl;
+  R_out << "$Female Spawning Biomass at fish time" << endl;
   R_out << fspbio_fishtime << endl;
   //  R_out << "Male Spawning Biomass at fish time: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$AY" << endl;
+  R_out << "$Mature Male Biomass at fish time" << endl;
   R_out << mspbio_fishtime << endl;
   //  R_out << "Total Spawning Biomass at fish time: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$AZ" << endl;
+  R_out << "$Total Spawning Biomass at fish time" << endl;
   R_out << fspbio_fishtime+mspbio_fishtime << endl;
   //  R_out << "Mating time Female Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BA" << endl;
+  R_out << "$Mating time Female Spawning Biomass" << endl;
   R_out << fspbio_matetime << endl;
   //  R_out << "Mating time Male Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BB" << endl;
+  R_out << "$Mature male biomass at mating" << endl;
   R_out << mspbio_matetime << endl;
   //  R_out << "Mating time Male old shell Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BC" << endl;
+  R_out << "$Old shell mature male biomass at mating" << endl;
   R_out << mspbio_old_matetime << endl;
   //  R_out << "Mating time female new shell Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BD" << endl;
+  R_out << "$New shell female spawning biomass at mating time" << endl;
   R_out << fspbio_new_matetime << endl;
   //  R_out << "Mating time Total Spawning Biomass : seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BE" << endl;
+  R_out << "$Total mature biomass at mating time" << endl;
   R_out << fspbio_matetime+mspbio_matetime << endl;
   //  R_out << "Mating time effective Female Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BF" << endl;
+  R_out << "$Effective female spawning biomass at mating time" << endl;
   R_out << efspbio_matetime << endl;
   //  R_out << "Mating time effective Male Spawning Biomass(old shell only): seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BG" << endl;
+  R_out << "$Effective mature male biomass at mating time" << endl;
   R_out << emspbio_matetime << endl;
   //  R_out << "Mating time Total effective Spawning Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BH" << endl;
+  R_out << "$Total effective spawning biomass at mating time" << endl;
   R_out << efspbio_matetime+emspbio_matetime << endl;
   //  R_out << "Mating time male Spawning numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BI" << endl;
+  R_out << "$Spawning numbers male at mating time" << endl;
   R_out << mspnum_matetime << endl;
   //  R_out << "Mating time Female Spawning numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BJ" << endl;
+  R_out << "$Spawning number female at mating time" << endl;
   R_out << efspnum_matetime << endl;
   //  R_out << "Mating time Male Spawning numbers(old shell only): seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BK" << endl;
+  R_out << "$Mating time Male Spawning numbers old " << endl;
   R_out << emspnum_old_matetime << endl;
   //  R_out << "ratio Mating time Female Spawning numbers to male old shell mature numbers : seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BL" << endl;
+  R_out << "$ratio Mating time Female Spawning numbers to male old shell mature numbers" << endl;
   R_out << elem_div(efspnum_matetime,emspnum_old_matetime) << endl;
   //  R_out << "Mating time effective Female new shell Spawning biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BM" << endl;
+  R_out << "$Mating time effective Female new shell Spawning biomass" << endl;
   R_out <<efspbio_new_matetime << endl;
   //  R_out << "Mating time Female new shell Spawning numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BN" << endl;
+  R_out << "$Mating time Female new shell Spawning numbers" << endl;
   R_out << fspnum_new_matetime << endl;
   //  R_out << "ratio Mating time Female new shell Spawning numbers to male old shell mature numbers : seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BO" << endl;
+  R_out << "$ratio Mating time Female new shell Spawning numbers to male old shell mature numbers" << endl;
   R_out << elem_div(fspnum_new_matetime,emspnum_old_matetime) << endl;
   //  R_out << "Predicted Female survey Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BP" << endl;
+  R_out << "$Predicted Female survey Biomass" << endl;
   R_out << pred_srv1_bioms(1) << endl;
   //  R_out << "Predicted Male survey Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BQ" << endl;
+  R_out << "$Predicted Male survey Biomass" << endl;
   R_out << pred_srv1_bioms(2)<< endl;
   //  R_out << "Predicted Female survey mature Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BR" << endl;
+  R_out << "$Predicted Female survey mature Biomass" << endl;
   R_out << fspbio_srv1 << endl;
   //  R_out << "Predicted Male survey mature Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BS" << endl;
+  R_out << "$Predicted Male survey mature Biomass" << endl;
   R_out << mspbio_srv1<< endl;
   //  R_out << "Predicted total survey mature Biomass: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BT" << endl;
+  R_out << "$Predicted total survey mature Biomass" << endl;
   R_out << fspbio_srv1+mspbio_srv1<< endl;
   //  R_out << "Predicted Female survey new mature numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BU" << endl;
+  R_out << "$Predicted Female survey new mature numbers" << endl;
   R_out << fspbio_srv1_num(1) << endl;
   //  R_out << "Predicted Female survey old mature numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BV" << endl;
+  R_out << "$redicted Female survey old mature numbers" << endl;
   R_out << fspbio_srv1_num(2) << endl;
   //  R_out << "Predicted Male survey new mature numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BW" << endl;
+  R_out << "$Predicted Male survey new mature numbers" << endl;
   R_out << mspbio_srv1_num(1)<< endl;
   //  R_out << "Predicted Male survey old mature numbers: seq(1978,"<<endyr<<") " << endl;
-  R_out << "$BX" << endl;
+  R_out << "$Predicted Male survey old mature numbers" << endl;
   R_out << mspbio_srv1_num(2)<< endl;
 //2009 bsfrf study
   //  R_out << "Observed industry survey mature biomass: seq(1,4) " << endl;
-  R_out << "$BY" << endl;
+  R_out << "$Observed industry survey mature biomass" << endl;
   R_out << obs_srv2_spbiom(1,1)<<" "<<obs_srv2_spbiom(1,2)<<" "<<obs_srv2_spbiom(2,1)<<" "<<obs_srv2_spbiom(2,2)<<endl;
   //  R_out << "Predicted industry survey mature biomass: seq(1,4) " << endl;
-  R_out << "$BZ" << endl;
+  R_out << "$Predicted industry survey mature biomass" << endl;
   R_out << fspbio_srv2_ind<<" "<<mspbio_srv2_ind<<" "<<fspbio_srv2_nmfs<<" "<<mspbio_srv2_nmfs<<endl;
   //  R_out << "Observed Prop industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CA" << endl;
+  R_out << "$bserved Prop industry survey female" << endl;
   R_out <<(obs_p_srv2_len(1,1,1)+obs_p_srv2_len(1,1,2))<<endl;
   //  R_out << "Observed Prop industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CB" << endl;
+  R_out << "$Observed Prop industry survey male" << endl;
   R_out <<(obs_p_srv2_len(1,2,1)+obs_p_srv2_len(1,2,2))<<endl;
   //  R_out << "Observed Prop industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CC" << endl;
+  R_out << "$Observed Prop industry nmfs survey female" << endl;
   R_out <<obs_p_srv2_len(2,1,1)+obs_p_srv2_len(2,1,2)<<endl;
   //  R_out << "Observed Prop industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CD" << endl;
+  R_out << "$Observed Prop industry nmfs survey male" << endl;
   R_out <<obs_p_srv2_len(2,2,1)+obs_p_srv2_len(2,2,2)<<endl;
   //  R_out << "Predicted Prop industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CE" << endl;
+  R_out << "$Predicted Prop industry survey female" << endl;
   R_out <<pred_p_srv2_len_ind(1)<<endl;
   //  R_out << "Predicted Prop industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CF" << endl;
+  R_out << "$Predicted Prop industry survey male" << endl;
   R_out <<pred_p_srv2_len_ind(2)<<endl;
   //  R_out << "Predicted Prop industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CG" << endl;
+  R_out << "$Predicted Prop industry nmfs survey female" << endl;
   R_out <<pred_p_srv2_len_nmfs(1)<<endl;
   //  R_out << "Predicted Prop industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CH" << endl;
+  R_out << "$redicted Prop industry nmfs survey male" << endl;
   R_out <<pred_p_srv2_len_nmfs(2)<<endl;
 //2010 bsfrf study   
   //  R_out << "Observed 2010 industry survey mature biomass: seq(1,4) " << endl;
-  R_out << "$CI" << endl;
+  R_out << "$Observed 2010 industry survey mature biomass" << endl;
   R_out << obs_srv10_spbiom(1,1)<<" "<<obs_srv10_spbiom(1,2)<<" "<<obs_srv10_spbiom(2,1)<<" "<<obs_srv10_spbiom(2,2)<<endl;
   //  R_out << "Predicted 2010 industry survey mature biomass: seq(1,4) " << endl;
-  R_out << "$CJ" << endl;
+  R_out << "$Predicted 2010 industry survey mature biomass" << endl;
   R_out << fspbio_srv10_ind<<" "<<mspbio_srv10_ind<<" "<<fspbio_srv10_nmfs<<" "<<mspbio_srv10_nmfs<<endl;
   //  R_out << "Observed Prop 2010 industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CK" << endl;
+  R_out << "$Observed Prop 2010 industry survey female" << endl;
   R_out <<(obs_p_srv10_len(1,1,1)+obs_p_srv10_len(1,1,2))<<endl;
   //  R_out << "Observed Prop 2010 industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CL" << endl;
+  R_out << "$Observed Prop 2010 industry survey male" << endl;
   R_out <<(obs_p_srv10_len(1,2,1)+obs_p_srv10_len(1,2,2))<<endl;
   //  R_out << "Observed Prop 2010 industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CM" << endl;
+  R_out << "$Observed Prop 2010 industry nmfs survey female" << endl;
   R_out <<obs_p_srv10_len(2,1,1)+obs_p_srv10_len(2,1,2)<<endl;
   //  R_out << "Observed Prop 2010 industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CN" << endl;
+  R_out << "$Observed Prop 2010 industry nmfs survey male" << endl;
   R_out <<obs_p_srv10_len(2,2,1)+obs_p_srv10_len(2,2,2)<<endl;
   //  R_out << "Predicted Prop 2010 industry survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CO" << endl;
+  R_out << "$Predicted Prop 2010 industry survey female" << endl;
   R_out <<pred_p_srv10_len_ind(1)<<endl;
   //  R_out << "Predicted Prop 2010 industry survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CP" << endl;
+  R_out << "$Predicted Prop 2010 industry survey male" << endl;
   R_out <<pred_p_srv10_len_ind(2)<<endl;
   //  R_out << "Predicted Prop 2010 industry nmfs survey female:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CQ" << endl;
+  R_out << "$Predicted Prop 2010 industry nmfs survey female" << endl;
   R_out <<pred_p_srv10_len_nmfs(1)<<endl;
   //  R_out << "Predicted Prop 2010 industry nmfs survey male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CR" << endl;
+  R_out << "$Predicted Prop 2010 industry nmfs survey male" << endl;
   R_out <<pred_p_srv10_len_nmfs(2)<<endl;
 
 
 
    //  R_out << "Observed Prop fishery ret new males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CS" << endl;
+  R_out << "$Observed proportion fishery retained new male" << endl;
       for (i=1; i<=nobs_fish; i++)
         {
           R_out << yrs_fish(i) << " " << obs_p_fish_ret(1,i)<< endl;
          }
     //  R_out << "Predicted length prop fishery ret new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$CT" << endl;
+  R_out << "$Predicted proportion fishery retained new male" << endl;
    //R_out<<pred_p_fish<<endl;
        for (i=1; i<=nobs_fish; i++)
         {
@@ -4155,13 +3193,13 @@ REPORT_SECTION
           R_out <<  ii  <<  " "  <<  pred_p_fish_fit(1,ii)  << endl;
          }
   //  R_out << "Observed Prop fishery ret old males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CU" << endl;
+  R_out << "$Observed proportion fishery retained old male" << endl;
       for (i=1; i<=nobs_fish; i++)
         {
           R_out << yrs_fish(i) << " " << obs_p_fish_ret(2,i)<< endl;
          }
     //  R_out << "Predicted length prop fishery ret old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$CV" << endl;
+  R_out << "$Predicted proportion fishery retained old male" << endl;
    //R_out<<pred_p_fish<<endl;
        for (i=1; i<=nobs_fish; i++)
         {
@@ -4170,13 +3208,13 @@ REPORT_SECTION
          }
 
   //  R_out << "Observed Prop fishery total new males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CW" << endl;
+  R_out << "$Observed proportion fishery total new male" << endl;
       for (i=1; i<=nobs_fish_discm; i++)
         {
           R_out << yrs_fish_discm(i) << " " << obs_p_fish_tot(1,i) << endl;
          }
     //  R_out << "Predicted length prop fishery total new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$CX" << endl;
+  R_out << "$Predicted proportion fishery total new male" << endl;
    //R_out<<pred_p_fish<<endl;
        for (i=1; i<=nobs_fish_discm; i++)
         {
@@ -4184,13 +3222,13 @@ REPORT_SECTION
           R_out <<  ii  <<  " "  <<  pred_p_fish(1,ii)  << endl;
          }
   //  R_out << "Observed Prop fishery total old males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$CY" << endl;
+  R_out << "$Observed proportion fishery total old male" << endl;
       for (i=1; i<=nobs_fish_discm; i++)
         {
           R_out << yrs_fish_discm(i) << " " << obs_p_fish_tot(2,i) << endl;
          }
     //  R_out << "Predicted length prop fishery total old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$CZ" << endl;
+  R_out << "$Predicted proportion fishery total old male" << endl;
    //R_out<<pred_p_fish<<endl;
        for (i=1; i<=nobs_fish_discm; i++)
         {
@@ -4198,27 +3236,27 @@ REPORT_SECTION
           R_out <<  ii  <<  " "  <<  pred_p_fish(2,ii)  << endl;
          }
   //  R_out << "Observed Prop fishery discard new males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$DA" << endl;
+  R_out << "$Observed proportion fishery discard new male" << endl;
       for (i=1; i<=nobs_fish_discm; i++)
         {
           R_out << yrs_fish_discm(i) << " " << obs_p_fish_discm(1,i) << endl;
          }
 
  // R_out << "Observed Prop fishery discard old males:'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$DB" << endl;
+  R_out << "$Observed proportion fishery discard old male" << endl;
       for (i=1; i<=nobs_fish_discm; i++)
         {
           R_out << yrs_fish_discm(i) << " " << obs_p_fish_discm(2,i)<< endl;
          }
 
     //  R_out << "Observed length prop fishery discard all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DC" << endl;
+  R_out << "$Observed proportion fishery discard all female" << endl;
     for (i=1; i<=nobs_fish_discf; i++)
     {
       R_out <<  yrs_fish_discf(i)  <<  " "  <<  obs_p_fish_discf(i)  << endl;
     }
     //  R_out << "Predicted length prop fishery discard all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DD" << endl;
+  R_out << "$Predicted proportion fishery discard all female" << endl;
     for (i=1; i<=nobs_fish_discf; i++)
     {
       ii=yrs_fish_discf(i);  
@@ -4226,27 +3264,27 @@ REPORT_SECTION
     }
 
     //  R_out << "Predicted length prop trawl females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DE" << endl;
+  R_out << "$Predicted proportion trawl female" << endl;
        for (i=1; i<=nobs_trawl; i++)
         {
           ii=yrs_trawl(i);  
           R_out <<  ii  <<  " "  <<  pred_p_trawl(1,ii)  << endl;
          }
     //  R_out << "Observed length prop trawl females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DF" << endl;
+  R_out << "$Observed proportion trawl female" << endl;
        for (i=1; i<=nobs_trawl; i++)
         {  
            R_out <<  yrs_trawl(i)  <<  " "  <<  obs_p_trawl(1,i)  << endl;
          }
     //  R_out << "Predicted length prop trawl males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DG" << endl;
+  R_out << "$Predicted proportion trawl male" << endl;
        for (i=1; i<=nobs_trawl; i++)
         {
           ii=yrs_trawl(i);  
           R_out <<  ii  <<  " "  <<  pred_p_trawl(2,ii)  << endl;
          }
     //  R_out << "Observed length prop trawl males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DH" << endl;
+  R_out << "$Observed proportion trawl male" << endl;
        for (i=1; i<=nobs_trawl; i++)
         {  
            R_out <<  yrs_trawl(i)  <<  " "  <<  obs_p_trawl(2,i)  << endl;
@@ -4265,28 +3303,28 @@ REPORT_SECTION
     //      R_out <<  ii  <<  " "  <<  pred_p_fish(2,ii)  << endl;
     //     }
  //  R_out << "Observed Length Prop survey immature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DI" << endl;
+  R_out << "$Observed proportion survey immature new female" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);
               R_out << ii <<" " <<obs_p_srv1_len(1,1,1,i) << endl;
            }
   //  R_out << "Predicted length prop survey immature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DJ" << endl;
+  R_out << "$Predicted proportion survey immature new female" << endl;
        for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);  
              R_out << ii << " " << pred_p_srv1_len_new(1,1,ii) << endl;
           }
   //  R_out << "Observed Length Prop survey immature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DK" << endl;
+  R_out << "$Observed proportion survey immature old female" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);
               R_out << ii <<" " <<obs_p_srv1_len(1,2,1,i) << endl;
            }
   //  R_out << "Predicted length prop survey immature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DL" << endl;
+  R_out << "$Predicted proportion survey immature old female" << endl;
        for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);  
@@ -4294,54 +3332,54 @@ REPORT_SECTION
           }
  
   //  R_out << "Observed Length Prop survey immature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DM" << endl;
+  R_out << "$Observed proportion survey immature new male" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              R_out << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(1,1,2,i) << endl;
           }
   //  R_out << "Predicted length prop survey immature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DN" << endl;
+  R_out << "$Predicted proportion survey immature new male" << endl;
        for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);  
              R_out << ii << " " << pred_p_srv1_len_new(1,2,ii) << endl;
          }
  //  R_out << "Observed Length Prop survey immature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DO" << endl;
+  R_out << "$Observed proportion survey immature old male" << endl;
  for (i=1; i<=nobs_srv1_length; i++)
  {
    R_out << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(1,2,2,i) << endl;
  }
  //  R_out << "Predicted length prop survey immature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DP" << endl;
+  R_out << "$Predicted proportion survey immature old male" << endl;
  for (i=1; i<=nobs_srv1_length; i++)
  {
    ii=yrs_srv1_length(i);  
    R_out << ii << " " << pred_p_srv1_len_old(1,2,ii) << endl;
  }
  //  R_out << "Observed Length Prop survey mature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DQ" << endl;
+  R_out << "$Observed proportion survey mature new female" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);
               R_out << ii <<" " <<obs_p_srv1_len(2,1,1,i) << endl;
            }
   //  R_out << "Predicted length prop survey mature new females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DR" << endl;
+  R_out << "$Predicted proportion survey mature new female" << endl;
        for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);  
              R_out << ii << " " << pred_p_srv1_len_new(2,1,ii) << endl;
           }
   //  R_out << "Observed Length Prop survey mature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DS" << endl;
+  R_out << "$Observed proportion survey mature old female" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);
               R_out << ii <<" " <<obs_p_srv1_len(2,2,1,i) << endl;
            }
   //  R_out << "Predicted length prop survey mature old females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DT" << endl;
+  R_out << "$Predicted proportion survey mature old female" << endl;
        for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);  
@@ -4349,33 +3387,33 @@ REPORT_SECTION
           }
  
   //  R_out << "Observed Length Prop survey mature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DU" << endl;
+  R_out << "$Observed proportion survey mature new male" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              R_out << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(2,1,2,i) << endl;
           }
   //  R_out << "Predicted length prop survey mature new males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DV" << endl;
+  R_out << "$Predicted proportion survey mature new male" << endl;
        for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);  
              R_out << ii << " " << pred_p_srv1_len_new(2,2,ii) << endl;
          }
  //  R_out << "Observed Length Prop survey mature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DW" << endl;
+  R_out << "$Observed proportion survey mature old male" << endl;
  for (i=1; i<=nobs_srv1_length; i++)
  {
    R_out << yrs_srv1_length(i) <<" " <<obs_p_srv1_len(2,2,2,i) << endl;
  }
  //  R_out << "Predicted length prop survey mature old males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DX" << endl;
+  R_out << "$Predicted proportion survey mature old male" << endl;
  for (i=1; i<=nobs_srv1_length; i++)
  {
    ii=yrs_srv1_length(i);  
    R_out << ii << " " << pred_p_srv1_len_old(2,2,ii) << endl;
  }
  //  R_out << "Observed Length Prop survey all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DY" << endl;
+  R_out << "$Observed proportion survey all females" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);
@@ -4383,7 +3421,7 @@ REPORT_SECTION
               tmpp4+=obs_p_srv1_len(1,1,1,i)+obs_p_srv1_len(2,1,1,i)+obs_p_srv1_len(2,2,1,i);
                          }
  //  R_out << "Predicted length prop survey all females: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$DZ" << endl;
+  R_out << "$Predicted proportion survey all female" << endl;
  for (i=1; i<=nobs_srv1_length; i++)
  {
    ii=yrs_srv1_length(i);  
@@ -4391,7 +3429,7 @@ REPORT_SECTION
     tmpp1+=pred_p_srv1_len_new(1,1,ii)+pred_p_srv1_len_new(2,1,ii)+pred_p_srv1_len_old(2,1,ii);
     }
  //  R_out << "Observed Length Prop survey all males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$EA" << endl;
+  R_out << "$Observed proportion survey all male" << endl;
          for (i=1; i<=nobs_srv1_length; i++)
           {
              ii=yrs_srv1_length(i);
@@ -4399,7 +3437,7 @@ REPORT_SECTION
          tmpp2+=obs_p_srv1_len(1,1,2,i)+obs_p_srv1_len(1,2,2,i)+obs_p_srv1_len(2,1,2,i)+obs_p_srv1_len(2,2,2,i);
                         }
  //  R_out << "Predicted length prop survey all males: 'year','27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$EB" << endl;
+  R_out << "$Predicted proportion survey all male" << endl;
  for (i=1; i<=nobs_srv1_length; i++)
  {
    ii=yrs_srv1_length(i);  
@@ -4407,16 +3445,16 @@ REPORT_SECTION
   tmpp3+=pred_p_srv1_len_new(1,2,ii)+pred_p_srv1_len_new(2,2,ii)+pred_p_srv1_len_old(2,2,ii);
     }
   //  R_out << "Sum of predicted prop survey all females: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$EC" << endl;
+  R_out << "$Sum of predicted proportion survey all female" << endl;
             R_out <<tmpp1<<endl;
   //  R_out << "Sum of predicted prop survey all males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$ED" << endl;
+  R_out << "$Sum of predicted proportion survey all male" << endl;
             R_out <<tmpp3<<endl;
   //  R_out << "Sum of Observed prop survey all females: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$EE" << endl;
+  R_out << "$Sum of observed proportion survey all female" << endl;
             R_out <<tmpp4<<endl;
   //  R_out << "Sum of Observed prop survey all males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'" << endl;
-  R_out << "$EF" << endl;
+  R_out << "$Sum of observed proportion survey all male" << endl;
             R_out <<tmpp2<<endl;
                 
 
@@ -4445,126 +3483,126 @@ REPORT_SECTION
 //                R_out << ii << " " << mean_length_obs(2,i) << endl;
 //  }
   //  R_out << "Predicted mean postmolt length females:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$EG" << endl;
+  R_out << "$Predicted mean postmolt length female" << endl;
   R_out << mean_length(1) << endl;
   //  R_out << "Predicted mean postmolt length males:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$EH" << endl;
+  R_out << "$Predicted mean postmolt length male" << endl;
   R_out << mean_length(2)<<endl; 
   //  R_out<< "sd mean length females:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  R_out << "$EI" << endl;
+  R_out << "$sd mean length female" << endl;
   R_out<<sd_mean_length(1)<<endl;
   //  R_out<< "sd mean length males:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  R_out << "$EJ" << endl;
+  R_out << "$sd mean length male" << endl;
   R_out<<sd_mean_length(2)<<endl;
   //  R_out << "af: 'females'" << endl;
-  R_out << "$EK" << endl;
+  R_out << "$af " << endl;
   R_out << af << endl;
   //  R_out << "am: 'males'" << endl;
-  R_out << "$EL" << endl;
+  R_out << "$am" << endl;
   R_out << am << endl;
   R_out << "$EM" << endl;
   R_out << af +(bf-bf1)*deltaf << endl;
   R_out << "$EN" << endl;
   R_out << am+(bm-b1)*deltam << endl;
   //  R_out << "bf: 'females'" << endl;
-  R_out << "$EN2" << endl;
+  R_out << "$bf " << endl;
   R_out << bf << endl;
-  R_out << "$EN3" << endl;
+  R_out << "$bf1" << endl;
   R_out << bf1 << endl;
   R_out << "$EN4" << endl;
     R_out << deltaf << endl;
-  R_out << "$EN5" << endl;
+  R_out << "$bm " << endl;
   R_out << bm << endl;
-  R_out << "$EN6" << endl;
+  R_out << "$b1" << endl;
   R_out << b1 << endl;
-  R_out << "$EN7" << endl;
+  R_out << "$delta male" << endl;
     R_out << deltam << endl;
-  R_out << "$EN8" << endl;
+  R_out << "$st_gr" << endl;
   R_out << st_gr << endl;
-  R_out << "$EN9" << endl;
+  R_out << "$st_gr" << endl;
   R_out << st_gr << endl;
     //  R_out << "Predicted probability of maturing females:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$EO" << endl;
+  R_out << "$Predicted probability of maturing female" << endl;
   R_out << maturity_est(1)<<endl; 
   //  R_out << "Predicted probability of maturing males:  '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$EP" << endl;
+  R_out << "$Predicted probability of maturing male" << endl;
   R_out << maturity_est(2)<<endl; 
   //  R_out<<"molting probs female: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  R_out << "$EQ" << endl;
+  R_out << "$Molting probability female" << endl;
   R_out<<moltp(1)<<endl;
   //  R_out<<"molting probs male:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$ER" << endl;
+  R_out << "$Molting probability male" << endl;
   R_out<<moltp(2)<<endl;
   //  R_out <<"Molting probability mature males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$ES" << endl;
+  R_out << "$Molting probability mature males" << endl;
   R_out <<moltp_mat(2)<<endl;
   //  R_out << "observed pot fishery cpue 1979 fishery to endyr fishery: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$ET" << endl;
+  R_out << "$observed pot fishery cpue" << endl;
   R_out <<cpue(1979,endyr)<<endl;
   //  R_out << "predicted pot fishery cpue 1978 to endyr-1 survey: seq(1978,"<<endyr-1<<")" << endl;
-  R_out << "$EU" << endl;
+  R_out << "$predicted pot fishery cpue" << endl;
   R_out <<cpue_pred(1978,endyr-1)<<endl;
   //  R_out << "observed retained catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$EV" << endl;
+  R_out << "$Observed retained catch biomass" << endl;
   R_out << catch_ret(styr,endyr-1) << endl;
   //  R_out << "predicted retained catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$EW" << endl;
+  R_out << "$Predicted retained catch biomas" << endl;
   R_out << pred_catch_ret(styr,endyr-1)<<endl;
   //  R_out << "predicted retained new catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$EX" << endl;
+  R_out << "$predicted retained new catch biomass" << endl;
   R_out << (catch_male_ret_new*wtm)(styr,endyr-1)<<endl;
   //  R_out << "predicted retained old catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$EY" << endl;
+  R_out << "$predicted retained old catch biomass" << endl;
   R_out << (catch_male_ret_old*wtm)(styr,endyr-1)<<endl;
   //  R_out << "observed retained+discard male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$EZ" << endl;
+  R_out << "$observed retained plus discard male catch biomass" << endl;
   R_out << obs_catchtot_biom(styr,endyr-1) << endl;
   //  R_out << "predicted retained+discard male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FA" << endl;
+  R_out << "$predicted retained plus discard male catch biomass" << endl;
   R_out << pred_catch(styr,endyr-1) << endl;
   //  R_out << "predicted retained+discard new male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FB" << endl;
+  R_out << "$predicted retained plus discard new male catch biomass" << endl;
   R_out << (catch_lmale_new*wtm)(styr,endyr-1) << endl;
   //  R_out << "predicted retained+discard old male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FC" << endl;
+  R_out << "$predicted retained plus discard old male catch biomass" << endl;
   R_out << (catch_lmale_old*wtm)(styr,endyr-1) << endl;
   //  R_out << "observed discard male mortality biomass: seq(1979,"<<endyr<<")"<<endl;
   // R_out << "$FD" << endl;
   // R_out << (obs_catchtot_biom-catch_ret)(styr,endyr-1) <<endl;
   //  R_out << "predicted discard male catch biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FE" << endl;
+  R_out << "$predicted discard male catch biomass" << endl;
   R_out << pred_catch(styr,endyr-1) -pred_catch_ret(styr,endyr-1)<< endl;
   //  R_out << "observed female discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FF" << endl;
+  R_out << "$observed female discard mortality biomass" << endl;
   R_out << obs_catchdf_biom(styr,endyr-1) << endl;
   //  R_out << "predicted female discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FG" << endl;
+  R_out << "$predicted female discard mortality biomass" << endl;
   R_out << pred_catch_disc(1)(styr,endyr-1) << endl;
   //  R_out << "observed male discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FH" << endl;
+  R_out << "$observed male discard mortality biomass" << endl;
   R_out << obs_catchdm_biom(styr,endyr-1) << endl;
 //  R_out << "predicted male discard mortality biomass: seq(1979,"<<endyr<<")" << endl;
 //  R_out << pred_catch_disc(2)(styr,endyr-1) << endl;
   //  R_out << "observed trawl catch biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$FI" << endl;
+  R_out << "$observed trawl catch biomass" << endl;
   R_out << obs_catcht_biom<<endl;
   //  R_out << "predicted trawl catch biomass: seq(1978,"<<endyr<<")"<<endl;
-  R_out << "$FJ" << endl;
+  R_out << "$predicted trawl catch biomass" << endl;
   R_out <<pred_catch_trawl<<endl;
   //  R_out << "estimated retained catch div. by male spawning biomass at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FK" << endl;
+  R_out << "$estimated retained catch div by male spawning biomass at fishtime" << endl;
   R_out <<elem_div(pred_catch_ret,mspbio_fishtime)(styr,endyr-1) << endl;
   //  R_out << "estimated total catch div. by male spawning biomass at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FL" << endl;
+  R_out << "$estimated total catch div by male spawning biomass at fishtime" << endl;
   R_out <<elem_div(pred_catch,mspbio_fishtime)(styr,endyr-1) << endl;
   //  R_out << "estimated total catch of males >101 div. by males >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FM" << endl;
+  R_out << "$estimated total catch of males 101 div by males 101 at fishtime" << endl;
   R_out <<elem_div(pred_catch_gt101(styr,endyr-1),bio_males_gt101(styr,endyr-1)) << endl;
   //  R_out << "estimated total catch numbers of males >101 div. by males numbers >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FN" << endl;
+  R_out << "$estimated total catch numbers of males 101 div by males numbers 101 at fishtime" << endl;
   R_out <<elem_div(pred_catch_no_gt101(styr,endyr-1),num_males_gt101(styr,endyr-1)) << endl;
   //  R_out << "estimated total catch numbers of males >101 div. by survey estimate males numbers >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FO" << endl;
+  R_out << "$estimated total catch numbers of males 101 div by survey estimate males numbers 101 at fishtime" << endl;
      for(i=styr;i<endyr;i++)
         {
          obs_tmp(i) = obs_lmales(i-(styr-1));
@@ -4576,19 +3614,19 @@ REPORT_SECTION
         }
 
   //  R_out << "estimated total catch biomass of males >101 div. by survey estimate male biomass >101 at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FP" << endl;
+  R_out << "$estimated total catch biomass of males 101 div by survey estimate male biomass 101 at fishtime" << endl;
   R_out <<elem_div(pred_catch_gt101(styr,endyr-1),obs_tmp(styr,endyr-1)*mfexp(-M_matn(2)*(7/12)) ) << endl;
 
   //  R_out << "estimated total catch biomass div. by survey estimate male mature biomass at fishtime: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FQ" << endl;
+  R_out << "$estimated total catch biomass div. by survey estimate male mature biomass at fishtime" << endl;
   R_out <<elem_div(pred_catch(styr,endyr-1),((obs_srv1_spbiom(2))(styr,endyr-1))*mfexp(-M_matn(2)*(7/12))) << endl;
   //  R_out << "estimated annual total fishing mortality: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FR" << endl;
+  R_out << "$estimated annual total fishing mortality" << endl;
   R_out << mfexp(log_avg_fmort+fmort_dev)(styr,endyr-1) << endl;
 //  R_out << "estimated target annual fishing mortality rate: seq(1978,"<<endyr<<")" << endl;
 //  R_out <<ftarget<<endl;
   //  R_out <<"retained F: seq(1978,"<<endyr<<")" << endl;
-  R_out << "$FS" << endl;
+  R_out << "$retained F" << endl;
          for(i=styr;i<=endyr;i++){
           R_out <<F_ret(1,i)(22)<<" ";
          }
@@ -4596,13 +3634,13 @@ REPORT_SECTION
 //  R_out <<"predicted ghl: seq(1978,"<<endyr<<")" << endl;
 //  R_out <<pred_catch_target<<endl;
   //  R_out <<"ghl: seq(1978,"<<endyr<<")" << endl;
-  R_out << "$FT" << endl;
+  R_out << "$ghl" << endl;
   R_out <<catch_ghl/2.2<<endl;
     //  R_out << "estimated annual fishing mortality females pot: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FU" << endl;
+  R_out << "$estimated annual fishing mortality females pot" << endl;
   R_out << fmortdf(styr,endyr-1) <<endl;
   //  R_out << "estimated annual fishing mortality trawl bycatch: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FV" << endl;
+  R_out << "$estimated annual fishing mortality trawl bycatch" << endl;
   R_out << fmortt(styr,endyr-1) <<endl;
 //  R_out << "initial number of recruitments female: seq(1963,1977)" << endl;
 //  for(i=styr-nirec; i<=styr-1; i++)
@@ -4618,14 +3656,14 @@ REPORT_SECTION
 //in spring of 1979, before the 1979 survey - since using the survey as the start of the year
 // in the model spring 1979 is stil 1978.  the last recruits are 2003 that come in spring 2004
 //  R_out << "estimated number of recruitments female: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FW" << endl;
+  R_out << "$estimated number of recruits female" << endl;
   for(i=styr; i<=endyr-1; i++)
   {
     R_out << mfexp(mean_log_rec(1)+rec_dev(1,i))<<" ";
   }
   R_out<<endl;
   //  R_out <<endl<< "estimated number of recruitments male: seq(1979,"<<endyr<<")" << endl;
-  R_out << "$FX" << endl;
+  R_out << "$estimated number of recruits male" << endl;
   for(i=styr; i<=endyr-1; i++)
   {
     R_out << mfexp(mean_log_rec(2)+rec_dev(2,i))<<" ";
@@ -4633,85 +3671,85 @@ REPORT_SECTION
   for(i=1;i<=median_rec_yrs;i++)R_out<<2*median_rec<<" ";
     R_out<<endl;
  // R_out<<"distribution of recruits to length bins: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<<endl;
-  R_out << "$FY" << endl;
+  R_out << "$distribution of recruits to length bins" << endl;
   R_out<<rec_len<<endl;
  // R_out<<"fishery total selectivity new shell 50% parameter: seq(1979,"<<endyr<<")"<<endl;
-  R_out << "$FZ" << endl;
+  R_out << "$fishery total selectivity new shell 50 parameter" << endl;
   R_out <<mfexp(log_avg_sel50_mn+log_sel50_dev_mn)(styr,endyr-1)<<endl;
  // R_out <<"fishery total selectivity old shell 50% parameter: seq(1979,"<<endyr<<")"<<endl;
-  R_out << "$GA" << endl;
+  R_out << "$fishery total selectivity old shell 50 parameter" << endl;
   R_out <<mfexp(log_avg_sel50_mo+log_sel50_dev_mo)(styr,endyr-1)<<endl;
 //  R_out << "selectivity fishery total new males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GB" << endl;
+  R_out << "$selectivity fishery total new male" << endl;
   R_out << sel(1) << endl;
  // R_out << "selectivity fishery total old males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GC" << endl;
+  R_out << "$selectivity fishery total old male" << endl;
   R_out << sel(2) << endl;
  // R_out << "selectivity fishery ret new males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GD" << endl;
+  R_out << "$selectivity fishery retained new male" << endl;
   R_out << sel_fit(1) << endl;
  // R_out << "selectivity fishery ret old males: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GE" << endl;
+  R_out << "$selectivity fishery retained old male" << endl;
   R_out << sel_fit(2) << endl;
  // R_out <<"retention curve males new: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GF" << endl;
+  R_out << "$retention curve new male" << endl;
   R_out <<sel_ret(1,endyr-1)<<endl;
  // R_out <<"retention curve males old: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GG" << endl;
+  R_out << "$retention curve old male" << endl;
   R_out <<sel_ret(2,endyr-1)<<endl;
  // R_out << "selectivity discard females: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GH" << endl;
+  R_out << "$selectivity discard female" << endl;
   R_out <<sel_discf<<endl;
  // R_out << "selectivity trawl females:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GI" << endl;
+  R_out << "$selectivity trawl female" << endl;
   R_out <<sel_trawl(1)<<endl;
  // R_out << "selectivity trawl males:'27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GJ" << endl;
+  R_out << "$selectivity trawl male" << endl;
   R_out <<sel_trawl(2)<<endl;
  // R_out << "selectivity survey females 1978 1981: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GK" << endl;
+  R_out << "$selectivity survey female Era 1" << endl;
   R_out << sel_srv1(1) << endl;
  // R_out << "selectivity survey males 1978 1981: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GL" << endl;
+  R_out << "$selectivity survey male Era 1" << endl;
   R_out << sel_srv1(2) << endl;
  // R_out << "selectivity survey females 1982 to 1988: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GM" << endl;
+  R_out << "$selectivity survey female Era 2" << endl;
   R_out << sel_srv2(1) << endl;
  // R_out << "selectivity survey males 1982 to 1988: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GN" << endl;
+  R_out << "$selectivity survey male Era 2" << endl;
   R_out << sel_srv2(2) << endl;
  // R_out << "selectivity survey females 1989 to endyr: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GO" << endl;
+  R_out << "$selectivity survey female Era 3" << endl;
   R_out << sel_srv3(1) << endl;
  // R_out << "selectivity survey males 1989 to endyr: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GP" << endl;
+  R_out << "$selectivity survey male Era 3" << endl;
   R_out << sel_srv3(2) << endl;
  // R_out << "selectivity industry survey females 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GQ" << endl;
+  R_out << "$selectivity industry survey females 2009" << endl;
   R_out << sel_srvind(1) << endl;
  // R_out << "selectivity industry survey males 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GR" << endl;
+  R_out << "$selectivity industry survey males 2009" << endl;
   R_out << sel_srvind(2) << endl;
  // R_out << "selectivity nmfs industry survey females 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GS" << endl;
+  R_out << "$selectivity nmfs industry survey females 2009" << endl;
   R_out << sel_srvnmfs(1) << endl;
  // R_out << "selectivity nmfs industry survey males 2009: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GT" << endl;
+  R_out << "$selectivity nmfs industry survey males 2009" << endl;
   R_out << sel_srvnmfs(2) << endl;
  // R_out << "selectivity industry survey females 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GU" << endl;
+  R_out << "$selectivity industry survey females 2010" << endl;
   R_out << sel_srv10ind(1) << endl;
  // R_out << "selectivity industry survey males 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GV" << endl;
+  R_out << "$selectivity industry survey males 2010" << endl;
   R_out << sel_srv10ind(2) << endl;
  // R_out << "selectivity nmfs industry survey females 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GW" << endl;
+  R_out << "$selectivity nmfs industry survey females 2010" << endl;
   R_out << sel_srv10nmfs(1) << endl;
  // R_out << "selectivity nmfs industry survey males 2010: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
-  R_out << "$GX" << endl;
+  R_out << "$selectivity nmfs industry survey males 2010" << endl;
   R_out << sel_srv10nmfs(2) << endl;
 
-  R_out << "$GY" << endl;
+  R_out << "$survey CV" << endl;
   R_out << cv_srv1o << endl;
   
  }
@@ -4761,7 +3799,7 @@ TOP_OF_MAIN_SECTION
   gradient_structure::set_CMPDIF_BUFFER_SIZE(10000000);
   time(&start);
   CheckFile.open("Check.Out");
-  R_out.open("R_inputmsept2014.txt");
+  R_out.open("R_input.txt");
 
 FINAL_SECTION
  time(&finish); 

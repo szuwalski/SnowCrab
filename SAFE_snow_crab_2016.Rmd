@@ -1,0 +1,431 @@
+---
+title: "A stock assessment for eastern Bering Sea snow crab"
+author: "Cody Szuwalski"
+date: "Sept 16, 2016"
+output:
+  pdf_document:
+    fig_caption: yes
+    fig_height: 4
+    fig_width: 6
+number_sections: yes
+toc: yes
+word_document: default
+csl: fish-and-fisheries.csl
+#bibliography: CPUE Standardization.bib
+---
+
+# Executive summary
+
+```{r,echo=F}
+library(knitr)
+library(ggplot2)
+library(reshape2)
+library(plyr)
+```
+1. Stock: species/area. 
+
+A size based model was developed for eastern Bering Sea snow crab (Chionoecetes opilio) to estimate population biomass and harvest levels.
+
+2. Catches: trends and current levels
+
+Catch trends historically followed survey abundance estimates of large males, as the survey estimates were the basis for calculating the Guideline Harvest Level (GHL ) for retained catch.  The TAC is currently set (starting in 2009) by Alaska Department of Fish and Game (ADFG) using the ADFG harvest strategy.  Retained catches increased from about 3,040 t at the beginning of the directed fishery in 1973 to a peak of 149,110 t in 1991, declined thereafter, then increased to another peak of 110,410 t in 1998.  Retained catch in the 1999/2000 fishery was reduced to 15,200 t due to the low abundance estimated by the 1999 survey.  A harvest strategy (Zheng et al. 2002) was developed using an earlier generation simulation model that pre-dated the current stock assessment model.  This early generation model has been used to set the GHL (TAC since 2009) since the 2000/01 fishery.  Retained catch in the 2014/15 fishery increased to 30,820 t from the 2013/14 fishery retained catch of 24,480 t.  The total catch in the 2014/15 fishery was estimated at 34,300 t (30% mortality on directed discards) and was well below the OFL of 69,000 t.  Discard in the directed fishery was 11,700 t (no mortality applied) in 2014/15, similar to the 10,880 t (no mortality applied) in 2013/14.
+
+Estimated discard mortality (mostly undersized males and old shell males) in the directed pot fishery has averaged about 31% (no mortality applied) of the retained catch biomass since 1992 when observers were first placed on crab vessels.  Discards prior to 1992 were estimated based on fishery selectivities estimated for the period with observer data and the full selection fishing mortality estimated using the retained catch and retained fishery selectivities. 
+
+3. Stock Biomass: 
+
+Model estimates of total mature biomass of snow crab increased from the early 1980’s to a peak in 1990 of about 1,019,600 t.  The total mature biomass includes all sizes of mature females and morphometrically mature males.  The stock was declared overfished in 1999 due to the survey estimate of total mature biomass (149,900 t) being below the minimum stock size threshold (MSST = 208,710 t).  A rebuilding plan was implemented in 2000.  During the 10 year rebuilding period, the assessment model structure was changed and the currency for estimating BMSY was changed from total mature survey biomass to model estimated mature male biomass at mating (MMB).  Using the revised definitions for estimating BMSY, MMB at mating was above B35% in 2010/11 and the stock was declared rebuilt in 2011.  Furthermore, the total mature biomass observed in the 2011 survey was 447,400 t which was also above the old BMSY (418,150 t) in place under the rebuilding plan implemented in 2000.  The increase in total mature biomass was mainly due to an increase in observed female mature biomass in 2011.  
+
+Observed survey mature male biomass increased from 96,100 t in 2013 to 156,900 t in 2014, then decreased to 79,000 t in 2015.  Observed survey mature female biomass also increased from 195,100 t in 2013 to 212,500 t in 2014, then decreased to 128,100 t in 2015.  The estimate of males greater than 101 mm increased from 73.6 million in 2013 to 138.5 million in 2014, then decreased to 57,200 t in 2015.  
+
+Base model estimates of mature male biomass at mating increased from 100,600 t in 2012/13 to 108,300 t in 2013/14, and to 129,300 t in 2014/15 (84% of B35% =146,357 t).  
+ 
+4. Recruitment
+
+Recruitment was near average in 2005 (lag 5 years) and just below average in 2006 to 2009.  Survey length frequency data in 2015 indicate a possible large recruitment, although estimated with high uncertainty, in 2010 (5 year lag).
+
+5. Management 
+
+(insert tables here)
+
+6.  Basis for the OFL 
+
+The OFL for 2015/16 for the Base model was 61,500 t fishing at FOFL = 1.26, a decrease from the 2014/15 OFL of 69,000 t.  The MMB at mating projected for 2015/16 when fishing at the F35% control rule (OFL) was 84.4% of B35%.  
+
+7.	Probability Density Function of the OFL
+
+The ABC (P*=.49) was estimated from the PDF of the OFL with a cv = 0.10 on beginning biomass estimated from the Hessian.  The description of the projection model used to estimate the PDF is included later in this assessment.
+
+8.	Basis for ABC 
+
+The Annual Catch Limit (ACL) was estimated at 61,200 t using a p*=0.49.  The total catch estimated at 90% of OFL (the ACL recommended by the SSC for 2013/14) was 55,400 t.  The MMB projected for 2015/16 when fishing at 90% of the OFL catch was 87.1% of B35%.   B35% for the Base model was estimated at 146,357 t and F35% was estimated at 1.53.  MMB at mating for 2014/15 was estimated at 129,300 t above the estimated MMST of 73,180 t.
+
+
+
+# A.  Summary of Major Changes 
+
+Changes to management
+
+Changes to the Data
+
+Data added to the assessment included:  2015 Bering Sea survey biomass and length frequency data;  2014/15 directed fishery retained and discard catch and length frequencies for retained and discard catch;  and groundfish discard length frequency and discard catch from 2014/15.  The 2013/14 discard length composition was corrected.  The observer total catch length frequency was input incorrectly where the observer discard length frequency should have been input.
+
+Changes to the Assessment Methodology
+
+Six model scenarios are presented in this assessment following recommendations by the CPT in May 2015.  Model 0 is the September 2014 model with the standard deviation parameter of the growth function fixed at a small value (0.5).  Models 1 changes the parameterization of the survey logistic curves from estimating a size at 95% selected to an offset from the size at 50% parameter.  Also, the survey q for the first time period and the survey availability for the industry survey in 2010 was changed to a probit scale to allow estimation of a variance when q is estimated at 1.0.  Model 2 is Model 1 with the constraint on the probability of maturing removed, the weight on the smoothness constraint on the female probability of maturing increased and the weight on fit to the trawl discard catch increased by 4 times.  In Model 3 the fixed size at 50% selected for female discard length data was changed from 4.2 to 4.4 (log scale) to better fit the length data.  Model 3 also increased the weight on the likelihood for the fit to the growth data from 2.0 to 3.0.  Model 4 removes the penalty on the directed fishing mortality estimates (male crab) from 1992 to present.  Model 5 removes the penalty on female fishing mortality estimates from 1992 to present; potlift data are used to estimate pre-1992 fishing mortality for female discard. 
+
+Model 5 was selected as the base model as all fishing mortality penalties, which have been shown to result in bias, were removed from 1992 to the present.  
+
+Changes to Assessment Results
+See above
+
+CPT May 2015 Recommendations for next assessment:
+
+Run the 2014 assessment model (Model 0) fixing the standard deviation of the cumulative normal distribution of the growth function to a small value for both male and female growth functions. 
+Keep the F penalties for pre 1992/93 as in Model 0 and remove them for post 1991/92. Do separate scenarios changing the F penalties for males and then adding the change in F penalties for female discards. (The CPT was concerned about the way pre 1992/93 effort data and post 1992/93 catchability estimate were used to regularize pre 1992/93 F to overcome the effect of F penalty removal.). 
+Do not consider a separate selectivity curve for 2013/14 to correct under fitting of the final year (2014) survey biomass. 
+ Run model scenarios from Model 0 (2014 assessment) to Model 1 with one change per scenario so that the effect of each change can be evaluated. 
+
+
+# B. Authors response to SSC and CPT comments
+
+Model scenarios include all CPT recommended models (6 models from Model 0 to Model 5).  
+
+SSC Recommendations June 2015:
+
+No specific recommendations in SSC minutes. 
+
+Authors response
+
+Model scenarios include all CPT recommended models.
+
+# C. INTRODUCTION
+
+Snow crab (Chionoecetes opilio) are distributed on the continental shelf of the Bering Sea, Chukchi Sea, and in the western Atlantic Ocean as far south as Maine.  In the Bering Sea, snow crab are common at depths less than about 200 meters.  The eastern Bering Sea population within U.S. waters is managed as a single stock; however, the distribution of the population may extend into Russian waters to an unknown degree. 
+
+## Fishery history
+
+Snow crab were harvested in the Bering Sea by the Japanese from the 1960s until 1980 when the Magnuson Act prohibited foreign fishing.  Retained catch in the domestic fishery increased in the late 1980s to a high of about 149,110 t in 1991, declined to 29,820 t in 1996, increased to 110,410 t in 1998 then declined to 15,200 t in the 1999/2000 fishery (Table 1, Figure 1).  Due to low abundance and a reduced harvest rate, retained catches from 2000/01 to 2006/07 ranged from a low of about 10,860 t to 16,780 t.  In the 2014/15 fishery retained catch was 30,820 t and total catch was estimated at 34,300 t (0.30 mortality for pot fishery discard and 0.80 mortality for groundfish discard).  Total catch in the 2013/14 fishery was 27,700 t.
+ 
+Discard from the directed pot fishery was estimated from observer data since 1992 and ranged from 11% to 64% (average 33%) of the retained catch of male crab biomass (Table 1).  Discard of male crab in the directed fishery increased in the last two years to 44% (2013/14) and 38% (2014/15) of the retained catch (no mortality applied).  Female discard catch is very low compared to male discard catch and not a significant source of mortality.  In 1991/92 trawl discard was about 1,950 t (no mortality applied), increased to about 3,550 t in 1994/95, then declined and ranged between 900 t and 1,500 t until 1998/99.  Trawl bycatch in 2012/13 and 2013/14 was 220 t and 120 t respectively.  Discard of snow crab in groundfish fisheries from highest to lowest is the yellowfin sole trawl fishery, flathead sole trawl fishery, Pacific cod bottom trawl fishery, rock sole trawl fishery, and the Pacific cod hook-and-line and pot fisheries.
+
+Size frequency data and catch per pot have been collected by observers on snow crab fishery vessels since 1992.  Observer coverage has been 10% on catcher vessels larger than 125 ft (since 2001), and 100% coverage on catcher processors (since 1992). 
+
+The average size of retained crabs has remained fairly constant over time ranging between 105 mm and 118 mm Carapace Width (CW), and most recently about 110 mm to 111 mm CW.  The percent new shell animals in the catch has varied between 69% (2002 fishery) to 98% (1999), and was 87% for the 2005/6 fishery and 93% in the 2007/8 fishery.  In the 2007/8 fishery 94% of the new shell males >101mm CW were retained, while 78% of the old shell males >101mm CW were retained.  Only 3% of crab were retained between 78mm and 101 mm CW.  The average weight of retained crab has varied between 0.5 kg (1983-1984) and 0.73 kg (1979), and 0.59 kg in the recent fisheries.
+
+Several modifications to pot gear have been introduced to reduce bycatch mortality.  In the 1978/79 season, pots used in the snow crab fishery first contained escape panels to prevent ghost fishing.  Escape panels consisted of an opening with one-half the perimeter of the tunnel eye laced with untreated cotton twine.  The size of the cotton laced panel to prevent ghost fishing was increased in 1991 to at least 18 inches in length.  No escape mechanisms for undersized crab were required until the 1997 season when at least one-third of one vertical surface had to contain not less than 5 inches stretched mesh webbing or have no less than four circular rings of no less than 3 3/4 inches inside diameter.  In the 2001 season the escapement for undersize crab was increased to at least eight escape rings of no less than 4 inches placed within one mesh measurement from the bottom of the pot, with four escape rings on each side of the two sides of a four-sided pot, or one-half of one side of the pot must have a side panel composed of not less than 5 1/4 inch stretched mesh webbing.  
+
+
+## Harvest rates
+
+The harvest rate used to set the Guideline Harvest Level (GHL) of retained crab only previous to 2000 was 58% of the number of male crab over 101 mm CW estimated from the survey.  The minimum legal size limit for snow crab is 78 mm, however, the snow crab market generally accepts animals greater than 101 mm.  In 2000, due to the decline in abundance and the declaration of the stock as overfished, the harvest rate for calculation of the GHL was reduced to 20% of male crab over 101 mm.  After 2000, a rebuilding strategy was developed based on simulations by Zheng (2002).
+
+The realized retained catch typically exceeded the GHL historically, resulting in exploitation rates for the retained catch on males >101mm ranging from about 10% to 80%  (Figure 2).  The exploitation rate for total catch divided by mature male biomass ranged from  6% to 46% and was estimated at 21% in 2014/15 (Table 6 and Figure 2).
+ 
+Prior to adoption of Amendment 24, BMSY (921.6 million lbs (418,150 t)) was defined as the average total mature biomass (males and females) estimated from the survey for the years 1983 to 1997 (NPFMC 1998).  MSST was defined as 50% of the BMSY value (MSST=460 million lbs of total mature biomass (209,074 t)).  The harvest strategy since 2000/01 used a retained crab harvest rate on the mature male biomass of 0.10 on levels of total mature biomass greater than ½ MSST (230 million lbs), increasing linearly to 0.225 when biomass is equal to or greater than BMSY (921.6 million lbs) (Zheng et al. 2002).  The GHL was actually set as the number of retained crab allowed in the harvest, calculated by dividing the GHL in lbs by the average weight of a male crab > 101 mm.  If the GHL in numbers was greater than 58% of the estimated number of new shell crabs greater than 101 mm plus 25% of the old shell crab greater than 101 mm, the GHL is capped at 58%.  If natural mortality is 0.2, then this actually results in a realized exploitation rate cap for the retained catch of 66% at the time of the fishery, occurring approximately 7 months after the survey (if survey Q=1).  The fishing mortality rate that results from this harvest strategy depends on the relationship between mature male numbers less than 101 mm compared to greater than 101 mm.  
+
+# D. DATA 
+
+## Data Sources
+
+Catch data and size frequencies of retained crab from the directed snow crab pot fishery from 1978/79 to the 2014/15 season were used in this analysis.  Observers were placed on directed crab fishery vessels starting in 1990.  Size frequency data on the total catch (retained plus discarded) in the directed crab fishery were available from 1992/93 to 2014/15.   Total discarded catch was estimated from observer data from 1992 to 2014/15 (Table 1).  The discarded male catch was estimated for 1978 to 1991 in the model using the estimated fishery selectivities based on the observer data for the period 1992 to 2014/15.  The discard catch estimate was multiplied by the assumed mortality of discards from the pot fishery.  The mortality of discarded crab was 30% for all model scenarios.  This estimate differs from the current rebuilding harvest strategy used since 2001 to the present by ADFG to set the TAC, which assumes a discard mortality of 25% (Zheng, et al. 2002).   The discards prior to 1992 may be underestimated due to the lack of escape mechanisms for undersized crab in the pots before 1997.
+
+
+The following table contains the various data components used in the model,
+
+```{r,echo=FALSE,warning=FALSE,message=F}
+Data<-c("Retained male crab pot fishery size frequency by shell condition",
+         "Discarded Males and female crab pot fishery size frequencey",
+         "Trawl fishery bycatch size frequencies by sex",
+         "Survey size frequencies by sex and shell condition",
+        "Retained catch estimates",
+        "Discard catch estimates from crab pot fishery",
+        "Trawl bycatch estimates",
+        "Total survey biomass estimates and coefficients of variation",
+        "2009 study area biomass estimates, CVs, and size frequencey for BSFRF and NMFS tows",
+        "2010 study area biomass estimates, CVs, and size frequencey for BSFRF and NMFS tows"
+         )
+DataYears<-c("1978/79 - 2015/16",
+             "1992/93 - 2015/16",
+             "1991/92 - 2015/16",
+             "1978-2016",
+             "1978/79 - 2015/16",
+             "1992/93 - 2015/16",
+             "1973 - 2015/16",
+             "1978 - 2016",
+             "2009",
+             "2010")
+
+PlotTab<- data.frame(Data,DataYears)
+colnames(PlotTab)<- c("Data component","Years")
+rownames(PlotTab)<- NULL
+kable(PlotTab)
+
+```
+## Survey biomass
+
+Abundance is estimated from the annual eastern Bering Sea (EBS) bottom trawl survey conducted by NMFS (see Rugolo et al. 2003 for design and methods).  Since 1989, the survey has sampled stations farther north than previous years (61.2o N previous to 1989).  In 1982 the survey net was changed resulting in a change in catchability.  Juvenile crabs tend to occupy more inshore northern regions (up to about 63o N) and mature crabs deeper areas to the south of the juveniles (Zheng et al. 2001).
+  
+All survey data in this assessment use measured net widths instead of the fixed 50 ft net width used in the September 2009 snow crab assessment (variable net width data were shown for comparison in the September 2009 assessment).  Snow crab assessments prior to and including September 2009 used survey biomass estimates for all crab based on an assumed 50 ft net width.  In 2009, Chilton et al. (2009) provided new survey estimates based on measured net width. The average measured net width for all tows in the 2009 survey was 17.08 meters which is about 112% of 50ft (15.24 meters) (Chilton et al. 2009).   The 2009 mature male survey biomass was 162,890 t using the fixed 50 ft net width and 141,300 t using the measured net width for each tow.  The difference between the survey male mature biomass estimates calculated with the fixed 50 ft width and the measured net width is small in the early part of the time series, and then is an average ratio of 0.86 (range 0.81 to 0.90) from 1998 to 2009. 
+
+The total mature biomass (all sizes of morphometrically mature males and females) estimated from the survey declined to a low of 82,100 t in 1985, increased to a high of 809,600 t in 1991 (includes northern stations after 1989), then declined to 140,900 t in 1999, when the stock was declared overfished (Table 3 and Figure 4).  The mature biomass increased in 2000 and 2001, mainly due to a few large catches of mature females.   The survey estimate of total mature biomass increased from 291,200 t in 2013 to 369,400 t in 2014, then declined to 207,100 t in 2015.
+ 
+Survey mature male biomass increased from 96,100 t in 2013 to 156,900 t in 2014, then declined to 79,000 t in 2015.  The observed survey estimate of males greater than 101 mm increased from 73.6 million in 2013 to 138.9 million in 2014, then declined to 57.2 million in 2015 (Table 3).  Survey mature female biomass increased from 195,100 t in 2013 to 212,500 t in 2014, then declined to 128,100 t in 2015.
+
+The term mature for male snow crab in this assessment means morphometrically mature.  Morphometric maturity for males refers to a marked change in chelae size (thereafter termed “large claw”), after which males are assumed to be effective at mating.  Males are functionally mature at smaller sizes than when they become morphometrically mature, although the contribution of these “small-clawed” males to annual reproductive output is negligible.  The minimum legal size limit for the snow crab fishery is 78 mm, however the size for males that are generally accepted by the fishery is >101mm.  The historical quotas were based on the survey abundance of large males (>101mm).  
+
+## Survey Size Composition
+
+Carapace width is measured on snow crab and shell condition recorded in the survey and the fishery.  Snow crab cannot be aged at present (except by radiometric aging of the shell since last molt) however, shell condition has been used as a proxy for age. Based on protocols adopted in the NMFS EBS trawl survey, shell condition class and presumptive age are as follows: soft shell (SC1) (less than three months from molting), new shell (SC2) (three months to less than one year from molting), old shell (SC3) (two years to three years from molting), very old shell (SC4) (three years to four years form molting), and very very old shell (SC5) (four years or longer from molting).  Radiometric aging of shells from terminal molt male crabs (after the last molt of their lifetime) elucidated the relationship between shell condition and presumptive age, which will be discussed in a later section (Nevissi et al. 1995). 
+
+Survey abundance by size for males and females indicate a moderate level of recruitment moving through the stock and resulting in the small increase in abundance in 2015 (Figures 6 - 8).  In 2009 small crab (<50mm) increased in abundance relative to 2008.  The 2010 length frequency data showed high abundance in the 40 to 50 mm range.  The recruitment progressed into the mature female abundance in 2011 and also can be seen in male abundance in the 50-65mm range in 2011(Figure 8).  However, in 2012 and 2013, the progress of the recruitment is not evident.  High numbers of small crab in the late 1970’s survey data did not follow through the population to the mid-1980’s.  The high numbers of small crab in the late 1980’s resulted in the high biomass levels of the early 1990’s and subsequent high catches.  Moderate increase in numbers can also be seen in the mid 1990’s.   The 2015 survey length composition data indicate a possible large recruitment to the model in 2015 (2010 lag 5 years to fertilization year).
+
+## Spatial distribution of catch and survey abundance
+
+The majority of the fishery catch occurs south of 58.5o N., even in years when ice cover did not restrict the fishery moving farther north.  In past years, most of the fishery catch occurred in the southern portion of the snow crab range possibly due to ice cover and proximity to port and practical constraints of meeting delivery schedules.  The directed fishery catch in 2012/13 is shown in Figure 9 showing some catch from east of the Pribilof Islands, however, the majority of catch is west and north of the Pribilof Islands.  The majority of catch in 2014/15 has shifted to east of the Pribilof Islands (Figure 11).
+
+CPUE of survey catch by tow for 2014 to 2015 are shown in Figures 12 through 25.  Immature female and small male (<78mm) distributions in 2014 and 2015 were farther south than in previous years with higher tows just north of the Pribilof Islands (Figures 12, 15, 20 and 22).  Legal males (>77mm) and large males (>101mm) are distributed farther south and east of the Pribilof Islands than in previous years (Figures 13, 14, 19, and 21).  Mature females with less than or equal to half clutch of eggs were mostly in the northern part of the survey area above 58 o N (Figures 18 and 24). 
+
+The difference between the summer survey distribution of large males and the fishery catch distribution indicates that survey catchability may be less than 1.0 and/or some movement occurs between the summer survey and the winter fishery.  However, the exploitation rate on males south of 58.5o N latitude may exceed the target rate, possibly resulting in localized depletion of males from the southern part of their range.  Snow crab larvae probably drift north and east after hatching in spring.  Snow crab appear to move south and west as they age, however, no tagging studies have been conducted to fully characterize the ontogenetic or annual migration patterns of this stock(Murphy et al. 2010).  High exploitation rates in the southern area may have resulted in a northward shift in snow crab distribution.  The last few years of survey data indicate a shift to the south in distribution of snow crab, which reverses the trends seen in early 2000s.
+
+Ernst, et al. (2005) found the centroids of survey summer distributions have moved to the north over time (Figures 26 and 27).  In the early 1980’s the centroids of mature female distribution were near 58.5 o N, in the 1990s the centroids were about 59.5 o N.  The centroids of old shell male distribution was south of 58 o N in the early 1980s, moved north in the late 1980s and early 1990s then shifted back to the south in the late 1990s.  The distribution of males>101 mm was about at 58 o N in the early 1980s, then was farther north (58.5 to 59 o N) in the late 1980s and early 1990s, went back south in 1996 and 1997 then has moved north with the centroid of the distribution in 2001 just north of 59 o N..  The centroids of the catch are generally south of 58 o N, except in 1987.  The centroids of catch also moved north in the late 1980s and most of the 1990s.  The centroids of the catch were about at 56.5 o N in 1997 and 1998, then moved north to above 58.5 o in 2002.
+
+## 2009 and 2010 Study Area Data Additional survey data 
+
+Bering Sea Fisheries Research Foundation (BSFRF) conducted a survey of 108 tows in 27 survey stations (10,827 nm2, hereafter referred to as the “study area”) in the Bering Sea in summer 2009 (Figure 28, see Somerton et al 2010 for more details).  The abundance estimated by the BSFRF survey in the study area was 66.9 million male crab >=100 mm compared to 36.7 million for the NMFS tows (Table 4).  The NMFS abundance of females >=50mm (121.5 million) was greater than the BSFRF abundance estimate in the study area (113.6 million) (Table 4).
+
+The abundance of male crab in the entire Bering Sea survey for 2009 was greatest in the 30 – 60mm size range (Figures 29 and 30).  The abundance of crab in the 35 to 60mm size range for the BSFRF net in the study area was very low compared to the abundance of the same size range for the NMFS entire Bering Sea survey.  The differences in abundance by size for the NMFS entire Bering Sea survey and the BSFRF study area were due to availability of crab in the study area as well as capture probability.   While the abundance of larger male crab for the NMFS net in the study area is less than for the BSFRF, the abundance of females >45 mm is greater for the NMFS net than the BSFRF (Figure 29).  This difference may be due to different towing locations for the two nets within the study area, or to higher catchability of females possibly due to aggregation behavior.  The ratio of abundance of the NMFS net and BSFRF net in the study area are quite different for males and females (Figure 31).  The ratio of abundance indicates a catchability for mature females (mainly 45 – 65 mm) that is greater than 1.0 for the NMFS net.
+
+The largest tows for small (<78mm) male crab in the entire Bering Sea area were north of the study area near St. Matthew Island (Figure 12 and 20).  Some higher tows for large males (>=100mm) and for mature females occurred in the study area as well as outside the study areas (Figures 5-18 and 22-24).  These distributions indicate that availability of crab of different sizes and sex varies spatial throughout the Bering Sea. The numbers by length and mature biomass by sex for the BSFRF tows and the NMFS tows within the study area were added to the model as an additional survey.
+
+The 2009 estimated snow crab abundance by length in the study area had very low numbers of both male and female crab in the 35 mm to 70 mm range than observed in the Bering sea wide survey(Figures 29 and 30).   The ratio of abundance (NMFS/BSFRF) by length for 2009 was 0.2 at about 45 mm increasing gradually to 0.4 at 95mm then increasing steeply to 0.9 to 1.25 above 115 mm (Figure 31).  The mean size of crab retained by the fishery is about 110 mm, with minimum size retained about 102mm.  Ratios of abundance for female crab were above 1.0 from 45mm to 60mm then declined to 0.5 to 0.8 above 60mm to 80mm.  There were very few female crab above 80mm in the population.  
+
+The 2010 study area covered a larger portion of the distribution of snow crab than the 2009 study area.  The abundance by length for the 2010 study area is very different from the 2009 data, with higher abundance in 2010 of small crab (Figure 32).  The expanded estimate (expanded to the study area) of male abundance from BSFRF data is higher than the Bering Sea wide abundance for length from 50mm to about 110mm. Female abundance shows a similar relationship (Figure 33).  The ratio of male abundance by length (NMFS/BSFRF) in 2010 increased to 0.6 at 40mm then decreased to about 0.2 at 65-70mm then increased and ranged between 0.3 and 0.4 up to about 112mm (Figure 34).  The ratios increased from 0.4 at 112 to about 0.7 at 122mm then to 1.55 at 132mm.  The ratio of female abundance by length in 2010 was 0.6 at about 45mm and declined to 0.4 at about 67mm then declined below 0.1 above about 77mm. 
+
+Several processes influence net performance.  Somerton et al. (2010) accounted for area swept, sediment type, depth and crab size.  However, they did not correct for the probability of encountering crab.  The 2010 study area data have a number of paired tows where BSFRF caught no crab (within a particular size bin) or where NMFS caught no crab.   This creates problems with simply taking the ratio of catches since a number of ratios will be infinity (dividing by 0).  This occurs because the paired tows although near in space were not fishing on the same density of crab.  In addition, the BSFRF tow covered about 10% of the area of the NMFS tow, due to the narrower net width and the 5 minute tow duration compared to the 30 minute NMFS tow duration.   To analyze these data, first the ratio of the “NMFS density” (numbers per nm2) to the “sum of the density” of NMFS and BSFRF were calculated (Figure 35 males and Figure 38 females).  These values range from 0 to 1.0. The simple mean of these values was estimated by length bin and then transformed to estimate mean catchability by length bin (Figure 39 males Figure 40 females).  A value of 0.5 for the ratio of the “NMFS density” to the “sum of density” is equivalent to a catchability of 1.0, and a value of the ratio of 0.33 is equivalent to a catchability of 0.5. The size of the catch for each observation is plotted in Figure 36 (same data as Figure 35).  
+
+The BSFRF study provides a rich data set to evaluate net performance.  In this survey the sample is the paired tows and the goal would be to evaluate net performance over a wide range of densities, sediment types and depths.  Somerton et al. (February 2011 Modeling Workshop) used catch to weight observations for estimation of the selectivity curve.  This assumes that trawl performance is influenced by local density of crab (an untested assumption).  No weighting of the observations assumes that there is no relationship between catch and the selectivity of crab.  If selectivity changes depending on whether catches are high or low, then further study and analysis is needed.  Further analysis needs to be done on whether data should be weighted in the initial estimation of the selectivity curve. The unweighted mean values by length bin are higher than the values estimated by Somerton et al..  Somerton weights again by survey abundance and adjusts for depth and sediment type in a separate step in the analysis to estimate a Bering Sea wide survey selectivity.  Simulation studies are needed to determine the influence of weighting (whether bias is introduced) and whether the distributional assumptions and likelihood equations used in the analysis of the paired tow data are correct and unbiased. 
+
+The overall distribution of the ratio of “NMFS density” to the “sum of the densities” is skewed with about 140 - 0.0 values and 110 - 1.0 values (Figure 41).  The percentage of observations where NMFS caught crab and no crab were caught by the BSFRF tow increases by size bin for male crab (Figures 41 through 46).
+
+Catches of male crab decrease with size simply because they are lower in abundance in the population.  At sizes of male crab greater than about 90 mm the fraction of observations where the ratio of NMFS density to the sum of densities was 1.0 and 1 crab was caught in the net was about 10% to 30%.  In other, words the majority of the tows involved more than 1 crab caught.
+
+The mean values of the ratio of NMFS density to the sum of densities for female crab transformed to catchability increase from less than 0.1 at 25mm to about 0.5 at 55mm then decrease slightly above 70mm (Figures 38 and 40).  
+
+## Weight to size relationship
+
+The weight (kg) – size (mm) relationship was estimated from survey data, where weight = a* sizeb.  Juvenile female a= 0.00000253, b=2.56472.  Mature female a=0.000675 b=2.943352, and males, a= 0.00000023, b=3.12948 (Figure 47).  
+
+## Maturity 
+
+Maturity for females was determined by visual examination during the survey and used to determine the fraction of females mature by size for each year.  Female maturity was determined by the shape of the abdomen, by the presence of brooded eggs or egg remnants.  The average fraction mature for female snow crab is shown in Figure 48b, although this curve is not used in the model.  
+
+Morphometric maturity for males is determined by chela height measurements, which are available starting from the 1989 survey (Otto 1998).  The number of males with chela height measurements has varied between about 3,000 and 7,000 per year.  In this report a mature male refers to a morphometrically mature male.  
+
+One maturity curve for males was estimated using the average fraction mature based on chela height data and applied to all years of survey data to estimate mature survey numbers (Figure 48c).  The separation of mature and immature males by chela height at small widths may not be adequately refined given the current measurement to the nearest millimeter.  Chela height measured to the nearest tenth of a millimeter (by Canadian researchers on North Atlantic snow crab) shows a clear break in chela height at small and large widths and shows fewer mature animals at small widths than the Bering Sea data measured to the nearest millimeter.  Measurements taken in 2004-2005 on Bering Sea snow crab chela to the nearest tenth of a millimeter show a similar break in chela height to the Canadian data (Rugolo et al. 2005).  
+
+The probability of a new shell crab maturing was estimated in the model at a smooth function to move crab from immature to mature (Figure 48).  The probability of maturing was estimated to match the observed fraction mature for all mature males and females observed in the survey data.  The probability of maturing by size for female crab was about 50% at about 48 mm and increased to 100% at 60mm (Figure 49).  The probability of maturing for male crab was about 15% to 20% at 60 mm to 90mm and increased sharply to 50% at about 98mm, and 100% at 108 mm.
+
+## Natural Mortality
+
+Natural mortality is a critical variable in population dynamic modeling, and may have a large influence on derived optimal harvest rates.  Natural mortality rates estimated in a population dynamics model may have high uncertainty and may be correlated with other parameters, and therefore are usually fixed.  The ability to estimate natural mortality in a population dynamics model depends on how the true value varies over time as well as other factors (Schnute and Richards 1995, Fu and Quinn 2000). 
+
+Nevissi, et al. (1995) used radiometric techniques to estimate shell age from last molt (Table 7).  The total sample size was 21 male crabs (a combination of Tanner and snow crab) from a collection of 105 male crabs from various hauls in the 1992 and 1993 NMFS Bering Sea survey.  Fishing mortality rates before and during the time period when these crab were collected were relatively high, and therefore maximum age would represent Z (total mortality) rather than M.  Representative samples for the 5 shell condition categories were collected that made up the 105 samples.  The oldest looking crab within shell conditions 4 and 5 were selected from the total sample of SC4 and SC5 crabs to radiometrically age (Orensanz, Univ. of Washington, pers comm.).  Shell condition 5 crab (SC5 = very, very old shell) had a maximum age of 6.85 years (s.d. 0.58, 95% CI approximately 5.69 to 8.01 years).  The average age of 6 crabs with SC4 (very old shell) and SC5, was 4.95 years.  The range of ages was 2.70 to 6.85 years for those same crabs.  Given the small sample size, this maximum age may not represent the 1.5% percentile of the population that is approximately equivalent to Hoenig’s method (1983).  Maximum life span defined for a virgin stock is reasonably expected to be longer than these observed maximum ages from exploited populations.  Radiometric ages estimated by Nevissi, et al. (1995) may be underestimated by several years, due to the continued exchange of material in crab shells even after shells have hardened (Craig Kastelle, pers. comm., Alaska Fisheries Science Center, Seattle, WA).  
+
+Tag recovery evidence from eastern Canada reveal observed maximum ages in exploited populations of 17-19 years (Nevissi, et al. 1995, Sainte-Marie 2002).  A maximum time at large of 11 years for tag returns of terminally molted mature male snow crab in the North Atlantic has been recorded since tagging started about 1993 (Fonseca, et al. 2008).  Fonseca, et al. (2008) estimated a maximum age of 7.8 years post terminal molt using data on dactal wear.  
+
+We reasoned that in a virgin population of snow crab, longevity would be at least 20 years.  Hence, we used 20 years as a proxy for longevity and assumed that this age would represent the 99th percentile of the distribution of ages in an unexploited population if observable.  Under negative exponential depletion, the 99th percentile corresponding to age 20 of an unexploited population corresponds to a natural mortality rate of 0.23.  Using Hoenig’s (1983) method an M=0.23 corresponds to a maximum age of 18 years (Table 8).  M=0.23 was used for all female crab in the model.  Male natural mortality estimated in the model with a prior constraint of mean M=0.23 with a se = 0.054 estimated from using the 95% CI of  +-1.7 years on maximum age estimates from dactal wear and tag return analysis in Fonseca, et al. (2008).
+
+  
+## Molting probability
+
+Female and male snow crab have a terminal molt to maturity.  Many papers have dealt with the question of terminal molt for Atlantic Ocean mature male snow crab (e.g., Dawe, et al. 1991).  A laboratory study of morphometrically mature male Tanner crab, which were also believed to have a terminal molt, found all crabs molted after two years (Paul and Paul 1995).  Bering Sea male snow crab appear to have a terminal molt based on data on hormone levels (Tamone et al. 2005) and findings from molt stage analysis via setagenesis.  The models presented here assume a terminal molt for both males and females. 
+
+Male Tanner and snow crabs that do not molt (old shell) may be important in reproduction.  Paul et al. (1995) found that old shell mature male Tanner crab out-competed new shell crab of the same size in breeding in a laboratory study.  Recently molted males did not breed even with no competition and may not breed until after about 100 days from molting (Paul et al. 1995).  Sainte-Marie et al. (2002) states that only old shell males take part in mating for North Atlantic snow crab.  If molting precludes males from breeding for a three month period, then males that are new shell at the time of the survey (June to July), would have molted during the preceding spring (March to April), and would not have participated in mating.  The fishery targets new shell males, resulting in those animals that molted to maturity and to a size acceptable to the fishery of being removed from the population before the chance to mate.  Animals that molt to maturity at a size smaller than what is acceptable to the fishery may be subjected to fishery mortality from being caught and discarded before they have a chance to mate.  However, new shell males will be a mixture of crab less than 1 year from terminal molt and 1+ years from terminal molt due to the inaccuracy of shell condition as a measure of shell age.
+
+Crabs in their first few years of life may molt more than once per year, however, the smallest crabs included in the model are approximately 3 to 4 years old and would be expected to molt annually. The growth transition matrix was applied to animals that grow, resulting in new shell animals.  Those animals that don’t molt become old shell animals.  Animals that are classified as new shell in the survey are assumed to have molted during the last year.  The assumption is that shell condition (new and old) is an accurate measure of whether animals have molted during the previous year.  The relationship between shell condition and time from last molt needs to be investigated further.  
+
+## Mating ratio and reproductive success
+
+Full clutches of unfertilized eggs may be extruded and appear normal to visual examination, and may be retained for several weeks or months by snow crab.  Resorption of eggs may occur if not all eggs are extruded resulting in less than a full clutch.  Female snow crab at the time of the survey may have a full clutch of eggs that are unfertilized, resulting in overestimation of reproductive potential.  Male snow crab are sperm conservers, using less than 4% of their sperm at each mating.  Females also will mate with more than one male.  The amount of stored sperm and clutch fullness varies with sex ratio (Sainte-Marie 2002).  If mating with only one male is inadequate to fertilize a full clutch, then females will need to mate with more than one male, necessitating a sex ratio closer to 1:1 in the mature population, than if one male is assumed to be able to adequately fertilize multiple females.
+
+The fraction barren females and clutch fullness observed in the survey increased in the early 1990s then decreased in the mid- 1990s then increased again in the late 1990s (Figures 49 and 50).  The highest levels of barren females coincides with the peaks in catch and exploitation rates that occurred in 1992 and 1993 fishery seasons and the 1998 and 1999 fishery seasons.  While the biomass of mature females was high in the early 1990s, the rate of production from the stock may have been reduced due to the spatial distribution of the catch and the resulting sex ratio in areas of highest reproductive potential.  The percentage of barren females was low in 2006, increased in 2007, then declined in 2008 and 2009 to below 1 percent for new and old shell females and about 17% for very old females.  Clutch fullness for new shell females declined slightly in 2009 relative to 2008, however, on average is about 70% compared to about 80% before 1997.  Clutch fullness for old and very old shell females was high in 2006, declined in 2007, then was higher in 2009 (about 78% old shell and 60% very old). 
+
+The fraction of barren females in the 2003 and 2004 survey south of 58.5 o N latitude was generally higher than north of 58.5 o N latitude (Figures 51 and 52).  In 2004 the fraction barren females south of 58.5 o N latitude was greater for all shell conditions.  In 2003, the fraction barren was greater for new shell and very very old shell south of 58.5 o N latitude.
+
+Laboratory analysis determined that female snow crab collected in waters colder than 1.5 o C from the Bering Sea were biennial spawners.  Future recruitment may be affected by the fraction of biennial spawning females in the population as well as the estimated fecundity of females, which may depend on water temperature. 
+
+An index of reproductive potential for crab stocks needs to be defined that includes spawning biomass, fecundity, fertilization rates and frequency of spawning.  In most animals, spawning biomass is a sufficient index of reproductive potential because it addresses size related impacts on fecundity, and because the fertilization rates and frequency of spawning are relatively constant over time.  This is not the case for snow crab.  
+
+The centroids of the cold pool (<2.0 o C) were estimated from the summer survey data for 1982 to 2006 (Figure 53).  The centroid is the average latitude and average longitude. In the 1980’s the cold pool was farther south(about 58 to 59 o N latitude) except for 1987 when the centroid shifted to north of 60 o N latitude.  The cold pool moved north from about 58 o N latitude in 1999 to about 60.5 o N latitude in 2003.  The cold pool was farthest south in 1989, 1999 and 1982 and farthest north in 1987, 1998, 2002 and 2003.  In 2005 the cold pool was north, then in 2006 back to the south.  The years 2007, 2008 and 2009 have all been cold years.  
+
+The clutch fullness and fraction of unmated females however, may not account for the fraction of females that may have unfertilized eggs, since these cannot be detected by the naked eye at the time of the survey.   The fraction of barren females observed in the survey may not be an accurate measure of fertilization success because females may retain unfertilized eggs for months after extrusion.  To examine this hypothesis, RACE personnel sampled mature females from the Bering Sea in winter and held them in tanks until their eggs hatched in March of the same year (Rugolo et al. 2005).  All females then extruded a new clutch of eggs in the absence of males.  All eggs were retained until the crabs were sacrificed near the end of August.  Approximately 20% of the females had full clutches of unfertilized eggs.  The unfertilized eggs could not be distinguished from fertilized eggs by visual inspection at the time they were sacrificed.  Indices of fertilized females based on the visual inspection method of assessing clutch fullness and percent unmated females may overestimate fertilized females and not an accurate index of reproductive success.    
+
+McMullen and Yoshihara (1969) examined female red king crab around Kodiak Island in 1968 and found high percentages of females without eggs in areas of most intense fishing (up to 72%).  Females that did not extrude eggs and mate were found to resorb their eggs in the ovaries over a period of several months.  One trawl haul captured 651 post-molt females and nine male red king crab during the period April to May 1968.  Seventy-six percent of the 651 females were not carrying eggs.  Ten females were collected that were carrying eggs and had firm post-molt shells.  The eggs were sampled 8 and 10 days after capture and were examined microscopically.  All eggs examined were found to be infertile.  This indicates that all ten females had extruded and held egg clutches without mating.   Eggs of females sampled in October of 1968 appear to have been all fertile from a table of results in McMullen and Yoshihara(1969), however the results are not discussed in the text, so this is unclear.  This may mean that extruded eggs that are unfertilized are lost between May and October.      
+
+## Growth
+
+Very little information exists on growth for Bering Sea snow crab.  A growth study was conducted in 2011 (Somerton 2013) that added new information that was used in the Base model of the current assessment.  Tagging experiments were conducted on snow crab in 1980 with recoveries occurring in the Tanner crab (Chionoecetes bairdi) fishery in 1980 to 1982 (Mcbride 1982).  All tagged crabs were males greater than 80mm CW and which were released in late May of 1980.  Forty-nine tagged crabs were recovered in the Tanner crab fishery in the spring of 1981 of which only 5 had increased in carapace width.  It is not known if the tags inhibited molting or resulted in mortality during molting, or the extent of tag retention.  One crab was recovered after 15 days in the 1980 fishery, which apparently grew from 108 mm to 123 mm carapace width.  One crab was recovered in 1982 after almost 2 years at sea that increased from 97 to 107 mm.  
+
+In the 2012 assessment and previous to 2012, growth data from 14 male crabs collected in March of 2003 that molted soon after being captured were used to estimate a linear function between premolt and postmolt width (Lou Rugolo unpublished data, Figure 54).  The crabs were measured when shells were still soft because all died after molting, so measurements are probably underestimates of postmolt width (Rugolo, pers. com.).  Growth appears to be greater than growth of some North Atlantic snow crab stocks (Sainte-Marie 1995).  Growth from the 1980 tagging of snow crab was not used due to uncertainty about the effect of tagging on growth.  Previous to the 2011 growth data collection that was used in the Base model and scenario 1, there were no growth measurements for Bering Sea snow crab females.  North Atlantic growth data indicate growth is slightly less for females than males.
+
+Somerton’s (2013) estimates of growth for Bering sea snow crab combined several data sets as well as female and male data.  The best model determined by Somerton(2013) included the following data :
+
+1.   Transit study;  14 crab
+2.	Cooperative seasonality study (Rugolo);   6 crab
+3.	Dutch harbor holding study;     9 crab
+4.	NMFS Kodiak holding study  held less than 30 days;  6 crab
+Total sample size was 35 crab.  Somerton(2013) excluded data from the NMFS Kodiak holding study where crab were held more than 30 days and also for the ADF&G Kodiak holding study where crab were collected during the summer survey and held until molting the next spring because growth was significantly lower than the above four data sets.
+
+Some data points were excluded from 1, 2 and 3 above (35 was the final sample size).  Females molting to maturity were excluded from all data sets, since the molt increment is usually smaller.  Crab missing more than two limbs were excluded due to other studies showing lower growth.  Crab from Rugolo’s seasonal study were excluded that were measured less than 3 days after molting due to difficulty in measuring soft crab accurately.  Somerton fit each data set starting with (1) above and testing the next data set for significant difference.  Two linear models were fit that joined at 36.1 mm (males and females combined, Figure 55), 
+
+## Selectivity
+
+# E. ANALYTIC APPROACH
+
+## 1. History of modeling approaches for the stock
+
+## 2. Model description
+
+The model structure was developed following Fournier and Archibald’s (1982) methods, with many similarities to Methot (1990).  The model was implemented using automatic differentiation software developed as a set of libraries under C++ (ADModel Builder).  ADModel Builder can estimate a large number of parameters in a non-linear model using automatic differentiation software extended from Greiwank and Corliss (1991) and developed into C++ class libraries.  This software provides the derivative calculations needed for finding the objective function via a quasi-Newton function minimization routine (e.g., Press et al. 1992).   The model implementation language (ADModel Builder) gives simple and rapid access to these routines and provides the ability to estimate the variance-covariance matrix for all parameters of interest. 
+
+The model estimates the abundance by length bin and sex in the first year (1978) as parameters rather than estimating the recruitments previous to 1978.  This results in 44 estimated parameters.   
+
+## 3. Model selection and evaluation
+List the scenarios that are considered
+This should include the model from the previous year as the 'base' model and then whatever other runs were requested after that.
+
+## 4. Results
+
+
+Write the code such that each scenario has it's own section
+Does everyone get its own MCMC?
+Then there is a section that compares them all at the end.
+Or is there a 'base' model to which all of the others are compared?
+
+# F. Calculation of the ABC
+
+# H. Rebuilding analyses
+
+# I. Data gaps and research priorities
+
+# K. Literature cited
+
+
+# Tables
+## Data
+
+
+```{r,echo=FALSE,warning=FALSE,message=F}
+# Read data file
+DATfile <-readLines("C:/SnowCrab/2016sc.DAT")
+
+# length of data types
+tmp<-grep("number of years of retained fishery data",DATfile)
+CatchYrN <-as.numeric(DATfile[tmp+1])
+tmp<-grep("number of years of survey data",DATfile)
+SurvYrN <-as.numeric(DATfile[tmp+1])
+tmp<-grep("number of years of fishery discard",DATfile)
+DiscYrFN <-as.numeric(DATfile[tmp+1])
+tmp<-grep("number of years of fishery male discard",DATfile)
+DiscYrMN <-as.numeric(DATfile[tmp+1])
+tmp<-grep("number of years of trawl discard",DATfile)
+TrawlYrN <-as.numeric(DATfile[tmp+1])
+
+# observed retained catch
+tmp<-grep("retained catch in numbers",DATfile)
+ObsCatchNumbers<-as.numeric(DATfile[(tmp+1):(tmp+CatchYrN)])[1:CatchYrN]
+tmp<-grep("retained catch in pounds",DATfile)
+ObsCatchPounds<-as.numeric(DATfile[(tmp+1):(tmp+CatchYrN)])[1:CatchYrN]
+tmp<-grep("years for fishery data",DATfile)
+RetCatchYrs<-as.numeric(unlist(strsplit(DATfile[(tmp+1)],split=" ")))
+
+# observed discard
+tmp<-grep("Discard Catch from observer",DATfile)
+ObsDiscF<-as.numeric(DATfile[(tmp+2):(tmp+1+CatchYrN)])[1:CatchYrN]
+tmp<-grep("discard catch males",DATfile)
+ObsDiscM<-as.numeric(DATfile[(tmp+1):(tmp+CatchYrN)])[1:CatchYrN]
+
+# observed trawl
+tmp<-grep("trawl bycatch numbers by geartype",DATfile)
+TrawlBycatch<-as.numeric(DATfile[(tmp+2):(tmp+1+CatchYrN)])[1:CatchYrN]
+
+# survey numbers
+tmp<-grep("survey numbers by year",DATfile)
+SurveyNumbers<-as.numeric(DATfile[(tmp+1):(tmp+SurvYrN)])
+tmp<-grep("years for survey data",DATfile)
+SurveyYrs<-as.numeric(unlist(strsplit(DATfile[(tmp+1)],split=" ")))
+
+
+# format all the above into a tabular format
+tmpMat<-matrix(ncol=7,nrow=SurvYrN)
+tmpMat[,1]<-SurveyYrs
+tmpMat[match(RetCatchYrs,SurveyYrs),2]<-ObsCatchNumbers
+tmpMat[match(RetCatchYrs,SurveyYrs),3]<-ObsCatchPounds
+tmpMat[match(RetCatchYrs,SurveyYrs),4]<-ObsDiscF
+tmpMat[match(RetCatchYrs,SurveyYrs),5]<-ObsDiscM
+tmpMat[match(RetCatchYrs,SurveyYrs),6]<-TrawlBycatch
+tmpMat[,7]<-SurveyNumbers
+
+
+PlotTab<- data.frame(tmpMat)
+colnames(PlotTab)<- c("Survey year","Retained catch (numbers)","Retained catch (lbs)",
+                      "Discarded females","Discarded males","Trawl bycatch (numbers)",
+                      "Total survey (numbers)")
+rownames(PlotTab)<- NULL
+kable(PlotTab)
+
+```
+
+Pull from the .DAT file directly.
+Total catch, bycatch and dsicards. catch at length with sample sizes
+surveybiomass estimates plus CV
+growth per molt data
+
+## model estimated quantities
+parameters
+recruitment
+biomass
+time series of catch divided by biomass
+
+# Figures
+## fits to the data
+observed and model predicted catches
+survey numbers
+catch proportions by length
+survey proportions by length
+marginal distributions for fits to the compositional data
+time series of implied effective sample sizes
+RMSE for indices
+q q plots and historgrams of residuals to justify sampling distributions for the data
+
+## estimated quanties
+fishery and survey selectivities, molting probabillities, weight at length
+estimated male, female, mature male, total and effective mature biomass (indicate proxy bmsy)
+estimated full selection F over time
+estimated fishing mortality vs estimated spawning stock biomass (kobe plot)
+fit of stock recruitment relationship
+
+retrospective analysis
+
+
+
+# APPENDIX A: MODEL STRUCTURE
+
+Recruitment is determined from the estimated mean recruitment, the yearly recruitment deviations and a gamma function that describes the proportion of recruits by length bin, N~a~ N^a^
+
+$$ N_{t,l} = pr_{l}e^{R_{0}+tao_{t}} $$
+
+
+where,
+
+R~0~    log mean recruitment
+pr~t~   proportion of recruits for each lenght bin
+tao~t~  recruitment deviations by year
+
+Recruitment is estimated equal for males and females in the model.
+
+Crab were distributed into 5mm CW bins based on a pre-molt to post-molt transition matrix.  For immature crab, the number of crabs in length bin l in year t-1 that remain immature in year t is given by,
+
+# APPENDIX B: PROJECTION MODEL STRUCTURE
+
