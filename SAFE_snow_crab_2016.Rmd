@@ -583,13 +583,17 @@ Recruitment is determined from the estimated mean recruitment, the yearly recrui
   S_{trawl,l} = & \frac {1}{1+e^{-S_{slope,trawl}(L_{l}-S_{50,trawl}}})
   \end{align}
 
+ \begin{align}
+ C_{male,dir,y}  = & \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {R_l F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
+ C_{male,tot,y}  = & \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
+ C_{fem,dir,y}   = & \sum_{l} \sum_{v} \sum_{m} w_{fem,l} \frac {F_{fem,dir,y,l}}{F_{fem,dir,y,l + F_{trawl,y,l}}} N_{fem,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{fem,dir,y,l}+F_{trawl,y,l})})  \\
+ C_{male,tot,y}  = & \sum_{s} \sum_{l} \sum_{v} \sum_{m} w_{s,l} N_{s,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{trawl,y,l})})
+ \end{align}
  
-  \begin{align}
-    C_{male,dir,y}  = \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {R_l F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
-    C_{male,tot,y}  = \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
-    C_{fem,dir,y}   = \sum_{l} \sum_{v} \sum_{m} w_{fem,l} \frac {F_{fem,dir,y,l}}{F_{fem,dir,y,l + F_{trawl,y,l}}} N_{fem,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{fem,dir,y,l}+F_{trawl,y,l})})  \\
-    C_{male,tot,y}  = \sum_{s} \sum_{l} \sum_{v} \sum_{m} w_{s,l} N_{s,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{trawl,y,l})})
-  \end(align)
+ $$ \kappa_{s,m,l} = 1- \frac {1}{(1-e^{-\phi^1_{s,m}(L_{l}-\phi^2_{s,m})})} $$
+ $$ X_{s,i,j} = \frac{Y_{s,i,j}}{ \sum_{k} Y_{s,i,k}} $$
+ $$ Y_{s,i,j} = (\Delta_{i,j})^{\frac {L_{s,i}-(L_{i}-2.5)}{ \beta_{s}}} $$
+ 
  
 where,
 
