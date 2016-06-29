@@ -283,19 +283,19 @@ Some data points were excluded from 1, 2 and 3 above (35 was the final sample si
 
 # E. ANALYTIC APPROACH
 
-## 1. History of modeling approaches for the stock
+## History of modeling approaches for the stock
 
-## 2. Model description
+## Model description
 
 The model structure was developed following Fournier and Archibald’s (1982) methods, with many similarities to Methot (1990).  The model was implemented using automatic differentiation software developed as a set of libraries under C++ (ADModel Builder).  ADModel Builder can estimate a large number of parameters in a non-linear model using automatic differentiation software extended from Greiwank and Corliss (1991) and developed into C++ class libraries.  This software provides the derivative calculations needed for finding the objective function via a quasi-Newton function minimization routine (e.g., Press et al. 1992).   The model implementation language (ADModel Builder) gives simple and rapid access to these routines and provides the ability to estimate the variance-covariance matrix for all parameters of interest. 
 
 The model estimates the abundance by length bin and sex in the first year (1978) as parameters rather than estimating the recruitments previous to 1978.  This results in 44 estimated parameters.   
 
-## 3. Model selection and evaluation
+## Model selection and evaluation
 List the scenarios that are considered
 This should include the model from the previous year as the 'base' model and then whatever other runs were requested after that.
 
-## 4. Results
+## Results
 
 
 Write the code such that each scenario has it's own section
@@ -356,7 +356,6 @@ SurveyNumbers<-as.numeric(DATfile[(tmp+1):(tmp+SurvYrN)])
 tmp<-grep("years for survey data",DATfile)
 SurveyYrs<-as.numeric(unlist(strsplit(DATfile[(tmp+1)],split=" ")))
 
-
 # format all the above into a tabular format
 tmpMat<-matrix(ncol=7,nrow=SurvYrN)
 tmpMat[,1]<-SurveyYrs
@@ -375,6 +374,25 @@ colnames(PlotTab)<- c("Survey year","Retained catch (numbers)","Retained catch (
 rownames(PlotTab)<- NULL
 kable(PlotTab)
 
+#==================================
+# Growth data
+tmp       <-grep("growth data female",DATfile)
+GrowthNfem<-as.numeric(DATfile[(tmp+1)])
+tmp1      <-grep("growth data male",DATfile)
+GrowthNm  <-as.numeric(DATfile[(tmp1+1)])
+GrowthData<-matrix(NA,ncol=4,nrow=max(GrowthNm,GrowthNfem))
+
+GrowthData[1:GrowthNfem,1]  <-as.numeric(unlist(strsplit(DATfile[(tmp+2)],split="\t")))
+GrowthData[1:GrowthNfem,2] <-as.numeric(unlist(strsplit(DATfile[(tmp+3)],split="\t")))
+
+GrowthData[1:GrowthNm,3]  <-as.numeric(unlist(strsplit(DATfile[(tmp1+2)],split="\t")))
+GrowthData[1:GrowthNm,4] <-as.numeric(unlist(strsplit(DATfile[(tmp1+3)],split="\t")))
+
+PlotTab<-data.frame(GrowthData)
+colnames(PlotTab)<-c("Female premolt length (mm)","Female postmolt length (mm)",
+                     "Male premolt length (mm)","Male postmolt length (mm)")
+kable(PlotTab)
+
 ```
 
 Pull from the .DAT file directly.
@@ -389,34 +407,190 @@ biomass
 time series of catch divided by biomass
 
 # Figures
-## fits to the data
-observed and model predicted catches
-survey numbers
-catch proportions by length
-survey proportions by length
-marginal distributions for fits to the compositional data
-time series of implied effective sample sizes
-RMSE for indices
-q q plots and historgrams of residuals to justify sampling distributions for the data
+```{r,echo=FALSE,warning=FALSE,message=F}
+##==fits to the data==
+# library(PBSmodelling)
+# TakeDir     <-"C:/SnowCrab/"
+# snowad.rep  <-readList(paste(TakeDir,"R_input.txt",sep=""))
+# sdfile      <-read.table(paste(TakeDir,"2016sc.std",sep=""))
+# corfile     <-readLines(paste(TakeDir,"2016sc.cor",sep=""),skip=1)
+# recruitsd   <-sdfile[sdfile[,2]=="recm_sd",]
+# 
+# #==MCMC stuff==========================
+# mcEval      <-readLines("C:/SnowCrab/eval.csv")
+# PSV <- file(paste(TakeDir,"/2016sc.psv",sep=""), "rb")
+# nopar1 <- readBin(PSV, what=integer(), n=1)
+# mcmc1 <- readBin(PSV, what=numeric(), n=nopar1 * 10000)
+# mcmc1 <- matrix(mcmc1, byrow=TRUE, ncol=nopar1)
+# 
+# VariableNames<-rep(0,nopar1)
+# for(x in 1:nopar1)
+# {
+#  temp<-unlist(strsplit((corfile[x+2]),split=" "))
+#  if(x<10)
+#  VariableNames[x]<-temp[9]
+#  if(x>=10&x<100)
+#   VariableNames[x]<-temp[8]
+#  if(x>100)
+#   VariableNames[x]<-temp[7]
+# }
+# 
+# colnames(mcmc1)<-VariableNames
+# 
+# Trace<-rep(0,2999)
+# for(x in 1:2999)
+# Trace[x]<-as.numeric(unlist(strsplit((mcEval[x]),split=" "))[1])
+# Trace<-Trace[!is.na(Trace)]
+# plot(Trace)
+# acf(Trace)
+# 
+# 
+# pdf("C:/SnowCrab/posteriors.pdf")
+# for(x in 1:ncol(mcmc1))
+#  hist(mcmc1[,x],main=colnames(mcmc1)[x])
+# dev.off()
+# 
+# 
+# 
+# source("C:/SnowCrab/SnowCrabCode/Rscripts/error_bar.R")
+# source("C:/SnowCrab/SnowCrabCode/Rscripts/plot.sizcomps.r.nosp.R")
+# source("C:/SnowCrab/SnowCrabCode/Rscripts/plot.bubble.residuals.addn.R")
+# 
+# 
+# tmp<-grep("length bins",DATfile)[[5]]
+# LengthBins<-as.numeric(unlist(strsplit(DATfile[(tmp+1)],split=" ")))
+# LengthBins<-LengthBins[!is.na(LengthBins)]
+# 
+# 
+# # set up list of scenarios
+# # read in output from each scenario
+# # 
+# ##=======FITS TO THE DATA SOURCES=========================
+# #==mature male biomass==============
+# plot(as.numeric(unlist(snowad.rep$"Observed survey male spawning biomass"))[1:SurvYrN]~SurveyYrs,pch=20,ylab="Mature Male Biomass (1000 t)",xlab="Year",las=1,ylim=c(0,600));
+# 
+# for(j in 1:length(SurveyYrs))
+# {
+#  segments(x0=SurveyYrs[j],x1=SurveyYrs[j],
+# 		y0=as.numeric(unlist(snowad.rep$"Observed survey male spawning biomass"))[j]  /   exp(1.96*sqrt(log(1+snowad.rep$"survey CV"[2,]^2)))[j],
+# 		y1=as.numeric(unlist(snowad.rep$"Observed survey male spawning biomass"))[j] * exp(1.96*sqrt(log(1+snowad.rep$"survey CV"[2,]^2)))[j])
+# }
+# 
+# lines(as.numeric(unlist(snowad.rep$"Predicted Male survey mature Biomass"))[1:SurvYrN]~SurveyYrs,type="l",lty=1,lwd=1)
+# 
+# #==mature female biomass==============
+# plot(as.numeric(unlist(snowad.rep$"Observed survey female spawning biomass"))[1:SurvYrN]~SurveyYrs,pch=20,ylab="Mature Female Biomass (1000 t)",xlab="Year",las=1,ylim=c(0,700));
+# 
+# for(j in 1:length(SurveyYrs))
+# {
+#  segments(x0=SurveyYrs[j],x1=SurveyYrs[j],
+# 		y0=as.numeric(unlist(snowad.rep$"Observed survey female spawning biomass"))[j]  /   exp(1.96*sqrt(log(1+snowad.rep$"survey CV"[1,]^2)))[j],
+# 		y1=as.numeric(unlist(snowad.rep$"Observed survey female spawning biomass"))[j] * exp(1.96*sqrt(log(1+snowad.rep$"survey CV"[1,]^2)))[j])
+# }
+# 
+# lines(as.numeric(unlist(snowad.rep$"Predicted Female survey mature Biomass"))[1:SurvYrN]~SurveyYrs,type="l",lty=1,lwd=1)
+# 
+# #==Growth data
+#    flength = (snowad.rep$"af"+snowad.rep$"bf"*(20:135))*(1-pnorm(((20:135)-snowad.rep$"delta male")/snowad.rep$"st_gr"))+
+#               (snowad.rep$"af2"+snowad.rep$"bf1"*(20:135))*pnorm(((20:135)-snowad.rep$"delta male")/snowad.rep$"st_gr");
+#    mlength = (snowad.rep$"am"+snowad.rep$"bm"*(20:135))*(1-pnorm(((20:135)-snowad.rep$"delta male")/snowad.rep$"st_gr"))+
+#               (snowad.rep$"am2"+snowad.rep$"b1"*(20:135))*pnorm(((20:135)-snowad.rep$"delta male")/snowad.rep$"st_gr");
+#               
+# par(mfrow=c(1,2),mar=c(.1,.1,.1,.1),oma=c(4,4,1,1))
+# Finc<-GrowthData[,2]-GrowthData[,1]
+# plot(Finc~GrowthData[,1],ylim=c(0,20),xlim=c(20,90),pch=16,col='grey')
+# legend(bty='n',"topleft","Female")
+# lines(flength~20:135)
+# 
+# Minc<-GrowthData[,4]-GrowthData[,3]
+# plot(Minc~GrowthData[,3],ylim=c(0,20),xlim=c(20,90),yaxt='n',pch=16,col='grey')
+# legend(bty='n',"topleft","Male")
+# mtext(side=2,"Growth increment (mm)",outer=T,line=2)
+# mtext(side=1,"Premolt length (mm)",outer=T,line=2)
+# 
+# 
+# #==retained catch biomass
+# names(snowad.rep)
+# plot(snowad.rep$"Observed retained catch biomass"~RetCatchYrs,las=1,ylab="Retained catch biomass (t)",xlab="Year")
+# lines(snowad.rep$"Predicted retained catch biomas"~RetCatchYrs)
+# legend("topright",bty='n',pch=c(NA,1),lty=c(1,NA),legend=c("Predicted","Observed"))
+# 
+# #===discard female biomass
+# plot(snowad.rep$"observed female discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xlab="Year")
+# lines(snowad.rep$"predicted female discard mortality biomass"~RetCatchYrs)
+# legend("topright",bty='n',pch=c(NA,1),lty=c(1,NA),legend=c("Predicted","Observed"))
+# 
+# #===trawl catch biomass
+# plot(snowad.rep$"observed trawl catch biomass"[1:CatchYrN]~RetCatchYrs,las=1,ylab="Trawl bycatch (t)",xlab="Year")
+# lines(snowad.rep$"predicted trawl catch biomass"[1:CatchYrN]~RetCatchYrs)
+# legend("topright",bty='n',pch=c(NA,1),lty=c(1,NA),legend=c("Predicted","Observed"))
+# 
+# #===industry survey
+# ObsIndustry2009<-c(snowad.rep$"Observed industry survey mature biomass",snowad.rep$"observed trawl catch biomass")
+# ObsIndustry2010<-c(snowad.rep$"Observed 2010 industry survey mature biomass",snowad.rep$"observed trawl catch biomass")
+
+#==data components that are fit to
+# retained fishery length comps
+# discard length comps
+# female discards
+# trawl fishery length comps
+# survey length comps
+# 
+# 
+# 
+# 
+# observed and model predicted catches
+# survey numbers
+# catch proportions by length
+# survey proportions by length
+# marginal distributions for fits to the compositional data
+# time series of implied effective sample sizes
+# RMSE for indices
+# q q plots and historgrams of residuals to justify sampling distributions for the data
 
 ## estimated quanties
-fishery and survey selectivities, molting probabillities, weight at length
-estimated male, female, mature male, total and effective mature biomass (indicate proxy bmsy)
-estimated full selection F over time
-estimated fishing mortality vs estimated spawning stock biomass (kobe plot)
-fit of stock recruitment relationship
+# fishery and survey selectivities, molting probabillities, weight at length
+# estimated male, female, mature male, total and effective mature biomass (indicate proxy bmsy)
+# estimated full selection F over time
+# estimated fishing mortality vs estimated spawning stock biomass (kobe plot)
+# fit of stock recruitment relationship
+# 
+# retrospective analysis
 
-retrospective analysis
-
-
+```
 
 # APPENDIX A: MODEL STRUCTURE
 
-Recruitment is determined from the estimated mean recruitment, the yearly recruitment deviations and a gamma function that describes the proportion of recruits by length bin, N~a~ N^a^
+Recruitment is determined from the estimated mean recruitment, the yearly recruitment deviations and a gamma function that describes the proportion of recruits by length bin,
 
-$$ N_{t,l} = pr_{l}e^{R_{0}+tao_{t}} $$
+ 
+  $$ N_{s,v,m,y+1,l} = 
+  \begin{cases}
+  \Omega_{s,l} \sum_l' \kappa_{s,imat,l'} Q_{s,imat,y,l'} X_{s,l',l} & \text{if v = new; m = mat} \\[2ex] 
+  1-\Omega_{s,l} \sum_{l'} \kappa_{s,imat,l'} Q_{s,imat,y,l'} X_{s,l',l} + R e^\epsilon_y Pr_{l} & \text{if v = new; m = imat} \\[2ex]
+  Q_{s,mat,y,l'} & \text{if v = old; m = mat} \\[2ex]
+  (1-\kappa_{s,imat,l'}) Q_{s,imat,y,l'} & \text{if v = old; m = imat} 
+  \end{cases}
+  $$
 
+ $$ Q_{s,m,y,l} = \sum_v N_{s,v,m,y,l}e^{Z_{s,v,m,y,l}} $$
+ $$ Z_{s,v,m,y,l} = M_{s,m} + \sum F_{s,f,y,l} $$
+ 
 
+  \begin{align}
+  S_{male,dir,l} = & \frac {1}{1+e^{-S_{slope,male,dir}(L_{l}-S_{50,male,dir}}}) \\
+  S_{fem,dir,l} = & \frac {1}{1+e^{-S_{slope,fem,dir}(L_{l}-S_{50,fem,dir}}}) \\
+  S_{trawl,l} = & \frac {1}{1+e^{-S_{slope,trawl}(L_{l}-S_{50,trawl}}})
+  \end{align}
+
+ 
+  \begin{align}
+    C_{male,dir,y}  = \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {R_l F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
+    C_{male,tot,y}  = \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
+    C_{fem,dir,y}   = \sum_{l} \sum_{v} \sum_{m} w_{fem,l} \frac {F_{fem,dir,y,l}}{F_{fem,dir,y,l + F_{trawl,y,l}}} N_{fem,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{fem,dir,y,l}+F_{trawl,y,l})})  \\
+    C_{male,tot,y}  = \sum_{s} \sum_{l} \sum_{v} \sum_{m} w_{s,l} N_{s,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{trawl,y,l})})
+  \end(align)
+ 
 where,
 
 R~0~    log mean recruitment

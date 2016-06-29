@@ -3,79 +3,79 @@ DATA_SECTION
   !!CLASS ofstream post("eval.csv")
   int call_no;
   !! call_no = 0;
-  number spmo																							// spawning month
-  !! spmo=0.;																										// spmo=deviation in fraction of year from time of fishery to mating 
+  number spmo																						// spawning month
+  !! spmo=0.;																							// spmo=deviation in fraction of year from time of fishery to mating 
 
-  init_int styr  																								 //start year of the model
-  init_int endyr 																								 //end year of the model
+  init_int styr  																							//start year of the model
+  init_int endyr 																							//end year of the model
 
   // Data stuff only from here
-  init_int nirec     																				     //number of intial recruitments to estimate 
-  init_int nlenm      																				          //number of length bins for males in the model
-  init_int nobs_fish 																				 //number of years of fishery retained length data
-  init_ivector yrs_fish(1,nobs_fish) 																				//years when have fishery retained length data
-  init_matrix nsamples_fish(1,2,1,nobs_fish)											 //nsamples weight for fish length comps needmatrix each year,new/old shell
-  init_int nobs_fish_discf  																				//number of years of fishery female discard length data
-  init_ivector yrs_fish_discf(1,nobs_fish_discf) 									//years when have fishery discard length data
-  init_vector nsamples_fish_discf(1,nobs_fish_discf)							 //nsamples weight for fish length comps needmatrix each year and sex
-  init_int nobs_fish_discm 																				 //number of years of fishery male discard length data
-  init_ivector yrs_fish_discm(1,nobs_fish_discm)											 //years when have fishery discard length data
-  init_matrix nsamples_fish_discm(1,2,1,nobs_fish_discm)				 //nsamples weight for fish length comps needmatrix each year and sex
+  init_int nirec     																				    	 //number of intial recruitments to estimate 
+  init_int nlenm      																				     //number of length bins for males in the model
+  init_int nobs_fish 																					 //number of years of fishery retained length data
+  init_ivector yrs_fish(1,nobs_fish) 															//years when have fishery retained length data
+  init_matrix nsamples_fish(1,2,1,nobs_fish)											//nsamples weight for fish length comps needmatrix each year,new/old shell
+  init_int nobs_fish_discf  																		//number of years of fishery female discard length data
+  init_ivector yrs_fish_discf(1,nobs_fish_discf) 										//years when have fishery discard length data
+  init_vector nsamples_fish_discf(1,nobs_fish_discf)							//nsamples weight for fish length comps needmatrix each year and sex
+  init_int nobs_fish_discm 																		//number of years of fishery male discard length data
+  init_ivector yrs_fish_discm(1,nobs_fish_discm)									//years when have fishery discard length data
+  init_matrix nsamples_fish_discm(1,2,1,nobs_fish_discm)				 	//nsamples weight for fish length comps needmatrix each year and sex
   init_number nobs_trawl
   init_vector yrs_trawl(1,nobs_trawl)
   init_matrix nsamples_trawl(1,2,1,nobs_trawl)
   init_number nobs_srv1
-  init_ivector yrs_srv1(1,nobs_srv1)            								                 //years when have biomass estimates
-  init_int nobs_srv1_length              												                    //number of years of survey length data
-  init_ivector yrs_srv1_length(1,nobs_srv1_length) 						       //years when have length data
-  init_4darray nsamples_srv1_length(1,2,1,2,1,2,1,nobs_srv1_length)			 //number of samples for each length comp by immat,mat,new/old,sex,year
+  init_ivector yrs_srv1(1,nobs_srv1)            								             //years when have biomass estimates
+  init_int nobs_srv1_length              												         //number of years of survey length data
+  init_ivector yrs_srv1_length(1,nobs_srv1_length) 						       	//years when have length data
+  init_4darray nsamples_srv1_length(1,2,1,2,1,2,1,nobs_srv1_length)	 //number of samples for each length comp by immat,mat,new/old,sex,year
    
 //extra survey in 2009
-  init_int yrs_srv2                     																	        //years when have biomass estimates for extra survey
-  init_3darray nsamples_srv2_length(1,2,1,2,1,2)													 //number of samples for each length comp by sruvey,sex,immat,mat
-  init_4darray obs_p_srv2_lend(1,2,1,2,1,2,1,nlenm) 										 //numbers by length two surveys, sex, immat, mat
+  init_int yrs_srv2                     																 //years when have biomass estimates for extra survey
+  init_3darray nsamples_srv2_length(1,2,1,2,1,2)									 //number of samples for each length comp by sruvey,sex,immat,mat
+  init_4darray obs_p_srv2_lend(1,2,1,2,1,2,1,nlenm) 							 //numbers by length two surveys, sex, immat, mat
   init_vector  obs_srv2(1,2)
   init_matrix  obs_srv2_cv(1,2,1,2)
   
 //extra survey in 2010
-  init_int yrs_srv10                          																	   //years when have biomass estimates for extra survey
-  init_3darray nsamples_srv10_length(1,2,1,2,1,2)											 //number of samples for each length comp by sruvey,sex,immat,mat
-  init_4darray obs_p_srv10_lend(1,2,1,2,1,2,1,nlenm)  									//numbers by length two surveys, sex, immat, mat
+  init_int yrs_srv10                          															  //years when have biomass estimates for extra survey
+  init_3darray nsamples_srv10_length(1,2,1,2,1,2)								 //number of samples for each length comp by sruvey,sex,immat,mat
+  init_4darray obs_p_srv10_lend(1,2,1,2,1,2,1,nlenm)  							//numbers by length two surveys, sex, immat, mat
   init_vector  obs_srv10(1,2)
   init_matrix  obs_srv10_cv(1,2,1,2)
   
  //standard survey for length data
  //first index,1 immat, 2 mature,1 new shell, 2 old shell, then female 1 male 2
   init_5darray obs_p_srv1_lend(1,2,1,2,1,2,1,nobs_srv1_length,1,nlenm)  //immat,mat,new, old survey length data,female,male,year then bin
-  init_3darray obs_p_fish_retd(1,2,1,nobs_fish,1,nlenm)  								 //new, old,male retained fishery length data
-  init_matrix obs_p_fish_discfd(1,nobs_fish_discf,1,nlenm)     					       //female,discard length data
+  init_3darray obs_p_fish_retd(1,2,1,nobs_fish,1,nlenm)  							 //new, old,male retained fishery length data
+  init_matrix obs_p_fish_discfd(1,nobs_fish_discf,1,nlenm)     					 //female,discard length data
   init_3darray obs_p_fish_discmd(1,2,1,nobs_fish_discm,1,nlenm)           //male,discard length data new-old shel
   init_3darray obs_p_trawld(1,2,1,nobs_trawl,1,nlenm)        
   init_vector catch_numbers(styr,endyr)
-  !! catch_numbers /= 1000.;                      																   //retained catch number of crab 
-  init_vector catch_ret(styr,endyr)   																 //retained catch lbs of crab 
+  !! catch_numbers /= 1000.;                      												 //retained catch number of crab 
+  init_vector catch_ret(styr,endyr)   															//retained catch lbs of crab 
   !! catch_ret /= 1000.;
-  init_matrix catch_odisc(1,2,styr,endyr) 														  //estimated discard catch numbers female,male
+  init_matrix catch_odisc(1,2,styr,endyr) 													 //estimated discard catch numbers female,male
   !! catch_odisc /= 1000.;
-  init_vector catch_trawl(styr,endyr)                     										        //trawl bycatch numbers sex combined need to apply mort 80%
+  init_vector catch_trawl(styr,endyr)                     										 //trawl bycatch numbers sex combined need to apply mort 80%
   !! catch_trawl /= 1000.;
   init_vector obs_srv1(1,nobs_srv1)  															  //survey numbers
   !! obs_srv1 /= 1000.;
-  init_matrix cv_srv1o(1,2,1,nobs_srv1)   																		 //survey cv
+  init_matrix cv_srv1o(1,2,1,nobs_srv1)   													 //survey cv
   
-  init_matrix wtf(1,2,1,nlenm)   																				  //weight at length juvenile and mature females (from kodiak program)
-  init_vector wtm(1,nlenm)    																					 //weight at length males (same as used in kodiak)
-  init_vector maturity_logistic(1,nlenm)   														    //logistic maturity probability curve for new shell immature males
-  init_matrix maturity_average(1,2,1,nlenm)  													  //probability mature for new immature females, avearge proportion mature by length for new males
-  init_matrix maturity_old_average(1,2,1,nlenm) 													 //average proportion mature by length for old shell females, males
-  init_3darray maturity(1,2,styr,endyr,1,nlenm)  												  //proportion mature by length for new shell females,males by year
-  init_3darray maturity_old(1,2,styr,endyr,1,nlenm) 													 //proportion mature by length for old shell females, males by year
-  init_matrix cv_mean_length_obs(1,2,1,2)  															 //cv of mean length for female and male min and max age
+  init_matrix wtf(1,2,1,nlenm)   																	 //weight at length juvenile and mature females (from kodiak program)
+  init_vector wtm(1,nlenm)    																		//weight at length males (same as used in kodiak)
+  init_vector maturity_logistic(1,nlenm)   													 //logistic maturity probability curve for new shell immature males
+  init_matrix maturity_average(1,2,1,nlenm)  												 //probability mature for new immature females, avearge proportion mature by length for new males
+  init_matrix maturity_old_average(1,2,1,nlenm) 										 //average proportion mature by length for old shell females, males
+  init_3darray maturity(1,2,styr,endyr,1,nlenm)  											 //proportion mature by length for new shell females,males by year
+  init_3darray maturity_old(1,2,styr,endyr,1,nlenm) 									 //proportion mature by length for old shell females, males by year
+  init_matrix cv_mean_length_obs(1,2,1,2)  												 //cv of mean length for female and male min and max age
   init_vector length_bins(1,nlenm)
   init_vector catch_midptIn(styr,endyr)
-  init_vector meanlength(1,13)  																				  //mean length at age for F40 calc
-  init_vector catch_fracmature(1,22)  																	  //fraction morphometrically mature males in the pot fishery catch
-  init_vector cpue(styr,endyr) 																				 //cpue fishery retained males only numbers/potlift
+  init_vector meanlength(1,13)  																	//mean length at age for F40 calc
+  init_vector catch_fracmature(1,22)  														 //fraction morphometrically mature males in the pot fishery catch
+  init_vector cpue(styr,endyr) 																		 //cpue fishery retained males only numbers/potlift
   init_vector catch_ghl(styr,endyr)
   init_int nobs_growf
   init_vector femalegrowdatx(1,nobs_growf)
@@ -88,26 +88,25 @@ DATA_SECTION
  // Open control file....
  !! ad_comm::change_datafile_name("2016sc.ctl");
 
-  init_int styr_fut   																													  //start year of future projections
-  init_int endyr_fut   																								  //end year of future projections
-  init_int nsellen 																										 //selectivity is set to the selectivity at nselages-1 after age nselages
-  init_int nsellen_srv1   																										      //same as above for survey selectivities
+  init_int styr_fut   																							  //start year of future projections
+  init_int endyr_fut   																							  //end year of future projections
+  init_int nsellen 																								 //selectivity is set to the selectivity at nselages-1 after age nselages
+  init_int nsellen_srv1   																					    //same as above for survey selectivities
   init_number p_const
-
-  init_number q1       																								   // Q  mult by pop biomass to get survey biomass
+  init_number q1       																						   // Q  mult by pop biomass to get survey biomass
  
-  init_vector M_in(1,2)   																										  //natural mortality females then males
-  init_vector M_matn_in(1,2)																										  //natural mortality mature new shell female/male
-  init_vector M_mato_in(1,2) 																										 //natural mortality mature old shell female/male
-  init_number m_disc        																										         //fraction of discards that die (e.g 0.25)
-  init_number m_trawl         																										       //fraction of trawl discards that die(.8)
+  init_vector M_in(1,2)   																					  	//natural mortality females then males
+  init_vector M_matn_in(1,2)																				//natural mortality mature new shell female/male
+  init_vector M_mato_in(1,2) 																				//natural mortality mature old shell female/male
+  init_number m_disc        																					//fraction of discards that die (e.g 0.25)
+  init_number m_trawl         																				//fraction of trawl discards that die(.8)
 
-  init_vector median_rec(1,2) 																										//median recruitment value to use for last years in model
-  init_int median_rec_yrs																										 //median recruitment fixed for endyr to endyr-median_rec_yrs+1
+  init_vector median_rec(1,2) 																				//median recruitment value to use for last years in model
+  init_int median_rec_yrs																					 //median recruitment fixed for endyr to endyr-median_rec_yrs+1
   init_number var_rec_obs
   init_number sd_var_rec
 
-  init_vector sel_som(1,5)  																										    // parameters for somerton 2009 study selectivity curve
+  init_vector sel_som(1,5)  																					 // parameters for somerton 2009 study selectivity curve
 
   init_number linff_obs
   init_number sd_linff
@@ -135,13 +134,13 @@ DATA_SECTION
   init_number mate_ratio
 
   init_number fraction_new_error
-  init_int nages     																										           //number of ages to track for mature old shell 
+  init_int nages     																									  //number of ages to track for mature old shell 
   init_int matest_n
   init_int matestm_n
 
-  init_vector wt_like(1,8)																										 //weights for selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
-  init_vector like_wght(1,7) 																										 //likelihood weights for fishery length data, survey length, age data, catch likelihood, survey biomass likelihood,growth like
-  init_number like_wght_mbio 																										 //likelihood weight for male biomass fit
+  init_vector wt_like(1,8)																							 //weights for selectivity likelihoods 1 fishery female, 2 survey female, 3 fishery male, 4 survey male
+  init_vector like_wght(1,7) 																						 //likelihood weights for fishery length data, survey length, age data, catch likelihood, survey biomass likelihood,growth like
+  init_number like_wght_mbio 																				 //likelihood weight for male biomass fit
   init_number like_wght_rec
   init_number like_wght_recf 
   init_number like_wght_sexr
@@ -149,9 +148,9 @@ DATA_SECTION
   init_number like_wght_fph1
   init_number like_wght_fph2
   init_number like_wght_fdev
-  init_number wght_total_catch																										   //weight for total catch biomass
-  init_number wght_female_potcatch  																										   //weight for female pot bycatch
-  init_number cpue_cv          																										    //cv for fit to fishery pot cpue
+  init_number wght_total_catch																				  //weight for total catch biomass
+  init_number wght_female_potcatch  																	 //weight for female pot bycatch
+  init_number cpue_cv          																					 //cv for fit to fishery pot cpue
   init_number wt_lmlike
 
   init_number old_shell_constraint
@@ -183,19 +182,19 @@ DATA_SECTION
   init_number maturity_phase
   init_number natM_phase
   
-  init_int phase_moltingp																										  //phase to estimate molting prob for mature males
-  init_int phase_fishsel																										   //phase to estimate dome shape parameters for fishery selectivities
-  init_int survsel_phase  																										 //switch for which survey selectivty to use for 1989 to present - positive estimated negative fixed at somerton and otto
-  init_int survsel1_phase																										  //switch for fixing all survey sel to somerton and otto - <0 fix, >0 estimate
-  init_int phase_fut  																										   //phase to do F40% and future projection calculations
-  init_int phase_logistic_sel 																										//phase to estimate selectivities using logistic function
-  init_int phase_selcoffs																										 //phase to estimate smooth selectivities
+  init_int phase_moltingp																								 //phase to estimate molting prob for mature males
+  init_int phase_fishsel																								 //phase to estimate dome shape parameters for fishery selectivities
+  init_int survsel_phase  																								 //switch for which survey selectivty to use for 1989 to present - positive estimated negative fixed at somerton and otto
+  init_int survsel1_phase																								 //switch for fixing all survey sel to somerton and otto - <0 fix, >0 estimate
+  init_int phase_fut  																										 //phase to do F40% and future projection calculations
+  init_int phase_logistic_sel 																						//phase to estimate selectivities using logistic function
+  init_int phase_selcoffs																								//phase to estimate smooth selectivities
 
   //weights for constraint on monotonicity 1 fishery female, 2 fishery male, 3 survey female, 4 survey male
-  init_int growth_switch 																										  //switch for which growth function to use
+  init_int growth_switch 																								 //switch for which growth function to use
   init_int somertonsel
   init_int monot_sel 																										 //switch for monotonically increasing selectivities (1 on 0 off)
-  init_int monot_sel_srv1																										  //sames as above for survey
+  init_int monot_sel_srv1																								 //sames as above for survey
   init_number maturity_switch
 
    int styr_rec;   
@@ -223,14 +222,14 @@ DATA_SECTION
  //==============================================================================  
  LOCAL_CALCS
    cout<<"to local calcs"<<endl;
-   styr_rec=styr-nirec; 																																		  //year to start estimating recruits to get initial age comp
-   if(nsellen>nlenm) nsellen=nlenm; 																										 //make sure nselages not greater than nages
-   if(nsellen_srv1>nlenm) nsellen_srv1=nlenm; 																										 //same as above for survey
-   obs_srv1=obs_srv1*1000000;              																										  //survey numbers read in are millions of crab
-   obs_srv2=obs_srv2*1000000;              																										  //survey numbers read in are millions of crab
-   wtf=wtf*.001;   																																			   //change weights to tons
-   wtm=wtm*.001;    																																	  //change weights to tons
-   catch_ret=catch_ret/2204;                 																										     //change retained catch from lbs to tons
+   styr_rec=styr-nirec; 																									  //year to start estimating recruits to get initial age comp
+   if(nsellen>nlenm) nsellen=nlenm; 																				 //make sure nselages not greater than nages
+   if(nsellen_srv1>nlenm) nsellen_srv1=nlenm; 															 //same as above for survey
+   obs_srv1=obs_srv1*1000000;              																		 //survey numbers read in are millions of crab
+   obs_srv2=obs_srv2*1000000;              																		  //survey numbers read in are millions of crab
+   wtf=wtf*.001;   																												 //change weights to tons
+   wtm=wtm*.001;    																										 //change weights to tons
+   catch_ret=catch_ret/2204;                 																			 //change retained catch from lbs to tons
     //   cout<<"end of local calcs"<<endl;
  END_CALCS
 
@@ -286,8 +285,8 @@ PARAMETER_SECTION
    //Females molt to maturity, therefore the prob of molting for mature females is 0
    init_bounded_number moltp_af(0.01,3.0,-6) 											     //paramters for logistic function molting
    init_bounded_number moltp_bf(20,200,-6)    											     //female
-  init_bounded_number moltp_am(0.04,3.0,-5)  											    //paramters for logistic function molting
-  init_bounded_number moltp_bm(130.0,300.0,-5)   									      //immature males
+  init_bounded_number moltp_am(0.04,3.0,-5)  										    //paramters for logistic function molting
+  init_bounded_number moltp_bm(130.0,300.0,-5)   									    //immature males
   init_bounded_number moltp_ammat(.0025,3.0,phase_moltingp) 			    //logistic molting prob for mature males
   init_bounded_number moltp_bmmat(1,120,phase_moltingp)  				   //logistic molting prob for mature males
 
@@ -478,9 +477,9 @@ PARAMETER_SECTION
   3darray natlength_mat(1,2,styr,endyr+Nproj,1,nlenm)
   
   //growth and molting related variables
-  3darray len_len(1,2,1,nlenm,1,nlenm)             //length to length growth array
-  matrix moltp(1,2,1,nlenm)                       //molting probabilities for female, male by length bin 
-  matrix moltp_mat(1,2,1,nlenm)                   //molting probs for mature female, male by length bin
+  3darray len_len(1,2,1,nlenm,1,nlenm)          	  	 //length to length growth array
+  matrix moltp(1,2,1,nlenm)                      				 //molting probabilities for female, male by length bin 
+  matrix moltp_mat(1,2,1,nlenm)                 		    //molting probs for mature female, male by length bin
  
  //fishing mortality related variables
  4darray Ftot(1,2,1,2,styr,endyr+Nproj,1,nlenm)
@@ -593,10 +592,10 @@ PARAMETER_SECTION
   4darray obs_p_srv10_len(1,2,1,2,1,2,1,nlenm) 
   5darray obs_p_srv1_len(1,2,1,2,1,2,1,nobs_srv1_length,1,nlenm) 
   5darray obs_p_srv1_len1(1,2,1,2,1,2,1,nobs_srv1_length,1,nlenm) 
-  3darray obs_p_srv1_lenc(1,2,1,nobs_srv1_length,1,nlenm) 												 //observed proportion survey length female, males,combined new/old
-  4darray obs_p_fish(1,2,1,2,1,nobs_fish,1,nlenm) 																 //observed proportion fishery length-combined ret/disc
-  vector obs_sexr(1,nobs_fish)  																									   //observed fraction female fishery length data
-  vector obs_sexr_srv1_l(1,nobs_srv1_length)  																		 //observed fraction female survey length data
+  3darray obs_p_srv1_lenc(1,2,1,nobs_srv1_length,1,nlenm) 											 //observed proportion survey length female, males,combined new/old
+  4darray obs_p_fish(1,2,1,2,1,nobs_fish,1,nlenm) 															 //observed proportion fishery length-combined ret/disc
+  vector obs_sexr(1,nobs_fish)  																					        //observed fraction female fishery length data
+  vector obs_sexr_srv1_l(1,nobs_srv1_length)  																 //observed fraction female survey length data
   
   //observed proportion at length fishery
   3darray obs_p_fish_ret(1,2,1,nobs_fish,1,nlenm)
@@ -779,9 +778,9 @@ PRELIMINARY_CALCS_SECTION
    for(m=endyr+1;m<=endyr+Nproj;m++)
     catch_midpt(m) = catch_midptIn(endyr);
 
-   cout<<catch_midpt<<endl;
    mnatlen_styr(1) = log(10*(obs_p_srv1_lend(1,1,2,1)+obs_p_srv1_lend(2,1,2,1)+1e-02));
    mnatlen_styr(2) = log(10*(obs_p_srv1_lend(1,2,2,1)+obs_p_srv1_lend(2,2,2,1)+1e-02));
+   
    for(j=1;j<=12;j++){
    fnatlen_styr(1,j) = log(10*(obs_p_srv1_lend(1,1,1,1,j)+obs_p_srv1_lend(2,1,1,1,j)+1e-02));
    fnatlen_styr(2,j) = log(10*(obs_p_srv1_lend(1,2,1,1,j)+obs_p_srv1_lend(2,2,1,1,j)+1e-02));
@@ -817,6 +816,7 @@ PRELIMINARY_CALCS_SECTION
      sumfishdiscm(i)+=sum(obs_p_fish_discmd(1,i));
      sumfishdiscm(i)+=sum(obs_p_fish_discmd(2,i));
   } 
+  
   for(i=1; i<=nobs_fish; i++){
     for(j=1; j<=2; j++){
       sumfishret(i)+=sum(obs_p_fish_retd(j,i));
@@ -826,6 +826,7 @@ PRELIMINARY_CALCS_SECTION
   for(i=1; i<=nobs_fish_discf; i++){
     sumfishdiscf(i)+=sum(obs_p_fish_discfd(i));
   }
+  
   for(i=1; i<=nobs_trawl; i++){
     for(k=1;k<=2;k++){
       sumtrawl(i)+=sum(obs_p_trawld(k,i));
@@ -981,8 +982,7 @@ PRELIMINARY_CALCS_SECTION
   for(i=1;i<=nobs_fish_discm;i++)
   {
    //obs_p_fish_discm are proportional to total catch (retained+discard)
-    obs_catchdm_biom(yrs_fish_discm(i)) = catch_tot(yrs_fish_discm(i)) * 
-                                          (obs_p_fish_discm(1,i)+obs_p_fish_discm(2,i))*wtm;
+    obs_catchdm_biom(yrs_fish_discm(i)) = catch_tot(yrs_fish_discm(i)) * (obs_p_fish_discm(1,i)+obs_p_fish_discm(2,i))*wtm;
     avgp += obs_p_fish_discm(1,i)+obs_p_fish_discm(2,i);
   }
   avgp=avgp/nobs_fish_discm;
@@ -1017,8 +1017,8 @@ PRELIMINARY_CALCS_SECTION
 PROCEDURE_SECTION
 
 //calculating natural mortality by maturity state, sex, and shell condition
-    M(1)=M_in(1)*Mmult_imat;     //natural mortality immature females then males
-    M(2)=M_in(2)*Mmult_imat;     //natural mortality immature females then males
+    M(1)=M_in(1)*Mmult_imat;    			 //natural mortality immature females then males
+    M(2)=M_in(2)*Mmult_imat;    			 //natural mortality immature females then males
     M_matn(2)=M_matn_in(2)*Mmult;  //natural mortality mature new shell female/male
     M_mato(2)=M_mato_in(2)*Mmult;  //natural mortality mature old shell female/male
     M_matn(1)=M_matn_in(1)*Mmultf;  //natural mortality mature new shell female/male
@@ -1055,32 +1055,52 @@ PROCEDURE_SECTION
 
    evaluate_the_objective_function();
 
-//==============================================================================
-FUNCTION WriteMCMC
- post<<
-// moltp_af <<","<<
-// moltp_bf <<","<<
-// moltp_am <<","<<
-// moltp_bm <<","<<
-// moltp_ammat <<","<<
-// moltp_bmmat <<","<<
- //srv1_slope <<","<<
- srv1_sel50 <<","<<
- fish_slope_mn <<","<<
- fish_sel50_mn <<","<<
- fish_slope_mo <<","<<
- fish_sel50_mo <<","<<
- fish_fit_slope_mn <<","<<
- fish_fit_sel50_mn <<","<<
- fish_fit_slope_mo <<","<<
- fish_fit_sel50_mo <<","<<
- fish_disc_slope_f <<","<<
- fish_disc_sel50_f <<","<<
- fish_disc_slope_tf <<","<<
- fish_disc_sel50_tf <<","<<
-// fish_disc_slope_tm <<","<<
-// fish_disc_sel50_tm <<","<<
- endl;
+   
+   if(mceval_phase())
+   {
+	   Find_F35();
+	   Find_OFL();
+	   
+	   post<<f<<" "<<Bmsy<<" "<< F35 << " " << FOFL << " " << OFL << endl;
+	   post<<fspbio_srv1<<endl;
+	   post<<mspbio_srv1<<endl;
+
+	   post<<fspbio_srv2_ind<<endl;
+	   post<<mspbio_srv2_ind<<endl;
+	   post<<fspbio_srv2_nmfs<<endl;
+	   post<<mspbio_srv2_nmfs<<endl;
+
+	   post<<fspbio_srv10_ind<<endl;
+	   post<<mspbio_srv10_ind<<endl;
+	   post<<fspbio_srv10_nmfs<<endl;
+	   post<<mspbio_srv10_nmfs<<endl;
+	   
+	   post<<pred_catch<<endl;
+	   post<<pred_catch_disc<<endl;
+	   post<<pred_catch_ret<<endl;
+	   post<<pred_catch_trawl<<endl;
+
+      //Don't need these now because they can be taken from the .psv file, but I'm scared to get rid of them yet
+	   // post<<af<< " "<<am<<" "<<bf<<" "<<bm<<" "<<b1<< " " <<bf1 << " " << deltam << " " << deltaf<< " " <<st_gr<< " "<<growth_beta<<" ";
+	   // post<<matest50f<< " "<<matestslpf<<" "<<matest50m<<" "<<matestslpm<<" "<<mateste<< " " <<matestfe << " " ;
+	   // post<<moltp_af<< " "<<moltp_bf<<" "<<moltp_am<<" "<<moltp_bm<<" "<<moltp_ammat<< " " <<moltp_bmmat << " " ;  
+ 	   // post<<mean_log_rec1<< " "<<rec_dev_mean<<" "<<mean_log_rec<<" "<<rec_devf<<" "<<alpha1_rec<< " " <<beta_rec << " " ;  
+	   // post<<mnatlen_styr<<" "<< fnatlen_styr << " ";
+	   // post<<log_avg_fmort<< " "<<fmort_dev<<" "<<log_avg_fmortdf<<" "<<fmortdf_dev<<" "<<log_avg_fmortt<<" " <<fmortt_dev<< " " <<discard_mult << " ";
+	   // post<<log_avg_sel50_mn<< " "<<log_sel50_dev_mn<<" "<<log_avg_sel50_mo<<" "<<log_sel50_dev_mo<<" "<<fish_slope_mn<<" " <<fish_slope_mo << " ";
+ 	   // post<<fish_fit_slope_mn<< " "<<fish_fit_sel50_mn<<" "<<fish_fit_slope_mo<<" "<<fish_fit_sel50_mo << " " ;  	
+ 	   // post<<fish_slope_mo2<< " "<<fish_sel50_mo2<<" "<<fish_slope_mn2<<" "<<fish_sel50_mn2 << " " ;  	
+ 	   // post<<fish_disc_slope_f<< " "<<fish_disc_sel50_f<<" "<<log_dev_50f<<" "<<fish_disc_slope_tf << " " <<fish_disc_sel50_tf<<" " ;
+	   // post<<srv1_q<< " "<<srv1_sel95<<" "<<srv1_sel50<<" "<<srv2_q<<" "<<srv2_sel95<<" " <<srv2_sel50 << " "<<srv3_q<<" "<<srv3_sel95<<" " <<srv3_sel50 << " ";   
+	   // post<<srv3f_sel95<<" "<< srv3f_sel50 << " "<<femQ<<" ";   
+ 	   // post<<srvind_q<< " "<<srvindfem_q<<" "<<srvind_sel95<<" "<<srvind_sel50<<" "<<srvind_sel95f<< " " <<srvind_sel50f << " " ;  
+ 	   // post<<srvnmfs_sel95<< " "<<srvnmfs_sel50<<" "<<srvnmfs_sel95f<<" "<<srvnmfs_sel50f << " " ;  	
+ 	   // post<<srv10ind_q<< " "<<srv10indfem_q<<" "<<srv10ind_sel95<<" "<<srv10ind_sel50<<" "<<srv10ind_sel95f<< " " <<srv10ind_sel50f << " " ;  
+ 	   // post<<srv10nmfs_sel95<< " "<<srv10nmfs_sel50<<" "<<srv10nmfs_sel95f<<" "<<srv10nmfs_sel50f << " " ;  	
+ 	   // post<<selsmo10ind<< " "<<selsmo09ind<<" "<<Mmult_imat<<" "<<Mmult<<" "<<Mmultf << " " ;  
+	   // post<<cpueq<<" "<< proprecn << " "<<endl;
+   }
+
 //==============================================================================
 FUNCTION get_maturity
 
@@ -2227,7 +2247,6 @@ FUNCTION evaluate_the_objective_function
     effn_fish_ret(k,ii)=1/(norm2(pred_p_fish_fit(k,ii)-obs_p_fish_ret(k,i))/(pred_p_fish_fit(1,ii)*(1-pred_p_fish_fit(1,ii))+pred_p_fish_fit(2,ii)*(1-pred_p_fish_fit(2,ii))));
   }
 
-   //These should be in the control file...
  for (i=1; i <= nobs_fish_discm; i++)
   {
     ij=yrs_fish_discm(i);
@@ -2249,13 +2268,12 @@ FUNCTION evaluate_the_objective_function
   for (i=1; i <= nobs_trawl; i++)
   {
     ij=yrs_trawl(i);
-  //trawlfishery length likelihood 
+  //trawlfishery length likelihood sur
     for(k=1;k<=2;k++)
       for (j=1; j<=nlenm; j++)
        len_like(5)-=nsamples_trawl(k,i)*(obs_p_trawl(k,i,j))*log(pred_p_trawl(k,ij,j)+p_const);
   }
 
-  
   //add the offset to the likelihood   
   len_like(1)-=offset(1);
   len_like(2)-=offset(2);
@@ -2797,12 +2815,108 @@ REPORT_SECTION
 
   Find_F35();
   Find_OFL();
-
-//  report<<"#fraction males morphometrically mature in the pot fishery catch-made up not used"<<endl;
-//  report<<catch_fracmature<<endl;
+  report<<f<<" "<<Bmsy<<" "<< F35 << " " << FOFL << " " << OFL << endl;
+  
   // this writes gradients for each parameter at each phase and at end "gradients.dat"
    save_gradients(gradients);
 
+   //The report file holds all of the quantities used in Jack's projection program
+   //The "Rout" below this writes to a file that is read for plotting in the safe document
+  report<<"#number of length bins"<<endl;
+  report<<nlenm<<endl;
+  report<<"#Nat mort immature female/male"<<endl;
+  report<<M<<endl;
+  report<<"#nat mort mature new shell female/male"<<endl;
+  report<<M_matn<<endl;
+  report<<"#nat mort mature old shell female/male"<<endl;
+  report<<M_mato<<endl;
+  report<<"#constant recruitment"<<endl;
+  report<<"1000000"<<endl;
+  report<<"#average of last 4 years sel total male new old shell"<<endl;
+  report<<(sel(1,endyr-4)+sel(1,endyr-3)+sel(1,endyr-2)+sel(1,endyr-1))/4.0<<endl;
+  report<<(sel(1,endyr-4)+sel(2,endyr-3)+sel(2,endyr-2)+sel(2,endyr-1))/4.0<<endl;
+  report<<"#average of last 4 years sel retained curve male new old shell"<<endl;
+  report<<(sel_fit(1,endyr-3)+sel_fit(1,endyr-2)+sel_fit(1,endyr-1))/3.0<<endl;
+  report<<(sel_fit(2,endyr-3)+sel_fit(2,endyr-2)+sel_fit(2,endyr-1))/3.0<<endl;
+  report<<"#trawl selectivity female male"<<endl;
+  report<<sel_trawl<<endl;
+  report<<"#female pot discard selectivity"<<endl;
+  report<<sel_discf(2009)<<endl;
+  report<<"#maturity curve new shell female male"<<endl;
+  report<<maturity_est(1)<<endl;
+  report<<maturity_est(2)<<endl;
+//  report<<maturity_average(1)<<endl;
+//  report<<maturity_logistic<<endl;
+  report<<"#maturity curve old shell female male"<<endl;
+  report<<maturity_old_average<<endl;
+  report<<"#molting probability immature female male"<<endl;
+  report<<moltp<<endl;
+  report<<"#molting probability mature female male"<<endl;
+  report<<moltp_mat<<endl;
+  report<<"#prop recruits to new shell"<<endl;
+  report<<proprecn<<endl;
+  report<<"#distribution of recruits to length bins"<<endl;
+  report<<rec_len<<endl;
+  report<<"#time of catch in fraction of year from survey - 7 months"<<endl;
+  report<<catch_midpt(endyr)<<endl;
+  report<<"#number at length new shell females males at time of fishery endyr from model"<<endl;
+  report<<natl_new_fishtime(1,endyr)<<endl;
+  report<<natl_new_fishtime(2,endyr)<<endl;
+  report<<"#number at length old shell females males at time of fishery endyr from model"<<endl;
+  report<<natl_old_fishtime(1,endyr)<<endl;
+  report<<natl_old_fishtime(2,endyr)<<endl;
+  report<<"#last year male spawning biomass"<<endl;
+  report<<mspbio(endyr)<<endl;
+  report<<"#last year female spawning biomass"<<endl;
+  report<<fspbio(endyr)<<endl;
+  report<<"#last year male spawning biomass at matingtime"<<endl;
+  report<<mspbio_matetime(endyr-1)<<endl;
+  report<<"#last year female spawning biomass at matingtime"<<endl;
+  report<<fspbio_matetime(endyr-1)<<endl;
+  report<<"#numbers at length immature new shell female male last year"<<endl;
+  report<<natlength_inew(1,endyr)<<endl;
+  report<<natlength_inew(2,endyr)<<endl;
+  report<<"#numbers at length immature old shell female male last year"<<endl;
+  report<<natlength_iold(1,endyr)<<endl;
+  report<<natlength_iold(2,endyr)<<endl;
+  report<<"#numbers at length mature new shell female male last year"<<endl;
+  report<<natlength_mnew(1,endyr)<<endl;
+  report<<natlength_mnew(2,endyr)<<endl;
+  report<<"#numbers at length mature old shell female male last year"<<endl;
+  report<<natlength_mold(1,endyr)<<endl;
+  report<<natlength_mold(2,endyr)<<endl;
+  report<<"#weight at length female juvenile"<<endl;
+  report<<wtf(1)<<endl;
+  report<<"#weight at length female mature"<<endl;
+  report<<wtf(2)<<endl;
+  report<<"#weight at length male"<<endl;
+  report<<wtm<<endl;
+  report<<"#length-length transition matrix"<<endl;
+  report<<len_len<<endl;
+  report<<"#female discard pot fishing F"<<endl;
+  report<<fmortdf(endyr-1)<<endl;
+  report<<"#trawl fishing F female male"<<endl;
+  report<<fmortt(endyr-1)<<endl;
+  report<<"#number of recruits from the model styr to endyr-1"<<endl;
+  report<<endyr-styr<<endl;
+  report <<"#recruitments female, male start year to endyr-1 from model" << endl;
+  for(i=styr; i<endyr; i++)
+  {
+    report << mfexp(mean_log_rec(1)+rec_dev(1,i))<<" ";
+  }
+  report <<endl<< "#recruitments male, male start year+1 to endyr-1 from model" << endl;
+  for(i=styr; i<endyr; i++)
+  {
+    report << mfexp(mean_log_rec(2)+rec_dev(2,i))<<" ";
+  }
+  report<<endl;
+  report<<"#male spawning biomass at matetime for endyr-5 to endyr-1 for spawner recruit curve to estimate recruitments"<<endl;
+  report<<mspbio_matetime(endyr-5,endyr-1)<<endl;
+  report<<"#male spawning biomass at matetime for str year to endyr-1 for spawner recruit curve to estimate recruitments"<<endl;
+  report<<mspbio_matetime(styr,endyr-1)<<endl;
+  report <<"#selectivity survey males 1989 to endyr: '27.5','32.5','37.5','42.5','47.5','52.5','57.5','62.5','67.5','72.5','77.5','82.5','87.5','92.5','97.5','102.5','107.5','112.5','117.5','122.5','127.5','132.5'"<< endl;
+  report << sel_srv3(2) << endl;
+   
 //Rout section 
     if (last_phase())
   {
