@@ -47,6 +47,23 @@
 0.0354
 7.905
 0.081
+# number of final years to average over for fishery sel50 par when time varying
+4
+
+#==weight at length
+# juvenile female
+# alpha_wt_imm_f
+0.001047
+# beta_wt_imm_f
+2.708367
+# alpha_wt_mat_f
+0.001158
+# beta_wt_mat_f
+2.708793
+# alpha_wt_m
+0.000267
+# beta_wt_m
+3.097253
 
 #==growth==
 #growth parameters from ST. Marie with sd(for priors not estimated)
@@ -149,8 +166,8 @@
 20.0
 # wght_female_potcatch : weight for female pot bycatch likelihood
 10.0
-# cput_cv : CV for the fit to pot fishery likelihood - larger means less weight on fit
-5.0
+# cput_cv : CV for the fit to pot fishery likelihood - larger means less weight on fit (CSS: this is not a CV, it is a SD for a normal likelihood)
+5
 # wt_lmlike : wt for fitting large male (>101) survey numbers
 0.001
 
@@ -175,19 +192,19 @@
 0.5
 # natm_Immult_var : variance for prior estimated M multiplier for immature
 1
-# smooth_mat_wght : smoothing for estimated maturity
-2
+# smooth_mat_wght : smoothing for estimated maturity (2)
+50
 # mat_est_wght : weighting for the maturity estimates
 0.5
 # mat_est_vs_obs_sd : standard deviation for deviations from observed maturity
 0.05
-# smooth_mat_wght_f : smoothness for estimated maturity for females
-2
+# smooth_mat_wght_f : smoothness for estimated maturity for females (2)
+50
 # mat_est_vs_obs_sd_f : standard deviation for deviation from observed maturity curve
 0.05
-# growth_data_wght_m : weight on the growth data
+# growth_data_wght_m : weight on the growth data (was 1)
  1
-# growth_data_wght_f : weight on the growth data
+# growth_data_wght_f : weight on the growth data (was 1)
  1
 # extra_wght_ind_m : add extra weight to the male lengths from the industry survey
  2
@@ -195,6 +212,7 @@
 0.0001
 # disc_catch_wght_fem : multiply like_wght(6) by this to increase weight on female discards
 30
+
 #===============phase estimation====================
 # fmort_phase : phase to estimate fishing mortality
 1
@@ -236,3 +254,7 @@
 # maturity_switch : if greater than 0 then use maturity logistic curve instead of fractions by year for probability
 #of new shell maturity
 2
+# f_penalties : switch for penalties on F
+0
+# retro_years : number of years from endyr to chop off when fitting
+0
