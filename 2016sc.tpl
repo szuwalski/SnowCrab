@@ -264,6 +264,7 @@ INITIALIZATION_SECTION
   mateste -0.7
   matestfe -0.7
   cpueq 0.001
+  fish_disc_sel50_f 4.2
  //==============================================================================
 PARAMETER_SECTION
  //growth pars
@@ -339,7 +340,8 @@ PARAMETER_SECTION
   init_bounded_number fish_sel50_mn2(100.0,160.0,phase_fishsel)
 
   init_bounded_number fish_disc_slope_f(0.10,0.70,phase_logistic_sel)
-  init_bounded_number fish_disc_sel50_f(4.20,4.201,-phase_logistic_sel)
+  // init_bounded_number fish_disc_sel50_f(4.20,4.201,-phase_logistic_sel)
+  init_bounded_number fish_disc_sel50_f(1,5,phase_logistic_sel)
   init_bounded_dev_vector log_dev_50f(1995,endyr-1,-5,5,-phase_logistic_sel)
   init_bounded_number fish_disc_slope_tf(.01,.3,phase_logistic_sel)
   init_bounded_number fish_disc_sel50_tf(30.,120.0,phase_logistic_sel)
