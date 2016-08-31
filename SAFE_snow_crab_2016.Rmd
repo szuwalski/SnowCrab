@@ -18,7 +18,7 @@ title: "A stock assessment for eastern Bering Sea snow crab"
 
 # Executive summary
 
-```{r,echo=F,message=FALSE}
+```{r,echo=F,message=FALSE,warning=F}
 library(knitr)
 library(ggplot2)
 library(PBSmodelling)
@@ -26,7 +26,13 @@ library(pander)
 
 # directory in which all of the scenario folder reside and names of the scenario folders
 TakeDir     <-"C:/SnowCrab/"
-Scenarios   <-c("Base 5 Francis","Model 2a MatPrior","Model 3b SmoothMat_Disc50")
+Scenarios   <-c("Base ALLNEWDATA","Base 5 Francis","Model 3b SmoothMat_Disc50")
+Scenarios   <-c("Base 5 ChangeWtPars","Model 2a MatPrior","Model 3a SmoothMat_Weight_200","Model 3a SmoothMat_Weight")
+ScenarioNames<-c("Base model","Model 1 (TrawlF)","Model 3 (Maturity)","Model 4 (Maturity and weighting)")
+
+Scenarios   <-c("Model 1c TrawlF_2vec_200","Model 2a MatPrior","Model X fitIndSurv")
+ScenarioNames<-c("Model 1 TrawlF","Model 2 (Maturity)","Model X ")
+
 #==This gets the counters that are constant from scenario to scenario
 # Read data file
 DATfile <-readLines(paste("C:/SnowCrab/",Scenarios[1],"/2016sc.DAT",sep=""))
@@ -83,8 +89,140 @@ tmp<-grep("length bins",DATfile)[[5]]
 LengthBins<-as.numeric(unlist(strsplit(DATfile[(tmp+1)],split=" ")))
 LengthBins<-LengthBins[!is.na(LengthBins)]
 
-#==read in files that will be needed
+
+  #  DO ALL OF THE MCMC AND THE RETROSPECTIVE PATTERN PLOTS HERE
+  # sdfile      <-read.table(paste(TakeDir,"2016sc.std",sep=""))
+  # corfile     <-readLines(paste(TakeDir,"2016sc.cor",sep=""),skip=1)
+  # recruitsd   <-sdfile[sdfile[,2]=="recm_sd",]
+  
+  #==MCMC stuff==========================
+  
+  #PSV <- file(paste(TakeDir,"/2016sc.psv",sep=""), "rb")
+  #nopar1 <- readBin(PSV, what=integer(), n=1)
+  #mcmc1 <- readBin(PSV, what=numeric(), n=nopar1 * 10000)
+  #mcmc1 <- matrix(mcmc1, byrow=TRUE, ncol=nopar1)
+  
+  # VariableNames<-rep(0,nopar1)
+  # for(x in 1:nopar1)
+  # {
+  #  temp<-unlist(strsplit((corfile[x+2]),split=" "))
+  #  if(x<10)
+  #  VariableNames[x]<-temp[9]
+  #  if(x>=10&x<100)
+  #   VariableNames[x]<-temp[8]
+  #  if(x>100)
+  #   VariableNames[x]<-temp[7]
+  # }
+  # 
+  # colnames(mcmc1)<-VariableNames
+  
+  PlotTrace<-function(input)
+  {
+    trace <-rep(0,length(input))
+    for(x in 1:length(Trace))
+      Trace[x]<-as.numeric(unlist(strsplit(as.character(input[[x]][1]),split=" "))[1])
+    return(Trace[!is.na(Trace)])
+  }
+ 
+#==pulling MLEs for management quantities
+REPfileEnd<-rep(list(list()),length(Scenarios))
+MgmtQuants<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+{
+  REPfileEnd[[x]]       <-readLines(paste("C:/SnowCrab/",Scenarios[x],"/2016sc.REP",sep=""))
+  MgmtQuants[[x]]       <-as.numeric(unlist(strsplit(as.character(REPfileEnd[[x]][1]),split=" ")))
+  MgmtQuants[[x]]$Status<-as.numeric(MgmtQuants[[x]][5])/as.numeric(MgmtQuants[[x]][2])
+  names(MgmtQuants[[x]])<-c("F","BMSY","Surv_MMB","Fish_MMB","Mate_MMB","F35","FOFL","OFL","Status")
+  }
+
+#==pulling posterior distributions for everything
+mcEval<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+  mcEval[[x]]  <-readLines(paste("C:/SnowCrab/",Scenarios[x],"/eval.csv",sep=""))
+
+MCMCreps    <-4000
+EvalOuts    <-rep(list(rep(list(list()),MCMCreps)),length(Scenarios))
+EvalCounter <-seq(1,length(mcEval[[1]]),17)
+
+for(z in 1:length(Scenarios))
+ for(x in 1:MCMCreps)
+  for(y in 0:16)
+    EvalOuts[[z]][[x]][y+1]<-mcEval[[z]][EvalCounter[x]+y]
+
+# inChop<-100
+# outChop<-4000
+# useEval<-EvalOuts[inChop:outChop]
+# Thin<-1
+# inSeq<-c(seq(1,length(useEval),Thin))
+# useEval<-useEval[inSeq]
+# par(mfrow=c(1,2),mar=c(.1,.1,.1,.1),oma=c(4,4,1,1))
+# plot(PlotTrace(EvalOuts))
+# acf(PlotTrace(EvalOuts))
+
+useEval<-EvalOuts
+
+  #==B35 posterior==
+  B35<-list()
+  temp<-rep(0,length(useEval[[1]]))
+  for(x in 1:length(useEval))
+  {
+    for(y in 1:length(temp))
+      temp[y]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][[y]][1]),split=" "))[2])
+    B35[[x]]<-temp
+  }
+  
+  #==F35 posterior==
+  F35<-list()
+  temp<-rep(0,length(useEval[[1]]))
+  for(x in 1:length(useEval))
+  {
+    for(y in 1:length(temp))
+      temp[y]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][[y]][1]),split=" "))[3])
+    F35[[x]]<-temp
+  }
+  
+  #==FOFL posterior==
+  FOFL<-list()
+  temp<-rep(0,length(useEval[[1]]))
+  for(x in 1:length(useEval))
+  {
+    for(y in 1:length(temp))
+      temp[y]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][[y]][1]),split=" "))[4])
+    FOFL[[x]]<-temp
+  }
+  
+  #==OFL posterior==
+  OFL<-list()
+  temp<-rep(0,length(useEval[[1]]))
+  for(x in 1:length(useEval))
+  {
+    for(y in 1:length(temp))
+      temp[y]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][[y]][1]),split=" "))[5])
+    OFL[[x]]<-temp
+  }
+ 
+  #==MMB posterior==
+  MMB<-list()
+  temp<-rep(0,length(useEval[[1]]))
+  for(x in 1:length(useEval))
+  {
+    for(y in 1:length(temp))
+      temp[y]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][[y]][4]),split=" "))[SurvYrN+1])
+    MMB[[x]]<-temp
+  } 
+
+ ABC<-rep(0,length(Scenarios))
+ for(x in 1:length(ABC))
+   ABC[x]<-  quantile(OFL[[x]],probs=0.49)
+ 
+ #==Status posterior==
+  Status<-list()
+  for(x in 1:length(useEval))
+   Status[[x]]<-MMB[[x]]/B35[[x]]
+
 ```
+
+
 1. Stock: Eastern Bering Sea snow crab, *Chionoecetes opilio*.
 
 2. Catches: trends and current levels
@@ -102,11 +240,11 @@ MODEL ESTIMATES TRACKING.
 
 4. Recruitment
 
-Estimated recruitment shifts from a period of high recruitment to a period of low recruitment in the mid 1990s (late 1980s when lagged to fertilization). Recent estimated recruitments have been above the average of the 'low' period , but are still beneath the average of the 'high' recruitment period. Suvey length frequencey data in 2016 indicate THIS KIND OF RECRUITMENT. 
+Estimated recruitment shifts from a period of high recruitment to a period of low recruitment in the mid 1990s (late 1980s when lagged to fertilization). Recent estimated recruitments have been above the average of the 'low' period , but are still beneath the average of the 'high' recruitment period. Suvey length frequencey data in 2016 reflect a what may be a large recruitment event starting in 2015, but data informing the estimates of numbers in the smaller size classes are still uncertain. 
 
 5. Management 
 
-*Historical status and catch specifications for snow crab (1,000t).*
+
 ```{r,echo=F}
 
 ManTable <-read.csv("C:/SnowCrab/ManagementTable.csv")
@@ -114,22 +252,23 @@ PlotTab<- data.frame(ManTable)
 colnames(PlotTab)<-c("Year","MSST","Biomass (MMB)","TAC","Retained catch","Total catch", "OFL","ABC")
 
 rownames(PlotTab)<- NULL
-pander(PlotTab,split.cells=10)
+pander(PlotTab,split.cells=10,caption="Historical status and catch specifications for snow crab (1,000t).")
 
 # PoundTab<-PlotTab
 # PoundTab[,c(2,3,4,5,6,7,8)]<-as.numeric(PoundTab[,c(2,3,4,5,6,7,8)])*2.20462
 # pander(PoundTab,split.cells=10)
 ```
 
-*Historical status and catch specifications for snow crab (millions of lbs).*
+
 ```{r,echo=F}
 ManTable <-read.csv("C:/SnowCrab/ManagementTable.csv")
 PlotTab<- data.frame(ManTable)
 colnames(PlotTab)<-c("Year","MSST","Biomass (MMB)","TAC","Retained catch","Total catch", "OFL","ABC")
 
 PlotTab[,c(2,3,4,5,6,7,8)]<-round((PlotTab[,c(2,3,4,5,6,7,8)])*2.20462,2)
-pander(PlotTab,split.cells=10)
+pander(PlotTab,split.cells=10,caption="Historical status and catch specifications for snow crab (millions of lbs).")
 ```
+
 6.  Basis for the OFL 
 
 The OFL for `r SurveyYrs[SurvYrN]` for the chosen model was INSERT CODE t fishing at FOFL = INSERT CODE (INSERT CODE % of the estimated F35%, INSERT CODE).  The calculated OFL was an/a DECREASE/INCREASE from the `r SurveyYrs[SurvYrN-1]` OFL of `r ManTable[nrow(ManTable),7]` t.  The MMB at mating projected for `r SurveyYrs[SurvYrN]` when removing the OFL was INSERT CODE, which was INSERT CODE % of B35% (INSERT CODE).   
@@ -142,6 +281,31 @@ The probabillity density function of the OFL was characterized by using a Markov
 
 The ABC was specified as INSERT CODE by calculating the 49th quantile of the posterior distribution of the OFL.  The total estimated catch, INSERT CODE, was estimated at 90% of the OFL (recommend by the SSC).  
 
+```{r,echo=F}
+
+
+PlotTab<- data.frame(Model=ScenarioNames,
+                     OFL=unlist(lapply(OFL,median)),
+                     B35=unlist(lapply(B35,median)),
+                     MMB=unlist(lapply(MMB,median)),
+                     Status=unlist(lapply(Status,median)),
+                     F35=unlist(lapply(F35,median)),
+                     FOFL=unlist(lapply(FOFL,median)),
+                     ABC=ABC)
+
+rownames(PlotTab)<- NULL
+PlotTab[,c(2:8)]<-round(PlotTab[,c(2:8)],2)
+pander(PlotTab,split.cells=c(18,rep(10,7)),justify=c("left",rep("center",7)),caption="Projected status and catch specifications for snow crab (1,000t).")
+  
+```
+
+```{r,echo=F}
+NextPlot<-PlotTab
+NextPlot[,c(2:4,8)]<-round(NextPlot[,c(2:4,8)]*2.20462,2)
+pander(NextPlot,c(18,rep(10,7)),justify=c("left",rep("center",7)),caption="Projected status and catch specifications for snow crab (millions of lbs).")
+```
+
+
 \newpage
 # A.  Summary of Major Changes 
 
@@ -153,7 +317,9 @@ Data added to the assessment included:  `r SurveyYrs[SurvYrN]` Bering Sea survey
 
 3. Assessment methodology: 
 
-Four models are presented in this assessment with several incremental steps each illustrated. Model 0 represents the 2015 model with minor structural changes suggested by the CPT implemented and serves as a basis for comparison between previous years' assessments.  Model 1 addresses the way in which fishing mortality in the trawl fleet is estimated. MODEL 2 removes the priors on maturity. MODEL 3 changes the way maturity is estimated.  Model 3a was the selected model for which MCMC was implemented and on which presented management quantities are based because estimating discard selectivity for females resulted in a model in which no females were selected for discard.
+Four models are presented in this assessment with several incremental steps, each of which are illustrated. Model 0 represents the 2015 model with minor structural changes suggested by the CPT implemented and serves as a basis for comparison between previous years' assessments.  Model 1 addresses the way in which fishing mortality in the trawl fleet is estimated. Model 2 removes the priors on maturity. Model 3 changes the way maturity is estimated.  Model 3a was the selected model for which MCMC was implemented and on which presented management quantities are based because estimating discard selectivity for females resulted in a model in which no females were selected for discard.
+
+The projection framework is now Bayesian (e.g. management quantities like MMB or the OFL are identified as the medians of posterior distributions resulting from a Markov Chain Monte Carlo algorithm).  This is preferable to the previous projection framework because it explicitly incorporates uncertainty in all parameters, rather than only numbers at length.
 
 4. Assessment results
 
@@ -191,7 +357,7 @@ All changes were undertaken in a stepwise fashion and the resulting changes in t
 
 ## Authors response
 
-All requests by the CPT were fulfilled and described below. Model scenarios include all CPT recommended models, except estimating a constant of proportionality between fishing effort in the pot fishery and fishing mortality in the trawl fishery because this is a stepbackwards from estimating a vector of deviations.
+Nearly all requests by the CPT were fulfilled and described below. Model scenarios include all CPT recommended models, save 1. Estimating a constant of proportionality between fishing effort in the pot fishery and fishing mortality in the trawl fishery was not performed because this is a stepbackwards from estimating a vector of deviations. 'Jittering' was not performed because the management advice produced from this assessment is Bayesian in nature--i.e. the estimated management quantities (e.g. MMB, B35%, OFL) are the medians of posterior distributions of these quantities. Consequently, 'jittering' would not influence the outcome of this assessment because it seeks to ensure the final maximum likelihood estimates of management quantities have converged to their most probable value. Finally, although functions to calculate Francis weights were included in the assessment, the prersented scenarios use only weight for survey composition data that are 20% of their previous values (i.e. 40 vs. 200).  During the application of the Francis weighting procedure, the algorithm lowered the weights beyond those presented here, but at the cost of a Hessian that was not positive definite.  Given the need for an invertible Hessian to perform MCMC, using weights at only 20% of the previously used values was a necessary compromise.
 
 \newpage
 # C. INTRODUCTION
@@ -292,6 +458,8 @@ Prior to adoption of Amendment 24, BMSY (921.6 million lbs (418,150 t)) was defi
 
 ## New Data
 
+HOW EXACTLY WERE DATA PULLED FROM AKFIN??
+
 ## Catch data
 
 Catch data and size frequencies of retained crab from the directed snow crab pot fishery from 1978/79 to the `r SurveyYrs[SurvYrN-1]` season were used in this analysis.  Observers were placed on directed crab fishery vessels starting in 1990.  Size frequency data on the total catch (retained plus discarded) in the directed crab fishery were available from 1992/93 to `r SurveyYrs[SurvYrN-1]`.   Total discarded catch was estimated from observer data from 1992 to `r SurveyYrs[SurvYrN-1]` (Table 1).  The discarded male catch was estimated for 1978 to 1991 in the model using the estimated fishery selectivities based on the observer data for the period 1992 to `r SurveyYrs[SurvYrN-1]`.  The discard catch estimate was multiplied by the assumed mortality of discards from the pot fishery.  The mortality of discarded crab was 30% for all model scenarios.  This estimate differs from the current rebuilding harvest strategy used since 2001 to the present by ADFG to set the TAC, which assumes a discard mortality of 25% (Zheng, et al. 2002).   The discards prior to 1992 may be underestimated due to the lack of escape mechanisms for undersized crab in the pots before 1997.
@@ -331,11 +499,13 @@ kable(PlotTab)
 
 ## Survey biomass
 
+DESCRIBE PRECISELY WHERE THE DATA WERE TAKEN FROM. LESS ABOUT WHAT THEY 'MEAN'.
+
 Abundance is estimated from the annual eastern Bering Sea (EBS) bottom trawl survey conducted by NMFS (see Rugolo et al. 2003 for design and methods).  Since 1989, the survey has sampled stations farther north than previous years (61.2o N previous to 1989).  In 1982 the survey net was changed resulting in a change in catchability.  Juvenile crabs tend to occupy more inshore northern regions (up to about 63o N) and mature crabs deeper areas to the south of the juveniles (Zheng et al. 2001).
   
 All survey data in this assessment use measured net widths instead of the fixed 50 ft net width used in the September 2009 snow crab assessment (variable net width data were shown for comparison in the September 2009 assessment).  Snow crab assessments prior to and including September 2009 used survey biomass estimates for all crab based on an assumed 50 ft net width.  In 2009, Chilton et al. (2009) provided new survey estimates based on measured net width. The average measured net width for all tows in the 2009 survey was 17.08 meters which is about 112% of 50ft (15.24 meters) (Chilton et al. 2009).   The 2009 mature male survey biomass was 162,890 t using the fixed 50 ft net width and 141,300 t using the measured net width for each tow.  The difference between the survey male mature biomass estimates calculated with the fixed 50 ft width and the measured net width is small in the early part of the time series, and then is an average ratio of 0.86 (range 0.81 to 0.90) from 1998 to 2009. 
 
-The total mature biomass (all sizes of morphometrically mature males and females) estimated from the survey declined to a low of 82,100 t in 1985, increased to a high of 809,600 t in 1991 (includes northern stations after 1989), then declined to 140,900 t in 1999, when the stock was declared overfished (Table 3 and Figure 4).  The mature biomass increased in 2000 and 2001, mainly due to a few large catches of mature females.   The survey estimate of total mature biomass increased from 291,200 t in 2013 to 369,400 t in 2014, then declined to 207,100 t in 2015.
+The total mature biomass (all sizes of morphometrically mature males and females) estimated from the survey declined to a low of 82,100 t in 1985, increased to a high of 809,600 t in 1991 (includes northern stations after 1989), then declined to 140,900 t in 1999, when the stock was declared overfished (Table 3 and Figure 4).  The mature biomass increased in 2000 and 2001, mainly due to a few large catches of mature females. The survey estimate of total mature biomass increased from 291,200 t in 2013 to 369,400 t in 2014, then declined to 207,100 t in 2015.
  
 Survey mature male biomass increased from 96,100 t in 2013 to 156,900 t in 2014, then declined to 79,000 t in 2015.  The observed survey estimate of males greater than 101 mm increased from 73.6 million in 2013 to 138.9 million in 2014, then declined to 57.2 million in 2015 (Table 3).  Survey mature female biomass increased from 195,100 t in 2013 to 212,500 t in 2014, then declined to 128,100 t in 2015.
 
@@ -405,7 +575,16 @@ This should include the model from the previous year as the 'base' model and the
 
 ## Results
 
-### Model 1
+### `r ScenarioNames[1]`
+Mature male biomass for the `r ScenarioNames[1]` ranged from an estimated high of `r round(max(snowad.rep[[1]]$"Mature male biomass at mating"))` t in `r SurveyYrs[which(snowad.rep[[1]]$"Mature male biomass at mating" == max(snowad.rep[[1]]$"Mature male biomass at mating"))]` to a low of `r round(min(snowad.rep[[1]]$"Mature male biomass at mating"[1:SurvYrN]))` t in `r SurveyYrs[which(snowad.rep[[1]]$"Mature male biomass at mating" == min(snowad.rep[[1]]$"Mature male biomass at mating"[1:SurvYrN]))]`.  Mature female biomass ranged from an estimated high of `r round(max(snowad.rep[[1]]$"Mating time Female Spawning Biomass"))` t in `r SurveyYrs[which(snowad.rep[[1]]$"Mating time Female Spawning Biomass"==max(snowad.rep[[1]]$"Mating time Female Spawning Biomass"))]` to a low of `r round(min(snowad.rep[[1]]$"Mating time Female Spawning Biomass"[1:SurvYrN]))` t in `r SurveyYrs[which(snowad.rep[[1]]$"Mating time Female Spawning Biomass"== min(snowad.rep[[1]]$"Mating time Female Spawning Biomass"[1:SurvYrN]))]`.
+
+
+Say something about fits?
+
+MMB (high, low)
+FMB (high, low)
+Estimates of natural mortality, selectivity in all fisheries, recruitment, 
+
 
 ### Model 2
 
@@ -416,13 +595,63 @@ Does everyone get its own MCMC?
 Then there is a section that compares them all at the end.
 Or is there a 'base' model to which all of the others are compared?
 
-# F. Calculation of the ABC
+### Winner winner chicken dinner
 
-# H. Rebuilding analyses
+# F. Calculation of the OFL
 
-# I. Data gaps and research priorities
+# G. Calculation of the ABC
 
-# K. Literature cited
+The acceptable biological catch (ABC) is calculated as the 49th quantile of the posterior distribution of the overfishing level (OFL). The OFL is calculated using proxies for biomass and fishing mortality reference points and a sloped control rule.  The distribution of the OFL is calculated via MCMC.  Proxies for biomass and fishing mortality reference points were calculated using spawner-per-recruit methods (e.g. Clark, 1991). After fitting the assessment model to the data and estimating population parameterse, the model was projected forward 100 years using the estimated parameters under no directed exploitation (bycatch exploitation was set to the average value) to determine 'virgin' mature male biomass per recruit.  Projections were repeated in which the bisection method was used to identify a fishing mortality that reduced the mature male biomass per recruit to 35% of the virgin level (i.e. F~35%~ and B~35%~).
+
+Calculated values of F~35%~ and B~35%~ were used in conjunction with a control rule to adjust the proportion of F~35%~ that is applied based on the status of the population relative to B~35%~ (Amendment 24, NMFS).
+
+\begin{equation}
+ F_{OFL} =
+ \begin{cases}
+ Bycatch  & if \frac{MMB}{MMB_{35}} \leq \Omega \\[3ex]
+ \frac {F_{35} ( \frac {MMB}{MMB_{35}} - \alpha}){1-\alpha}  & if \Omega < \frac {MMB}{MMB_{35}} < 1 \\[3ex]
+ F_{35} & if MMB > MMB_{35}
+\end{cases}
+\end{equation}
+
+Where MMB is the estimated current mature male biomaiss, MMB~*35%*~ is the mature male biomass at the time of mating resulting from fishign at F~*35%*, F~*35%*~ is the fishing mortality that reduces the mature male biomass per recruit to 35% of unfished levels, $\Omega$ is the fraction of MMB~*35%*~ below which directed fishing mortlaity is zero (here this is set to 0.25), and $\alpha$ determins the slop of the descneding limb of the harvest control rule (set to 0.05 here).
+
+# H. Data gaps and research priorities
+Incorporate weight at length data into the analysis
+Standardize the .DAT file creation from files in AKFIN
+Model fisheries for bycatch in the pot fishery and hook and line fishery as well (pot fishery was 25% of bycatch this year)
+Think hard about what should be fit--total retained catch looks good, but when you look at the fits by shell condition, a lot of the catch is old shell in some years.
+Better characterization of the CVs of everything (survey biomass in particular)
+Use the 200 weights of the most uptodate model this year. Next year change the way that selectivity is estimated.
+
+Is the retrospective bias caused by the way catch is taken out?
+F happens over the whole year in the updating of the dynamics, but, it is calculated on a fraction of the population in the get catch at age function.
+
+When doing it the way that it is currently done, the model just picks any shape it needs to match the survey selectivity.
+This doesn't really inform selectivity well.
+
+What's the point of the q in the BSFRF 'availability'? Should be taken out.
+
+Revisit the weighting.
+Several catches have the same 'sd', but are different magnitudes.
+For example, the length comps have both 'weights' and 'sample sizes'. Just the sample sizes should be adjusted.
+Priors: having a 'weight' and a 'variance' doesn't make any sense
+
+Why does the two piece growth function only have one intercept for each sex, but two slopes?
+
+Make the bounds for parameters read in in a CTL fiel
+
+FIX IT SO RINPUT IS NOT OVERWRITTEN WITH EVALUATING THE CSV. CAN JUST RENAME IT AFTER RUNNING FOR NOW, BUT THAT IS DUMB.
+
+Large claw male vs small claw male differences in weight at length
+
+There is something wrong with the BSFRF data--the proportions are identical in one of the years for bothmature and immature (see EmpiricSurvDat.csv)
+
+The pattern in the changes in survey q do not make sense to me.  There was less coverage in the early years, but the q is higher.  Survey qs should be nested--one should be estimated from 0-1, the rest should be estimated as that estimated parameter times an adjustment factor that ranges from 0-1. The one that all others are based off of should be the era that has the most coverage in the survey.
+
+# I. Ecosystem Considerations
+
+# J. Literature cited
 
 
 
@@ -430,11 +659,6 @@ Or is there a 'base' model to which all of the others are compared?
 # APPENDIX A: MODEL STRUCTURE
 
 NEEDS:
-
- * List and description of all likelihood components
- * How many parameters are estimated
- * Description of how the stat of hte population at the start of the first year of the assessment period is determined
- * Size range of the model
  * List all of hte parameters esetimaed outside of the assessment and how they were estimated
  * List all of hte eparameters estimated conditionally on those above and indicate bounds and priors
  * List any constraints iposed on estimated parameters
@@ -442,67 +666,11 @@ NEEDS:
  * Define model outputs
     + biomass measures
     + recruitment
-    + fishing mortalityi (exploitation rate vs instantaneous)
+    + fishing mortality (exploitation rate vs instantaneous)
+  
+## Population dynamics  
     
-The population dynamics model used here tracks the number of crab of sex *s*, shell condition *v*, maturity state *m*, in year *y* at length *l*, N~*s,v,m,y,l*~. A terminal molt occurs in which crab move from immature to mature, and then do not molt again.  The dynamics are described by:
-
-  $$ N_{s,v,m,y+1,l} = 
-  \begin{cases}
-  \Omega_{s,l}  \kappa_{s,l'} Q_{s,imat,y,l'} X_{s,l',l} & \text{if v = new; m = mat} \\[2ex] 
-  1-\Omega_{s,l} \kappa_{s,l'} Q_{s,imat,y,l'} X_{s,l',l} + R e^\epsilon_y Pr_{l} & \text{if v = new; m = imat} \\[2ex]
-  Q_{s,mat,y,l'} & \text{if v = old; m = mat} \\[2ex]
-  (1-\kappa_{s,l'}) Q_{s,imat,y,l'} & \text{if v = old; m = imat} 
-  \end{cases}
-  $$
-
-Where $\Omega_{s,l}$ is the probability of maturing at length *l* for sex *s*, $\kappa_{s,l'}$ is the probability of molting for an immature crab of sex *s* at length *l'*,  and X~*s,l,l'*~ is the size transition matrix describing the probability of transitioning from size *l* to size *l'* for sex *s*. Q~*s,m,y,l'*~ is the number of crab of sex *s*, maturity state *m*, and length *l'* surviving natural and fishing mortality during year *y*:
-
- \begin{equation}
-  Q_{s,m,y,l} = \sum_v N_{s,v,m,y,l}e^{Z_{s,v,m,y,l}} 
- \end{equation}
- 
- Where N~*s,v,m,y,l*~ is the numbers, *N*, of sex *s* during year *y* of shell condition *v* and maturity state *m* at length *l*. Z~*x,v,m,y,l*~ represents the total mortality experienced by the population and consists of the sum of instantaneous rates of natural mortality by sex and maturity state (M~*s,m~*) and fishing mortality (F~*s,f,y,l*~) from each fishery. Each fishing mortality is subject to seletivity by length *l*, which varies between sexes *s* and fisheries *f* (and sometimes by year *y*) .
- 
- \begin{equation} Z_{s,v,m,y,l} = M_{s,m} + \sum_f S_{s,f,y,l} F_{s,f,y,l} \end{equation}
- 
-Selectivities in the directed and bycatch fisheries are specified as logistic functions of size.  Different selectivities are estimated for females and males in the directed fisheries (S~*fem,dir,l*~ and S~*male,dir,l*~, respectively), a single selectivity for both sexes is estimated for bycatch in the groundfish trawl fishery (S~{trawl,l}), and a retention selectivity is estimated for the directed fishery for males (R~*dir,l*~; all females are discarded).
- 
-  \begin{align}
-  S_{male,dir,l} = & \frac {1}{1+e^{-S_{slope,m,d}(L_{l}-S_{50,m,d}}}) \\
-  S_{fem,dir,l} = & \frac {1}{1+e^{-S_{slope,f,d}(L_{l}-S_{50,f,d}}}) \\
-  S_{trawl,l} = & \frac {1}{1+e^{-S_{slope,t}(L_{l}-S_{50,t}}}) \\
-  R_{dir,l} = & \frac {1}{1+e^{-S_{slope,m,d}(L_{l}-S_{50,m,d}}})
-  \end{align}
-
-Where S~*slope,s,f*~ is the slope of the logistic curve for sex *s* in fishery *f* and S~*50,s,f*~ is the length at 50% selection for sex *s* in fishery *f*.  Catch in each fishery *f* during each year *y* is calculated as the fraction of the total fishing mortality, F~*s,f,y,l*~, applied to a given sex *s* in a given fishery *f* times the biomass removed by all fisheries for that sex.
-
- \begin{align}
- C_{male,dir,y}  = & \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {R_l F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
- C_{male,tot,y}  = & \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
- C_{fem,dir,y}   = & \sum_{l} \sum_{v} \sum_{m} w_{fem,l} \frac {F_{fem,dir,y,l}}{F_{fem,dir,y,l + F_{trawl,y,l}}} N_{fem,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{fem,dir,y,l}+F_{trawl,y,l})})  \\
- C_{m+f,trawl,y}  = & \sum_{s} \sum_{l} \sum_{v} \sum_{m} w_{s,l} N_{s,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{trawl,y,l})})
- \end{align}
- 
-Where $\delta_y$ is the mid point of the fishery (all fisheries are assumed to occur concurrently and the midpoint is based on the directed fishery, which accounts for the vast majority of the fishing mortality), w~*s,l*~ is the weight at length *l* for sex *s*. 
- 
-Molting and growth occur before the survey.  Immmature crab are assumed to molt every year with a probabillity of molting to maturity based on length *l*. For crab that do molt, the growth increment within the size-transition matrix, X~*s,l,l'*~, is based on a linear relationship between pre- and post-molt length and the variabillity around that relationship is characterized by a normalized gamma function. 
-
- \begin{equation} X_{s,l,l'} = \frac{Y_{s,l,l'}}{ \sum_{l'} Y_{s,l,l'}}\end{equation}
-
- \begin{equation} Y_{s,l,l'} = (\Delta_{l,l'})^{\frac {\hat{L_{s,l}}-(\bar{L}_{l}-2.5)}{ \beta_{s}}} \end{equation}
-
- \begin{equation} \hat{L}_{s,l} = \gamma^1_s + \gamma^w_s \bar{L}_{l} \end{equation}
- 
- \begin{equation} \Delta_{l,l'} = \bar{L}_{l'} + 2.5 - L_{l} \end{equation}
- 
- Where EXPLAIN THINGS ABOVE THAT NEED EXPLAINING.
- 
- An average recruitment for the entire assessment period and yearly deviations around this average are estimated within the assessment.  The sex ratio of recruitment is assumed to be 50/50 male to female.  Each year's estimated recruitment is allocated to length bins based on a discretized and renormalized gamma function.
- 
- \begin{equation} Re_{y} = e^(Re_{avg} + Re_{dev,y}) \end{equation}
- \begin{equation} Pr_l = \frac {(\Delta_{1,l})^{v^1/v^2}e^{-\Delta_{1,l'}/v^2}}{\sum_{l'} (\Delta_{1,l'})^{v^1/v^2}e^{(-\Delta_{1,l'}/v^2)}} \end{equation}
- 
- Numbers of a given sex *s* of shell condition *v* and maturity state *m* at length *l* in the initial year of the assessment, N~*s,v,m,y=1,l*}, are calculated from an estimated vector of numbers at length *l* by sex *s* and maturity state *m*, $\gamma_{s,v,l}$. 
+The snow crab population dynamics model tracks the number of crab of sex *s*, shell condition *v*, maturity state *m*, in year *y* at length *l*, N~*s,v,m,y,l*~. A terminal molt occurs in which crab move from immature to mature, and then do not molt again. The mid-points of the size bins tracked in the model span from 27.5 to 132.5mm carapace width, with 5 mm size classes. For the base assessment, 331 parameters are estimated. Numbers of a given sex *s* of shell condition *v* and maturity state *m* at length *l* in the initial year of the assessment, N~*s,v,m,y=1,l*}, are calculated from an estimated vector of numbers at length *l* by sex *s* and shell condition *v*, $\lambda_{s,v,l}$. THERE ARE STRONG PRIORS ON A FEW THINGS HERE e.g. immmature old shell.
  
 \begin{equation} N_{s,v,m,y=1,l} = 
   \begin{cases}
@@ -513,29 +681,138 @@ Molting and growth occur before the survey.  Immmature crab are assumed to molt 
   \end{cases}
   \end{equation}
 
-LIKELIHOOD COMPONENTS 
+The dynamics after the initial year are described by:
+
+  \begin{equation} N_{s,v,m,y+1,l} = 
+  \begin{cases}
+  \Omega_{s,l}  \kappa_{s,l'} Q_{s,imat,y,l'} X_{s,l',l} & \text{if v = new; m = mat} \\[2ex] 
+  1-\Omega_{s,l} \kappa_{s,l'} Q_{s,imat,y,l'} X_{s,l',l} + Rec^\epsilon_y Pr_{l} & \text{if v = new; m = imat} \\[2ex]
+  Q_{s,mat,y,l'} & \text{if v = old; m = mat} \\[2ex]
+  (1-\kappa_{s,l'}) Q_{s,imat,y,l'} & \text{if v = old; m = imat} 
+  \end{cases}
+  \end{equation}
+
+Where $\Omega_{s,l}$ is the probability of maturing at length *l* for sex *s* (a freely estimated vector for both males and females constrained by penalties on smoothness), $\kappa_{s,l'}$ is the probability of molting for an immature crab of sex *s* at length *l'* (set to 1 for),  and X~*s,l,l'*~ is the size transition matrix describing the probability of transitioning from size *l'* to size *l* for sex *s*. Q~*s,m,y,l'*~ is the number of crab of sex *s*, maturity state *m*, and length *l'* surviving natural and fishing mortality during year *y*:
+
+ \begin{equation}
+  Q_{s,m,y,l} = \sum_v N_{s,v,m,y,l}e^{Z_{s,v,m,y,l}} 
+ \end{equation}
  
-  
+ Where N~*s,v,m,y,l*~ represents the numbers, *N*, of sex *s* during year *y* of shell condition *v* and maturity state *m* at length *l*. Z~*x,v,m,y,l*~ represents the total mortality experienced by the population and consists of the sum of instantaneous rates of natural mortality by sex and maturity state, M~*s,m*~, and fishing mortality, F~*s,f,y,l*~ from each fishery. Each fishing mortality is subject to seletivity by length *l*, which varies between sexes *s* and fisheries *f* (and by year *y* if specified) . M~*s,m*~ is specified in the model and a multiplier $\gamma_{natM,m}$ is estimated subject to constraints (see table X; this formulation effectively specifies a mean and standard deviation for a prior distribution for M).
+ 
+ \begin{equation} Z_{s,v,m,y,l} = \gamma_{natM,m} M_{s,m} + \sum_f S_{s,f,y,l} F_{s,f,y,l} \end{equation}
+ 
+Selectivities in the directed and bycatch fisheries are estimated logistic functions of size.  Different selectivities are estimated for females and males in the directed fisheries (S~*fem,dir,l*~ and S~*male,dir,l*~, respectively), a single selectivity for both sexes is estimated for bycatch in the groundfish trawl fishery (S~*trawl,l*~), and a retention selectivity is estimated for the directed fishery for males (R~*dir,l*~; all females are discarded).
+ 
+  \begin{align}
+  S_{male,dir,l} = & \frac {1}{1+e^{-S_{slope,m,d}(L_{l}-S_{50,m,d}}}) \\
+  S_{fem,dir,l} = & \frac {1}{1+e^{-S_{slope,f,d}(L_{l}-S_{50,f,d}}}) \\
+  S_{trawl,l} = & \frac {1}{1+e^{-S_{slope,t}(L_{l}-S_{50,t}}}) \\
+  R_{dir,l} = & \frac {1}{1+e^{-S_{slope,m,d}(L_{l}-S_{50,m,d}}})
+  \end{align}
+
+Where S~*slope,s,f*~ is the slope of the logistic curve for sex *s* in fishery *f* and S~*50,s,f*~ is the length at 50% selection for sex *s* in fishery *f*.  Catches for all fisheries are modeled as pulse fisheries in which all catch is removed instantaneously (i.e. no natural mortality occurs). Catch in fishery *f* during year *y* is calculated as the fraction of the total fishing mortality, F~*s,f,y,l*~, applied to a given sex *s* in a fishery *f* times the biomass removed by all fisheries for that sex.
+
  \begin{align}
- L_{1,a} = & \lambda_{1,a} \sum_{y} N^{eff}_{1,y} \sum_{l} p^{obs}_{1,y,l} ln( \hat {p}_{1,y,l}/p^{obs}_{1,y,l}) \\
- L_{1,b} = & \lambda_{1,a} \sum_{y} N^{eff}_{2,y} \sum_{l} p^{obs}_{2,y,l} ln( \hat {p}_{2,y,l}/p^{obs}_{2,y,l}) \\
- L_{1,c} = & \lambda_{1,a} \sum_{y} N^{eff}_{3,y} \sum_{l} p^{obs}_{3,y,l} ln( \hat {p}_{3,y,l}/p^{obs}_{3,y,l}) \\
- L_{1,d} = & \lambda_{1,a} \sum_{s} \sum_{y} N^eff_{4,s,y} \sum_{l} p^{obs}_{4,y,s,l} ln(\hat {p}_{4,y,s,l}/p^{obs}_{4,y,s,l}) 
+ C_{male,dir,y}  = & \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {R_l F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
+ C_{male,tot,y}  = & \sum_{l} \sum_{v} \sum_{m} w_{male,l} \frac {F_{male,dir,y,l}}{F_{male,dir,y,l + F_{trawl,y,l}}} N_{male,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{male,dir,y,l}+F_{trawl,y,l})}) \\
+ C_{fem,dir,y}   = & \sum_{l} \sum_{v} \sum_{m} w_{fem,l} \frac {F_{fem,dir,y,l}}{F_{fem,dir,y,l + F_{trawl,y,l}}} N_{fem,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{fem,dir,y,l}+F_{trawl,y,l})})  \\
+ C_{m+f,trawl,y}  = & \sum_{s} \sum_{l} \sum_{v} \sum_{m} w_{s,l} N_{s,v,m,y,l} e^{-\delta_y M_{s,m}} (1-e^{-(F_{trawl,y,l})})
  \end{align}
-  
-where,
+ 
+Where $\delta_y$ is the mid point of the fishery (all fisheries are assumed to occur concurrently and the midpoint is based on the directed fishery, which accounts for the vast majority of the fishing mortality) and w~*s,l*~ is the weight at length *l* for sex *s*. Trawl data and discard data are entered into the model with an assumed mortality of 80% and 30%, respectively.  Fully-selected fishing mortality parameters for fishery *f* are estimated as a logged average over a given time period ($F^{log}_{avg}$) with yearly deviations around that mean ($F^{log}_{dev,y}$).
 
-R~0~    log mean recruitment
-pr~t~   proportion of recruits for each lenght bin
-tao~t~  recruitment deviations by year
+\begin{equation}
+ F_{f,y} = e^{F^{log}_{avg,f}+F^{log}_{dev,f,y}}
+\end{equation}
 
-Recruitment is estimated equal for males and females in the model.
+Selectivity for the survey is estimated for 3 eras: 1978-1981, 1982-1988, and 1989-present. Selectivity is assumed to be logistic and separate parameters representing the length at which selection probability equal 50% and 95% (s~*50,s,e*~ and s~*95,s,e*~, respectively) are estimated for males and females in the third era (1989-present). Separate catchability coefficients (q~*s,e*~) are estimated for males and females in all eras.
+
+  \begin{equation}
+  S_{surv,s,l,e} =  \frac {q_{s,e}}{1+e^{-log(19)\frac{L_{l}-s_{50,s,e}}{s_{95,s,e}-s_{50,s,e}}}}) \\
+  \end{equation}
+
+Survey selectivity is informed by side-by-side experimental surveys during the years 2009 and 2010. A portion of the NMFS summer survey tows were accompanied by an industry vessel using nephrops trawls with an assumed selectivity of 1 for all size classes. To represent the proportion of the population covered by the experiment, a vector is freely estimated for males, $S^{free}_{y}$ (subject to a scaling parameter), and a logistic curve is estimated for females, INSERT NAME. 
+
+  \begin{align}
+  S_{IND,s=fem,l,y} = & \frac {q_{IND,s=fem,y}}{1+e^{-log(19)\frac{L_{l}-s_{50,s,y}}{s_{95,s,y}-s_{50,s,y}}}}) \\
+  S_{IND,s=male,l,y} = &  q_{IND,s=male,y}S^{free}_{y} 
+  \end{align}
+
+Based on this logic, after identifying the fraction of the crab at length covered by the experimental surveys, the length frequencies of the NMFS data collected simultaneously with the experimental trawls can be calculated by multiplying the numbers at length 'available' to the experimental trawls by the overall survey selectivity, S~*surv,s,l,e=3*~. The predicted numbers at length for the NMFS and industry data from the selectivity experiment are calculated by multiplying the respective selectivities by the survey numbers at length.
+
+  \begin{equation}
+  S_{NMFS,s,l,expY} =  S_{IND,s,l,y}  S_{surv,s,l,e=3} 
+  \end{equation}
+
+
+The probability of maturing for both males and females is a freely estimated vector INSERT VECTOR. Mature male and female biomass (MMB and FMB, respectively) are fitted in the objective function and are the product of mature numbers at length during year *y* and the weight at length, w~*s,l*~:
+
+  \begin{align}
+  MMB_{y} = & \sum_{l,v} w_{male,l} N_{male,v,mat,y,l} \\
+  FMB_{y} = & \sum_{l,v} w_{fem,l} N_{fem,v,mat,y,l} \\
+  w_{s,l} = & \alpha_{wt,s}L_{l}^{\beta_{wt,s}}
+  \end{align}
+
+Parameters $\alpha_{wt,s}$ and $\beta_{wt,s}$ are estimated outside of the assessment model and specified in the control file.
+
+Molting and growth occur before the survey.  Immmature crab are assumed to molt every year with an estimated probabillity of molting to maturity based on length *l* (a freely estimated vector of probabilities between 0 and 1). For crab that do molt, the growth increment within the size-transition matrix, X~*s,l,l'*~, is based on a piece-wise linear relationship between predicted pre- and post-molt length, $\hat{L}^{post}_{s,l}$ and the variabillity around that relationship is characterized by a discretized and renormalized gamma function.
+
+ \begin{equation} X_{s,l,l'} = \frac{Y_{s,l,l'}}{ \sum_{l'} Y_{s,l,l'}}\end{equation}
+
+ \begin{equation} Y_{s,l,l'} = (\Delta_{l,l'})^{\frac {\hat{L_{s,l}}-(\bar{L}_{l}-2.5)}{ \beta_{s}}} \end{equation}
+
+ \begin{equation} \hat{L}^{post}_{s,l} = \frac {\hat{L}^{post}_{s,l,1} (1- \Phi (( \bar{L}_{s,l}^{pre} - \delta_{a,x}) / {stgr}))
+ +  \hat{L}^{post}_{s,l,2} \Phi ((\bar{L}_{s,l}^{pre} - \delta_{a,x})/{stgr})}{2} \end{equation}
+
+ \begin{equation} \Delta_{l,l'} = \bar{L}_{l'} + 2.5 - L_{l} \end{equation}
+
+
+ Where EXPLAIN THINGS ABOVE THAT NEED EXPLAINING.
+ 
+ An average recruitment for the assessment period (1978-present) and yearly deviations around this average are estimated within the assessment.  The sex ratio of recruitment is assumed to be 50/50 male to female.  Each year's estimated recruitment is allocated to length bins based on a discretized and renormalized gamma function.
+ 
+ \begin{equation} Re_{y} = e^{(Rec_{avg} + Rec_{dev,y})} \end{equation}
+ \begin{equation} Pr_l = \frac {(\Delta_{1,l})^{v^1/v^2}e^{-\Delta_{1,l'}/v^2}}{\sum_{l'} (\Delta_{1,l'})^{v^1/v^2}e^{(-\Delta_{1,l'}/v^2)}} \end{equation}
+ 
+
+## Likelihood components
+
+Three general types of likelihood components are used here to fit to the available data: multinomial likelihoods for size composition data, a log-normal likelihoods for indices of abundance data, and normal likelihoods for catch data, growth data, priors, and penalties. Multinomial likelihoods are implemented in the form:
+
+\begin{equation} L_{x} = \lambda_{x} \sum_{y} N^{eff}_{x,y} \sum_{l} p^{obs}_{x,y,l} ln( \hat {p}_{x,y,l}/p^{obs}_{x,y,l})
+\end{equation}
+
+L~*x,a*` is the likelihood associated with data component x, where $\lambda_{x,y}$ represents an optional additional weighting factor for the likelihood, $N^{eff}_{x,y}$ is the effective sample sizes for the likelihood, $p^{obs}_{x,y,l}$ is the observed proportion in size bin *l* during year *y* for data component *x*, and $\hat {p}_{x,y,l}$ is the predicted proportion in size bin *l* during year *y* for data component *x*. XX multinomial likelihood components are included in the assessment (see table XX for descriptions, weighting factors, and effective sample sizes).
+
+Iterative methods for determining appropriate effective samples sizes for composition data are suggested to avoid overweighting the size composition data and washing out the signal from the indices of abundance.  Talk about Francis method here. Talk about why it wasn't used.
+
+Lognormal likelihoods were implemented in the form:
+
+\begin{equation} L_{x} = \lambda_{x} \sum_{y} \frac {(ln(\hat{I}_{x,y}) - ln(I_{x,y}))^2}{2(ln(CV_{x,y}^2 + 1))}
+\end{equation}
+
+$L_{x}$ is the contritbution to the objective function of data component *x*, $\lambda_{x}$ is any additional weighting applied to the component, $\hat{I}_{x,y}$ is the predicted value of quantity *I* from data component *x* during year *y*, I~*x,y*~ is the observed value of quantity *I* from data component *x* during year *y* and CV~*x,y*~ is the coefficient of variation for data component *x* during year *y*.  XX lognormal likelihood components are included in this assessment (see table XX for descriptions, weighting factors, and CVs).
+
+Normal likelihoods were implemented in the form:
+
+\begin{equation} L_{x} = \lambda_{x} \sum_{y}  (\hat{I}_{x,y} - I_{x,y})^2
+\end{equation}
+
+$L_{x}$ is the contritbution to the objective function of data component *x*, $\lambda_{x}$ is represents the weight applied to the data component (and can be translated to a standard deviation), $\hat{I}_{x,y}$ is the predicted value of quantity *I* from data component *x* during year *y*, I~*x,y*~ is the observed value of quantity *I* from data component *x* during year *y*. XX normal likelihood components are included in this assessment (see table XX for descriptions, weighting factors, and translated standard deviations).
+
 
 Crab were distributed into 5mm CW bins based on a pre-molt to post-molt transition matrix.  For immature crab, the number of crabs in length bin l in year t-1 that remain immature in year t is given by,
+
+Code for this assessment can be found on github.com/szuwalski/SnowCrab.
 
 \newpage
 
 # APPENDIX B: PROJECTION MODEL STRUCTURE
+The projection framework in the assessment is used to calculate reference points and project numbers at length to the time of fishery to calculate the OFL and associated total allowable catches.  Previously, parameters were estimated by fitting the model to the data, then the parameters were assumed known, and the final year's numbers at length were transferred to a projection model. Reference points were calculated by projecting the population into the future under no fishing mortalty (to find virgin biomass) and a fishing mortality was solved for that reduced the mature male biomass to 35% of virgin levels. The process was repeated to find the OFL, by adding lognormal error was to the initial numbers at length (i.e. those in the final year of assessment) and iteratively calculating the F~OFL~ based on the harvest control rule outlined above.  Many simulations with different lognormal error were carried out to develop a distribution of the OFL which was then used to determine an ABC.
+
+This method does not propagate the uncertainty in all parameters forward, so a Bayesian methodology was adopted for this iteration of the assessment. In the Bayesian implementation of this assessment model, none of the equations changed (other than in the ways requested by the CPT), but the distributions for the OFL, MMB, B~35%~, and F~35%~ were developed by characterizing the posterior distributions of these quantities via a Markov Chain Monte Carlo algorithm built into ADMB.  Accomplishing this required building in functions to calculate reference points and extra storage space (see functions 'get_fut_mortality', 'find_OFL', 'find_F35' in the .TPL on github).
+
 
 Previous
 Current (MCMCMCMCMCMC)
@@ -564,7 +841,7 @@ colnames(PlotTab)<- c("Survey year","Retained catch (numbers)","Retained catch (
 ## add cvs for survey
 
 rownames(PlotTab)<- NULL
-pander(PlotTab,split.cells=10)
+pander(PlotTab,split.cells=10,caption="Observed retained catches, discarded catch, and bycatch")
 #TRY PANDER
 ```
 
@@ -586,20 +863,12 @@ colnames(PlotTab)<- c("Survey year","Female mature biomass","Female CV",
 ## add cvs for survey
 
 rownames(PlotTab)<- NULL
-pander(PlotTab,split.cells=10)
+pander(PlotTab,split.cells=10,caption="Observed mature male and female biomass at the time of the survey and coefficients of variation")
 ```
 
 \newpage
 
 ```{r,echo=FALSE,warning=FALSE,message=F}
-RefPoints <-as.numeric(unlist(strsplit(REPfile[1],split=" ")))
-B35       <-RefPoints[2]
-MMB_mate  <-RefPoints[3]
-MMB_fish  <-RefPoints[4]
-F35       <-RefPoints[5]
-FOFL      <-RefPoints[6]
-OFL       <-RefPoints[7]
-
 #==================================
 # Growth data
 tmp       <-grep("growth data female",DATfile)
@@ -617,13 +886,696 @@ GrowthData[1:GrowthNm,4] <-as.numeric(unlist(strsplit(DATfile[(tmp1+3)],split="\
 PlotTab<-data.frame(GrowthData)
 colnames(PlotTab)<-c("Female premolt length (mm)","Female postmolt length (mm)",
                      "Male premolt length (mm)","Male postmolt length (mm)")
-pander(PlotTab,split.cells=13)
+pander(PlotTab,split.cells=13,caption="Observed growth increment data by sex")
 ```
 
 \newpage
 
-# Figures
-## Fits to data sources
+```{r,echo=FALSE,warning=FALSE,message=F}
+
+LikeForm<-read.csv(paste(TakeDir,"Likelihood components and weightings.csv",sep=""),header=T)
+CTLfile <-readLines(paste("C:/SnowCrab/",Scenarios[1],"/2016sc.CTL",sep=""))
+DATfile <-readLines(paste("C:/SnowCrab/",Scenarios[1],"/2016sc.DAT",sep=""))
+
+WeightVals<-rep(0,nrow(LikeForm))
+PriorVal<-rep(NA,nrow(LikeForm))
+
+#==
+GetWeights<-function(VarName,VarLoc,VarInd)
+{
+  tmp<-grep(VarName,VarLoc)
+  rawWeight<-as.numeric(unlist(strsplit(VarLoc[tmp+1],split=" ")))[2]
+  if(is.na(rawWeight))
+    rawWeight<-as.numeric(unlist(strsplit(VarLoc[tmp+1],split=" ")))[1]
+  
+  if(LikeForm[VarInd,3]=='normal')
+    outWeight<-paste("sd = ",round(sqrt(2*rawWeight),2),sep="")
+  if(LikeForm[VarInd,3]=='lognormal')
+    outWeight<-paste("cv = ",rawWeight,sep="")
+  if(LikeForm[VarInd,3]=='multinomial')
+    outWeight<-paste("EffN = ",rawWeight,sep="")
+  return(outWeight)
+}
+
+WeightVals[1]<-GetWeights("like_wght_recf",CTLfile,1)
+PriorVal[1]<-0
+
+WeightVals[2]<-GetWeights("old_shell_constraint",CTLfile,2)
+PriorVal[1]<-0
+
+WeightVals[3]<-GetWeights("nsamples weight for retained fishery",DATfile,3)
+WeightVals[4]<-GetWeights("nsamples weight for retained fishery",DATfile,4)
+WeightVals[5]<-GetWeights("nsamples weight for fishery female",DATfile,5)
+WeightVals[6]<-GetWeights("put in larger sample size for initial",DATfile,6)
+WeightVals[7]<-GetWeights("sample sizes trawl length data",DATfile,7)
+WeightVals[8]<-GetWeights("assumed sample sizes",DATfile,8)
+WeightVals[9]<-GetWeights("assumed sample sizes",DATfile,9)
+
+#==ugh this is ridiculous...fix this
+tmp<-grep("natm_mult_var",CTLfile)
+rawVar<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+WeightVals[10]<-paste("sd = ",round(sqrt(rawVar),2))
+PriorVal[10]<-1
+
+# tmp<-grep("natm_Immult_var",CTLfile)
+# rawVar<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+# WeightVals[11]<-paste("SD = ",round(sqrt(rawVar)))
+# PriorVal[11]<-1
+
+# tmp<-grep("smooth_mat_wght",CTLfile)
+# rawVar<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+# WeightVals[11]<-paste("wt = ",round(sqrt(rawVar[1])))
+WeightVals[11]<-GetWeights("mat_est_vs_obs_sd",CTLfile,11)
+
+WeightVals[12]<-GetWeights("growth_data_wght_m",CTLfile,12)
+WeightVals[13]<-GetWeights("growth_data_wght_f",CTLfile,13)
+
+WeightVals[14]<-"cv = 1.64,1.79 (f,m)"
+WeightVals[15]<-"cv = 0.46,0.32 (f,m)"
+WeightVals[16]<-GetWeights("cput_cv",CTLfile,16)
+WeightVals[17]<-GetWeights("weight for retained catch biomass",CTLfile,17)
+
+tmp<-grep("weight for retained catch biomass",CTLfile)
+wt1<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+WeightVals[18]<-paste("sd = ",round(sqrt(wt1)))
+
+WeightVals[19]<-GetWeights("weight for retained catch biomass",CTLfile,19)
+
+tmp<-grep("disc_catch_wght_fem",CTLfile)
+wt2<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+WeightVals[20]<-paste("sd = ",round(sqrt(wt1*wt2)))
+
+WeightVals[21]<-"cv = 0.14-0.57; 0.084-0.227 (f,m)"
+WeightVals[22]<-GetWeights("like_wght_fph2",CTLfile,22)
+PriorVal[22]<-1.15
+
+WeightVals[23]<-"cv = 0.19,0.29 (f,m)"
+WeightVals[24]<-"cv = 0.13,0.21 (f,m)"
+
+WeightVals[25]<-GetWeights("sample sizes trawl length data",DATfile,25)
+WeightVals[26]<-WeightVals[9]<-GetWeights("assumed sample sizes",DATfile,26)
+WeightVals[27]<-WeightVals[9]<-GetWeights("assumed sample sizes",DATfile,27)
+
+tmp<-grep("selsmo_wght",CTLfile)
+rawVar<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+WeightVals[28]<-paste("wt = ",round(sqrt(rawVar[2])))
+
+tmp<-grep("femSel_wght",CTLfile)
+rawVar<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+WeightVals[29]<-paste("wt = ",round(sqrt(rawVar[2])))
+
+tmp<-grep("init_yr_len_smooth_f",CTLfile)
+rawVar<-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+WeightVals[30]<-paste("wt = ",round(sqrt(rawVar[2])))
+
+inPanda<-cbind(LikeForm[,2:3],WeightVals,PriorVal)
+colnames(inPanda)<-c("Likelihood component","Form","Weighting","Prior")
+pander(inPanda,split.cells=c(25,10,15,10),justify=c("left",rep("center",3)),caption="Likelihoods form, weighting, and priors for the base model")
+
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F}
+
+LikeNames<-read.csv(paste(TakeDir,"LikelihoodComponentNames.txt",sep=""),header=F)
+
+OutLikes<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+ OutLikes[[x]]<-readLines(paste("C:/SnowCrab/",Scenarios[x],"/2016sc.REP",sep=""))[2]
+
+# format all the above into a tabular format
+tmpMat<-matrix(ncol=length(Scenarios)+1,nrow=nrow(LikeNames))
+tmpMat[,1]<-LikeNames[,2]
+for(x in 1:length(Scenarios))
+  tmpMat[,1+x]<-round(as.numeric(unlist(strsplit(OutLikes[[x]],split=" ")))[2:(nrow(tmpMat)+1)],2)
+
+PlotTab<- data.frame(tmpMat)
+PlotTab[,1]<-inPanda[,1]
+colnames(PlotTab)<- c("Likelihood component",ScenarioNames)
+## break apart catch and survey numbers
+## add cvs for survey
+
+rownames(PlotTab)<- NULL
+
+pander(PlotTab,split.cells=c(27,8,8,8),justify=c("left",rep("center",length(Scenarios))),caption="Contribution to the objective function by individual likelihood component by modeling scenario")
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F}
+
+ParBounds<-read.csv(paste(TakeDir,"Parameter Bounds.csv",sep=""),header=T)
+ParSymbol<- "$\\alpha_{f}$"
+ParSymbol<-append(ParSymbol, "$\\alpha_{m}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{f,1}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{m,1}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{f,2}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{m,2}$")
+ParSymbol<-append(ParSymbol, "$\\delta_{m}$")
+ParSymbol<-append(ParSymbol, "$\\delta_{f}$")
+ParSymbol<-append(ParSymbol, "stgr")
+ParSymbol<-append(ParSymbol, "$\\beta_{g}$")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, "$\\Omega_{m,l}$")
+ParSymbol<-append(ParSymbol, "$\\Omega_{f,l}$")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, "$\\kappa_{s,l'}$")
+ParSymbol<-append(ParSymbol, "$\\kappa_{s,l'}$")
+ParSymbol<-append(ParSymbol, "$Rec_{avg}$")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, "$Rec_{f,dev,y}$")
+ParSymbol<-append(ParSymbol, "$Rec_{m,dev,y}$")
+ParSymbol<-append(ParSymbol, "$\\alpha_{rec}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{rec}$")
+ParSymbol<-append(ParSymbol, "$\\lambda_{male,v,l}$")
+ParSymbol<-append(ParSymbol, "$\\lambda_{fem,v,l}$")
+
+ParSymbol<-append(ParSymbol, "$F^{log}_{avg,dir}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,dir,y}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{avg,disc}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,disc,y}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{avg,trawl}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,trawl,era1}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,trawl,era2}$")
+
+ParSymbol<-append(ParSymbol, "")
+ParSymbol<-append(ParSymbol, "")
+
+ParSymbol<-append(ParSymbol, "$S_{50,new,dir}$")
+ParSymbol<-append(ParSymbol, "")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "")
+
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$") #44
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+
+ParSymbol<-append(ParSymbol, "$log(S_{50,f,disc,dev})$")
+
+ParSymbol<-append(ParSymbol, "$S_{slope,trawl}$")
+ParSymbol<-append(ParSymbol, "$S_{50,trawl}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,era1,surv}$")
+ParSymbol<-append(ParSymbol, "$q_{f,era1,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,era1,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,era1,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$q_{f,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,era2,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,era3,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,m,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,m,era2,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{f,era3,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,f,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,f,era2,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,09,ind}$")
+ParSymbol<-append(ParSymbol, "$q_{f,09,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{95,f,09,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{50,f,09,ind}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,10,ind}$")
+ParSymbol<-append(ParSymbol, "$q_{f,10,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{95,f,10,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{50,f,10,ind}$")
+
+ParSymbol<-append(ParSymbol, "SelVecMaleInd09")
+ParSymbol<-append(ParSymbol, "SelVecMaleInd10")
+
+ParSymbol<-append(ParSymbol, "Mmultimmat")
+ParSymbol<-append(ParSymbol, "Mmult")
+ParSymbol<-append(ParSymbol, "MmultF")
+ParSymbol<-append(ParSymbol, "$q_{cpue}$")
+ParSymbol<-append(ParSymbol, "propRec")
+
+
+PlotTab<-cbind(ParBounds,ParSymbol)
+rownames(PlotTab)<- NULL
+pander(PlotTab,split.cells=c(10,10,10,10,10),justify=c("left",rep("center",4)),caption="Contribution to the objective function by individual likelihood component by modeling scenario")
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F}
+
+#==pulling parameter values
+#==this should be the medians of the posteriors for all of these
+PARvals<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+  PARvals[[x]]  <-readLines(paste("C:/SnowCrab/",Scenarios[x],"/2016sc.PAR",sep=""))
+
+ParBounds
+
+PullPars<-
+ParSymbol<- "$\\alpha_{f}$"
+ParSymbol<-append(ParSymbol, "$\\alpha_{m}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{f,1}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{m,1}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{f,2}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{m,2}$")
+ParSymbol<-append(ParSymbol, "$\\delta_{m}$")
+ParSymbol<-append(ParSymbol, "$\\delta_{f}$")
+ParSymbol<-append(ParSymbol, "stgr")
+ParSymbol<-append(ParSymbol, "$\\beta_{g}$")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, "$\\Omega_{m,l}$")
+ParSymbol<-append(ParSymbol, "$\\Omega_{f,l}$")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, "$\\kappa_{s,l'}$")
+ParSymbol<-append(ParSymbol, "$\\kappa_{s,l'}$")
+ParSymbol<-append(ParSymbol, "$Rec_{avg}$")
+ParSymbol<-append(ParSymbol, " ")
+ParSymbol<-append(ParSymbol, "$Rec_{f,dev,y}$")
+ParSymbol<-append(ParSymbol, "$Rec_{m,dev,y}$")
+ParSymbol<-append(ParSymbol, "$\\alpha_{rec}$")
+ParSymbol<-append(ParSymbol, "$\\beta_{rec}$")
+ParSymbol<-append(ParSymbol, "$\\lambda_{male,v,l}$")
+ParSymbol<-append(ParSymbol, "$\\lambda_{fem,v,l}$")
+
+ParSymbol<-append(ParSymbol, "$F^{log}_{avg,dir}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,dir,y}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{avg,disc}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,disc,y}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{avg,trawl}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,trawl,era1}$")
+ParSymbol<-append(ParSymbol, "$F^{log}_{dev,trawl,era2}$")
+
+ParSymbol<-append(ParSymbol, "")
+ParSymbol<-append(ParSymbol, "")
+
+ParSymbol<-append(ParSymbol, "$S_{50,new,dir}$")
+ParSymbol<-append(ParSymbol, "")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "")
+
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$") #44
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+ParSymbol<-append(ParSymbol, "$S_{slope,m,d}$")
+ParSymbol<-append(ParSymbol, "$S_{50,old,dir}$")
+
+ParSymbol<-append(ParSymbol, "$log(S_{50,f,disc,dev})$")
+
+ParSymbol<-append(ParSymbol, "$S_{slope,trawl}$")
+ParSymbol<-append(ParSymbol, "$S_{50,trawl}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,era1,surv}$")
+ParSymbol<-append(ParSymbol, "$q_{f,era1,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,era1,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,era1,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$q_{f,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,era2,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,era3,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,m,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,m,era2,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{f,era3,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{95,f,era2,surv}$")
+ParSymbol<-append(ParSymbol, "$S_{50,f,era2,surv}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,09,ind}$")
+ParSymbol<-append(ParSymbol, "$q_{f,09,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{95,f,09,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{50,f,09,ind}$")
+
+ParSymbol<-append(ParSymbol, "$q_{m,10,ind}$")
+ParSymbol<-append(ParSymbol, "$q_{f,10,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{95,f,10,ind}$")
+ParSymbol<-append(ParSymbol, "$S_{50,f,10,ind}$")
+
+ParSymbol<-append(ParSymbol, "SelVecMaleInd09")
+ParSymbol<-append(ParSymbol, "SelVecMaleInd10")
+
+ParSymbol<-append(ParSymbol, "Mmultimmat")
+ParSymbol<-append(ParSymbol, "Mmult")
+ParSymbol<-append(ParSymbol, "MmultF")
+ParSymbol<-append(ParSymbol, "$q_{cpue}$")
+ParSymbol<-append(ParSymbol, "propRec")
+
+
+PlotTab<-cbind(ParBounds,ParSymbol)
+rownames(PlotTab)<- NULL
+pander(PlotTab,split.cells=c(10,10,10,10,10),justify=c("left",rep("center",4)),caption="Contribution to the objective function by individual likelihood component by modeling scenario")
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Observed relative density of all males at the time of the 2016 NMFS summer survey"}
+
+library(plotrix)
+survDAT<-read.csv("C:/SnowCrab/EBSCrab_Haul.csv",header=T)
+
+drvYear<-as.numeric(substr(survDAT$CRUISE,1,4))
+SurvYR<-unique(drvYear)
+AllStation<-unique(survDAT$GIS_STATION)
+
+#==plot GIS stations
+AllStnLoc<-matrix(ncol=2,nrow=length(AllStation))
+for(w in 1:length(AllStation))
+{
+  temp<-survDAT[survDAT$GIS_STATION==AllStation[w],]
+  AllStnLoc[w,1]<-temp$MID_LATITUDE[1]
+  AllStnLoc[w,2]<-temp$MID_LONGITUDE[1]
+}
+
+# dev.new(width=15,height=10)
+# par(mar=c(.1,.1,.1,.1))
+# plot(0,ylim=c(min(AllStnLoc[,1]),max(AllStnLoc[,1])),xlim=c(min(AllStnLoc[,2]),max(AllStnLoc[,2])))
+# for(w in 1:length(AllStation))
+#   text(AllStation[w],x=AllStnLoc[w,2],y=AllStnLoc[w,1],cex=.5)
+
+#========================
+#==find survey densities (total)
+#========================
+nmiSurv<-140350
+DensityM<-matrix(nrow=length(SurvYR),ncol=length(AllStation))
+DensityM78<-matrix(nrow=length(SurvYR),ncol=length(AllStation))
+DensityM101<-matrix(nrow=length(SurvYR),ncol=length(AllStation))
+DensityF<-matrix(nrow=length(SurvYR),ncol=length(AllStation))
+DensityFmat<-matrix(nrow=length(SurvYR),ncol=length(AllStation))
+StationYr<-matrix(nrow=length(SurvYR),ncol=length(AllStation))
+for(y in 1:length(SurvYR))
+{
+  yrDAT<-survDAT[drvYear==SurvYR[y],]
+  fileyr<-SurvYR[y]
+  stationsUNQ<-(unique(yrDAT$GIS_STATION))
+  #==density at station
+  for(j in 1:length(stationsUNQ))
+  {
+    stationALL<-yrDAT[yrDAT$GIS_STATION==stationsUNQ[j],]
+    StationYr[y,j]<-as.character(stationsUNQ[j])
+    Hauls<-(unique(stationALL$HAUL))
+    Males<-stationALL[stationALL$SEX==1,]
+    Males78<-stationALL[stationALL$SEX==1 & stationALL$WIDTH>77,]
+    Males101<-stationALL[stationALL$SEX==1& stationALL$WIDTH>101,]
+    Females<-stationALL[stationALL$SEX==2,]
+   
+    #==densities across hauls in crabs per km^2
+    tempDensM<-NULL
+    tempDensM78<-NULL
+    tempDensM101<-NULL
+    tempDensF<-NULL
+    for(k in 1:length(Hauls))
+    {
+      SampFactM<-Males$SAMPLING_FACTOR[which(Males$HAUL==Hauls[k])[1]] 
+      AreaSweptM<-Males$AREA_SWEPT_VARIABLE[which(Males$HAUL==Hauls[k])[1]]
+      tempDensM<-length(Males$HAUL==Hauls[k])*SampFactM/AreaSweptM
+      
+      SampFactM<-Males78$SAMPLING_FACTOR[which(Males78$HAUL==Hauls[k])[1]] 
+      AreaSweptM<-Males78$AREA_SWEPT_VARIABLE[which(Males78$HAUL==Hauls[k])[1]]
+      tempDensM78<-length(Males78$HAUL==Hauls[k])*SampFactM/AreaSweptM
+      
+      SampFactM<-Males101$SAMPLING_FACTOR[which(Males101$HAUL==Hauls[k])[1]] 
+      AreaSweptM<-Males101$AREA_SWEPT_VARIABLE[which(Males101$HAUL==Hauls[k])[1]]
+      tempDensM101<-length(Males101$HAUL==Hauls[k])*SampFactM/AreaSweptM
+      
+      SampFactF<-Females$SAMPLING_FACTOR[which(Females$HAUL==Hauls[k])[1]] 
+      AreaSweptF<-Females$AREA_SWEPT_VARIABLE[which(Females$HAUL==Hauls[k])[1]]
+      tempDensF<-length(Females$HAUL==Hauls[k])*SampFactF/AreaSweptF
+    }
+    DensityM[y,j]<-mean(tempDensM)
+    DensityM78[y,j]<-mean(tempDensM78)
+    DensityM101[y,j]<-mean(tempDensM101)
+    DensityF[y,j]<-mean(tempDensF)
+  }
+}
+
+#===========================
+#  plot densities by year
+#============================
+
+library("maps")
+library("lattice")
+library(PBSmapping)
+library(mapdata)    #some additional hires data
+library(maptools)   #useful tools such as reading shapefiles
+library(mapproj)
+
+ y<-length(SurvYR)
+  state.map <- map('worldHires', xlim=c(-175, -155.9), ylim=c(50, 65.5),
+                   plot = FALSE, fill = TRUE,col='grey85')
+  #  S of 58.39, W of 168
+  # state.map <- map('worldHires', xlim=c(-173, -167.5), ylim=c(52, 58),
+  #                  plot = FALSE, fill = TRUE,col='grey85')
+  # 
+  state.info <- data.frame(density = DensityM[y,],
+                           long = AllStnLoc[match(StationYr[y,],AllStation,),2],
+                           lat = AllStnLoc[match(StationYr[y,],AllStation,),1])
+  state.info<-state.info[rowSums(is.na(state.info))!=3, ]
+  state.info[is.na(state.info),1]<-0
+  
+  panel.3dmap <- function(..., rot.mat, distance, xlim,
+                          ylim, zlim, xlim.scaled, ylim.scaled, zlim.scaled) {
+    scaled.val <- function(x, original, scaled) {
+      scaled[1] + (x - original[1]) * diff(scaled)/diff(original)
+    }
+    m <- ltransform3dto3d(rbind(scaled.val(state.map$x,
+                                           xlim, xlim.scaled), scaled.val(state.map$y, ylim,
+                                                                          ylim.scaled), zlim.scaled[1]), rot.mat, distance)
+    panel.lines(m[1, ], m[2, ], col = "grey76")
+  }
+  
+  pl <-cloud(density ~ long + lat, state.info, panel.3d.cloud = function(...) {
+    panel.3dmap(...)
+    panel.3dscatter(...)
+  }, type = "h", scales = list(draw = TRUE), zoom = 1.1,
+  xlim = state.map$range[1:2], ylim = state.map$range[3:4],
+  xlab = NULL, ylab = NULL, zlab = NULL, aspect = c(diff(state.map$range[3:4])/diff(state.map$range[1:2]),
+                                                    0.3), panel.aspect = 0.75, lwd = 3, screen = list(z = 30, x = -60), par.settings = list(axis.line = list(col = "transparent"),box.3d = list(col = "transparent", alpha = 0)))
+  
+  print(pl)
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Observed relative density of males >77mm carapace width at the time of the 2016 NMFS summer survey"}
+
+  y<-length(SurvYR)
+  state.map <- map('worldHires', xlim=c(-175, -155.9), ylim=c(50, 65.5),
+                   plot = FALSE, fill = TRUE,col='grey85')
+  #  S of 58.39, W of 168
+  # state.map <- map('worldHires', xlim=c(-173, -167.5), ylim=c(52, 58),
+  #                  plot = FALSE, fill = TRUE,col='grey85')
+  # 
+  state.info <- data.frame(density = DensityM78[y,],
+                           long = AllStnLoc[match(StationYr[y,],AllStation,),2],
+                           lat = AllStnLoc[match(StationYr[y,],AllStation,),1])
+  state.info<-state.info[rowSums(is.na(state.info))!=3, ]
+  state.info[is.na(state.info),1]<-0
+  
+  panel.3dmap <- function(..., rot.mat, distance, xlim,
+                          ylim, zlim, xlim.scaled, ylim.scaled, zlim.scaled) {
+    scaled.val <- function(x, original, scaled) {
+      scaled[1] + (x - original[1]) * diff(scaled)/diff(original)
+    }
+    m <- ltransform3dto3d(rbind(scaled.val(state.map$x,
+                                           xlim, xlim.scaled), scaled.val(state.map$y, ylim,
+                                                                          ylim.scaled), zlim.scaled[1]), rot.mat, distance)
+    panel.lines(m[1, ], m[2, ], col = "grey76")
+  }
+  
+  pl <-cloud(density ~ long + lat, state.info, panel.3d.cloud = function(...) {
+    panel.3dmap(...)
+    panel.3dscatter(...)
+  }, type = "h", scales = list(draw = TRUE), zoom = 1.1,
+  xlim = state.map$range[1:2], ylim = state.map$range[3:4],
+  xlab = NULL, ylab = NULL, zlab = NULL, aspect = c(diff(state.map$range[3:4])/diff(state.map$range[1:2]),
+                                                    0.3), panel.aspect = 0.75, lwd = 3, screen = list(z = 30,
+                                                                                                      x = -60), par.settings = list(axis.line = list(col = "transparent"),
+                                                                                                                                    box.3d = list(col = "transparent", alpha = 0)))
+  
+  print(pl)
+
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Observed relative density of males >101mm carapace width at the time of the 2016 NMFS summer survey"}
+
+  y<-length(SurvYR)
+  state.map <- map('worldHires', xlim=c(-175, -155.9), ylim=c(50, 65.5),
+                   plot = FALSE, fill = TRUE,col='grey85')
+  #  S of 58.39, W of 168
+  # state.map <- map('worldHires', xlim=c(-173, -167.5), ylim=c(52, 58),
+  #                  plot = FALSE, fill = TRUE,col='grey85')
+  # 
+  state.info <- data.frame(density = DensityM101[y,],
+                           long = AllStnLoc[match(StationYr[y,],AllStation,),2],
+                           lat = AllStnLoc[match(StationYr[y,],AllStation,),1])
+  state.info<-state.info[rowSums(is.na(state.info))!=3, ]
+  state.info[is.na(state.info),1]<-0
+  
+  panel.3dmap <- function(..., rot.mat, distance, xlim,
+                          ylim, zlim, xlim.scaled, ylim.scaled, zlim.scaled) {
+    scaled.val <- function(x, original, scaled) {
+      scaled[1] + (x - original[1]) * diff(scaled)/diff(original)
+    }
+    m <- ltransform3dto3d(rbind(scaled.val(state.map$x,
+                                           xlim, xlim.scaled), scaled.val(state.map$y, ylim,
+                                                                          ylim.scaled), zlim.scaled[1]), rot.mat, distance)
+    panel.lines(m[1, ], m[2, ], col = "grey76")
+  }
+  
+  pl <-cloud(density ~ long + lat, state.info, panel.3d.cloud = function(...) {
+    panel.3dmap(...)
+    panel.3dscatter(...)
+  }, type = "h", scales = list(draw = TRUE), zoom = 1.1,
+  xlim = state.map$range[1:2], ylim = state.map$range[3:4],
+  xlab = NULL, ylab = NULL, zlab = NULL, aspect = c(diff(state.map$range[3:4])/diff(state.map$range[1:2]),
+                                                    0.3), panel.aspect = 0.75, lwd = 3, screen = list(z = 30,
+                                                                                                      x = -60), par.settings = list(axis.line = list(col = "transparent"),
+                                                                                                                                    box.3d = list(col = "transparent", alpha = 0)))
+  
+  print(pl)
+
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Observed relative density of all females at the time of the 2016 NMFS summer survey"}
+
+  y<-length(SurvYR)
+  state.map <- map('worldHires', xlim=c(-175, -155.9), ylim=c(50, 65.5),
+                   plot = FALSE, fill = TRUE,col='grey85')
+  #  S of 58.39, W of 168
+  # state.map <- map('worldHires', xlim=c(-173, -167.5), ylim=c(52, 58),
+  #                  plot = FALSE, fill = TRUE,col='grey85')
+  # 
+  state.info <- data.frame(density = DensityF[y,],
+                           long = AllStnLoc[match(StationYr[y,],AllStation,),2],
+                           lat = AllStnLoc[match(StationYr[y,],AllStation,),1])
+  state.info<-state.info[rowSums(is.na(state.info))!=3, ]
+  state.info[is.na(state.info),1]<-0
+  
+  panel.3dmap <- function(..., rot.mat, distance, xlim,
+                          ylim, zlim, xlim.scaled, ylim.scaled, zlim.scaled) {
+    scaled.val <- function(x, original, scaled) {
+      scaled[1] + (x - original[1]) * diff(scaled)/diff(original)
+    }
+    m <- ltransform3dto3d(rbind(scaled.val(state.map$x,
+                                           xlim, xlim.scaled), scaled.val(state.map$y, ylim,
+                                                                          ylim.scaled), zlim.scaled[1]), rot.mat, distance)
+    panel.lines(m[1, ], m[2, ], col = "grey76")
+  }
+  
+  pl <-cloud(density ~ long + lat, state.info, panel.3d.cloud = function(...) {
+    panel.3dmap(...)
+    panel.3dscatter(...)
+  }, type = "h", scales = list(draw = TRUE), zoom = 1.1, col="red",
+  xlim = state.map$range[1:2], ylim = state.map$range[3:4],
+  xlab = NULL, ylab = NULL, zlab = NULL, aspect = c(diff(state.map$range[3:4])/diff(state.map$range[1:2]),
+                                                    0.3), panel.aspect = 0.75, lwd = 3, screen = list(z = 30,
+                                                                                                      x = -60), par.settings = list(axis.line = list(col = "transparent"),
+                                                                                                                                    box.3d = list(col = "transparent", alpha = 0)))
+  
+  print(pl)
+
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Observed relative numbers at length at the time of the survey"}
+LengthPlot<-function(LenDat,lenYrs,LengthBin,titled="",colrep=11,freq=T,transp=.5,shrink=5,chopX=NA)
+{
+if(freq==T)
+ useLen<-LenDat/apply(LenDat,1,max,na.rm=T)
+if(freq==F)
+ useLen<-LenDat/shrink
+yearN<-nrow(LenDat)
+runDown<-seq(yearN,1,-1)
+counter<-1
+par(mar=c(3,1,1,4))
+plot(0,ylim=c(0,yearN),xlim=c(0,min(length(LengthBin),chopX,na.rm=T)),type="l",axes=F,ylab="",xlab="",
+main=titled)
+useCol<-rep(topo.colors(colrep,alpha=transp),ceiling(yearN/colrep))
+for(x in 1:yearN)
+{
+ tempY<-c(counter*rep(1,length(LengthBin)+1),rev(useLen[x,])+counter)
+ tempX<-c(seq(1,length(LengthBin)),seq(length(LengthBin),1,-1))
+ polygon(y=c(counter*rep(1,length(LengthBin)),rev(useLen[x,])+counter),
+         x=c(seq(1,length(LengthBin)),seq(length(LengthBin),1,-1)),col=useCol[x],border='lightgrey')
+ counter<-counter+1
+}
+axis(side=4,at=seq(1,yearN,3),labels=lenYrs[lenYrs%%3==1],las=1,cex=.65)
+axis(side=1,at=seq(1,length(LengthBin)),labels=LengthBin,las=1,line=-1)
+mtext(side=1,"Length",line=1)
+}
+
+
+# Bring in observed survey numbers
+tmp<-grep("females survey immature new shell",DATfile)
+SurvImmFemNew<-matrix(as.numeric(unlist(strsplit(DATfile[(tmp+2):(tmp+SurvYrN+1)],split=" "))),nrow=SurvYrN,byrow=T)
+tmp<-grep("females survey mature new shell",DATfile)
+SurvMatFemNew<-matrix(as.numeric(unlist(strsplit(DATfile[(tmp+2):(tmp+SurvYrN+1)],split=" "))),nrow=SurvYrN,byrow=T)
+tmp<-grep("females survey mature old shell",DATfile)
+SurvMatFemOld<-matrix(as.numeric(unlist(strsplit(DATfile[(tmp+2):(tmp+SurvYrN+1)],split=" "))),nrow=SurvYrN,byrow=T)
+
+# LengthPlot(LenDat=SurvImmFemNew,lenYrs=SurveyYrs,LengthBin=LengthBins,titled="Immature females",colrep=11,freq=F,transp=.3,shrink=500,chopX=10)
+LengthPlot(LenDat=SurvMatFemNew+SurvMatFemOld+SurvImmFemNew,lenYrs=SurveyYrs,LengthBin=LengthBins,titled="Total females",colrep=40,freq=F,transp=.3,shrink=1000,chopX=12)
+```
+
+\newpage
+ 
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Observed relative numbers at length at the time of the survey"}
+
+# Bring in observed survey numbers
+tmp<-grep("males new shell immature survey",DATfile)
+SurvImmMalNew<-matrix(as.numeric(unlist(strsplit(DATfile[(tmp+3):(tmp+SurvYrN+2)],split=" "))),nrow=SurvYrN,byrow=T)
+tmp<-grep("survey males new shell mature",DATfile)
+SurvMatMalNew<-matrix(as.numeric(unlist(strsplit(DATfile[(tmp+3):(tmp+SurvYrN+2)],split=" "))),nrow=SurvYrN,byrow=T)
+tmp<-grep("survey males old shell mature",DATfile)
+SurvMatMalOld<-matrix(as.numeric(unlist(strsplit(DATfile[(tmp+2):(tmp+SurvYrN+1)],split=" "))),nrow=SurvYrN,byrow=T)
+
+tmp<-grep("survey males old shell immature",DATfile)
+temp<-unlist(strsplit(DATfile[(tmp+2):(tmp+SurvYrN+1)],split=" "))
+temp<-unlist(strsplit(temp,split="\t"))
+SurvImmMalOld<-matrix(as.numeric(temp),nrow=SurvYrN,byrow=T)
+
+totMales<-SurvImmMalNew+SurvMatMalNew+SurvMatMalOld+SurvImmMalOld
+LengthPlot(LenDat=totMales,lenYrs=SurveyYrs,LengthBin=LengthBins,titled="Total males",colrep=70,freq=F,transp=.3,shrink=300,chopX=20)
+
+```
+
+\newpage
 
 ```{r,echo=FALSE,warning=FALSE,message=F,fig.width=6.5,fig.height=6,fig.cap="Model fits to the observed mature biomass at survey"}
 ##=======FITS TO THE DATA SOURCES=========================
@@ -660,7 +1612,7 @@ for(x in 1:length(Scenarios))
  lines(as.numeric(unlist(snowad.rep[[x]]$"Predicted Female survey mature Biomass"))[1:SurvYrN]~SurveyYrs,type="l",lty=x,lwd=1)
 legend("topleft",bty='n',"Females")
 mtext(side=2,outer=T,text=c("Mature biomass at survey (1000 t)"),line=3)
-
+legend("topright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
 ```
 
 \newpage
@@ -679,7 +1631,7 @@ for(x in 1:length(Scenarios))
 {
   tempF<-(snowad.rep[[x]]$"af"+snowad.rep[[x]]$"bf"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[x]]$"delta male") / snowad.rep[[x]]$"st_gr")) + (snowad.rep[[x]]$"af2"+snowad.rep[[x]]$"bf1"*(20:135))*pnorm(((20:135) -snowad.rep[[x]]$"delta male")/snowad.rep[[x]]$"st_gr")
   flength[[x]]<-tempF
-  tempM<-(snowad.rep[[1]]$"am"+snowad.rep[[1]]$"bm"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[1]]$"delta male") / snowad.rep[[1]]$"st_gr"))+ (snowad.rep[[1]]$"am2"+snowad.rep[[1]]$"b1"*(20:135))*pnorm(((20:135) -snowad.rep[[1]]$"delta male")/snowad.rep[[1]]$"st_gr")
+  tempM<-(snowad.rep[[x]]$"am"+snowad.rep[[x]]$"bm"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[x]]$"delta male") / snowad.rep[[x]]$"st_gr"))+ (snowad.rep[[x]]$"am2"+snowad.rep[[x]]$"b1"*(20:135))*pnorm(((20:135) -snowad.rep[[x]]$"delta male")/snowad.rep[[x]]$"st_gr")
   mlength[[x]]<-tempM
   
 }
@@ -705,36 +1657,83 @@ legend("bottomright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
 \newpage
 
 ```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8,fig.height=10,fig.cap="Model fits to catch data"}
+
+#==pull in weights used as SD
+# Read data file
+CTLfile <-readLines(paste("C:/SnowCrab/",Scenarios[1],"/2016sc.CTL",sep=""))
+tmp<-grep("weight for retained catch biomass",CTLfile)
+RetCatWt <-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+sdRetCat<-sqrt(2*RetCatWt)
+
+tmp<-grep("wght_total_catch ",CTLfile)
+TotCatWt <-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+sdTotCat<-sqrt(2*TotCatWt)
+
+tmp<-grep("disc_catch_wght_fem ",CTLfile)
+FemDiscWt <-as.numeric(unlist(strsplit(CTLfile[tmp+1],split=" ")))
+sdFemDisc <-sqrt(FemDiscWt*2)
+
 #==retained catch biomass
 par(mfrow=c(4,1),mar=c(.1,.1,.3,.1),oma=c(4,4.5,1,1))
-plot(snowad.rep[[1]]$"Observed retained catch biomass"~RetCatchYrs,las=1,ylab="Retained catch biomass (t)", xaxt="n")
+plot(snowad.rep[[1]]$"Observed retained catch biomass"~RetCatchYrs,las=1,ylab="Retained catch biomass (t)", xaxt="n",ylim=c(0,175))
 for(x in 1:length(Scenarios))
  lines(snowad.rep[[x]]$"Predicted retained catch biomas"~RetCatchYrs,lty=x)
 legend("topright",bty='n',pch=c(NA,1),lty=c(1,NA),legend=c("Predicted","Observed"))
 legend("topleft",bty='n',"Retained")
 
+for(j in 1:length(RetCatchYrs))
+{
+ segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+		y0=as.numeric(unlist(snowad.rep[[1]]$"Observed retained catch biomass"))[j]  +   1.96*sdRetCat,
+		y1=as.numeric(unlist(snowad.rep[[1]]$"Observed retained catch biomass"))[j] - 1.96*sdRetCat)
+}
+
 #===discard female biomass
-plot(snowad.rep[[1]]$"observed female discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xaxt="n")
+plot(snowad.rep[[1]]$"observed female discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xaxt="n",ylim=c(0,0.2))
 for(x in 1:length(Scenarios))
   lines(snowad.rep[[x]]$"predicted female discard mortality biomass"~RetCatchYrs,lty=x)
 legend("topleft",bty='n',"Discard (female)")
 
+for(j in 1:length(RetCatchYrs))
+{
+ segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+		y0=as.numeric(unlist(snowad.rep[[1]]$"observed female discard mortality biomass"))[j]  +   1.96*sdFemDisc,
+		y1=as.numeric(unlist(snowad.rep[[1]]$"observed female discard mortality biomass"))[j] - 1.96*sdFemDisc)
+}
+
 #===discard male biomass
-plot(snowad.rep[[1]]$"observed male discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xaxt="n",ylim=c(0,23))
+plot(snowad.rep[[1]]$"observed male discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xaxt="n",ylim=c(0,30))
 for(x in 1:length(Scenarios))
  lines(snowad.rep[[x]]$"predicted discard male catch biomass"~RetCatchYrs,lty=x)
 legend("topleft",bty='n',"Discard (male)")
 
+for(j in 1:length(RetCatchYrs))
+{
+ segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+		y0=as.numeric(unlist(snowad.rep[[1]]$"observed male discard mortality biomass"))[j]  +   1.96*sdTotCat,
+		y1=as.numeric(unlist(snowad.rep[[1]]$"observed male discard mortality biomass"))[j] - 1.96*sdTotCat)
+}
+
+
 #===trawl catch biomass
-plot(snowad.rep[[1]]$"observed trawl catch biomass"[1:CatchYrN]~RetCatchYrs,las=1,ylab="Trawl bycatch (t)",xlab="Year")
+plot(snowad.rep[[1]]$"observed trawl catch biomass"[1:CatchYrN]~RetCatchYrs,las=1,ylab="Trawl bycatch (t)",xlab="Year",ylim=c(0,5))
 for(x in 1:length(Scenarios))
   lines(snowad.rep[[x]]$"predicted trawl catch biomass"[1:CatchYrN]~RetCatchYrs,lty=x)
 legend("topleft",bty='n',"Trawl")
 mtext(side=2,outer=T,line=3,"Biomass (t)")
 mtext(side=1,outer=T,line=2.5,"Year")
 legend("topright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
+for(j in 1:length(RetCatchYrs))
+{
+ segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+		y0=as.numeric(unlist(snowad.rep[[1]]$"observed trawl catch biomass"))[j]  +   1.96*sdRetCat,
+		y1=as.numeric(unlist(snowad.rep[[1]]$"observed trawl catch biomass"))[j] - 1.96*sdRetCat)
+}
+
 
 ```
+
+\newpage
 
 ```{r,echo=FALSE,warning=FALSE,message=F,fig.width=7,fig.height=6,fig.cap="Model fits to pot CPUE data"}
 plot(snowad.rep[[1]]$"observed pot fishery cpue"~ SurveyYrs[1:(length(SurveyYrs)-1)],ylim=c(0,450),las=1,ylab="",xlab="")
@@ -816,11 +1815,13 @@ legend("topright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
 #==survey proportions (mature and immature by sex)
 #==PUT THE SAMPLE SIZE IN THE FIGURE SOMEHOW==
 
-PlotLenProps<-function(obs,obs2=NA,pred,pred2=NA,inYears,xquant,chopX,chopY,pointsize=1,YaxisN,XaxisN)
+PlotLenProps<-function(obs,obs2=NA,pred,pred2=NA,inYears,xquant,chopX,chopY,pointsize=1,YaxisN,XaxisN,addRow=NA)
 {
  Nobs<-nrow(obs)
  inRow<-ceiling(sqrt(Nobs))
- incol<-floor(sqrt(Nobs))
+ incol<-ceiling(sqrt(Nobs))
+ if(!is.na(addRow))
+  inRow<-inRow+1
  par(mfcol=c(inRow,incol),mar=c(0.1,.1,.1,.1),oma=c(4,4,1,1))
  for(x in 1:Nobs)
  {
@@ -919,12 +1920,6 @@ PlotLenProps(obs =(snowad.rep[[1]]$"Observed proportion survey immature new male
              plot.new()
              legend("center",lty=seq(1,length(Scenarios)),legend=Scenarios,bty='n')
              
-             
-             
-             
-             
-             
-             
 ```
 
 \newpage
@@ -972,35 +1967,131 @@ Mi<-apply(tempMimm,1,sum)
 tempMmat<-(snowad.rep[[1]]$"Predicted proportion survey mature new male" + snowad.rep[[1]]$"Predicted proportion survey mature old male")[,-1]
 MM<-apply(tempMmat,1,sum)
 
-par(mfrow=c(3,2),mar=c(.1,.1,.1,.1),oma=c(4,6,2,1))
-for(x in c(1,2,5,6,7,8))
- {
-  plot(snowad.rep[[2]]$"Observed Lbar"[x,]~SurveyYrs, pch=16,col=1,las=1,ylim=c(20,100),xaxt='n',yaxt='n')
-  if(x==7 | x==1 |x==5)
-    axis(side=2,las=1)
-
-  if(x==7 | x==8)
-    axis(side=1)
- for(y in 1:length(Scenarios))
- {
-  inputPreds<-rbind(snowad.rep[[y]]$"Predicted Lbar new shell",snowad.rep[[y]]$"Predicted Lbar old shell")
-  if(length(inputPreds)>0)
-  {
-    inputPreds<-inputPreds[c(1,2,5,6,3,4,7,8),]
-    lines(inputPreds[x,]~SurveyYrs,lty=y)
-  }
- }
-} 
-mtext(outer=T,side=2,"Average size (mm)",line=2.5,adj=.5)
-mtext(outer=T,side=3,adj=.25,"Females")
-mtext(outer=T,side=3,adj=.75,"Males")
-mtext(outer=T,side=1,"Year",line=2)
-mtext(outer=TRUE,side=2,adj=.1,"New shell immature",line=4)
-mtext(outer=TRUE,side=2,adj=.5,"New shell mature",line=4)
-mtext(outer=TRUE,side=2,adj=.9,"Old shell mature",line=4)
-
-legend("bottomright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
+# par(mfrow=c(3,2),mar=c(.1,.1,.1,.1),oma=c(4,6,2,1))
+# for(x in c(1,2,5,6,7,8))
+#  {
+#   plot(snowad.rep[[1]]$"Observed Lbar"[x,]~SurveyYrs, pch=16,col=1,las=1,ylim=c(20,100),xaxt='n',yaxt='n')
+#   if(x==7 | x==1 |x==5)
+#     axis(side=2,las=1)
+# 
+#   if(x==7 | x==8)
+#     axis(side=1)
+#  for(y in 1:length(Scenarios))
+#  {
+#   inputPreds<-rbind(snowad.rep[[y]]$"Predicted Lbar new shell",snowad.rep[[y]]$"Predicted Lbar old shell")
+#   if(length(inputPreds)>0)
+#   {
+#     inputPreds<-inputPreds[c(1,2,5,6,3,4,7,8),]
+#     lines(inputPreds[x,]~SurveyYrs,lty=y)
+#   }
+#  }
+# } 
+# mtext(outer=T,side=2,"Average size (mm)",line=2.5,adj=.5)
+# mtext(outer=T,side=3,adj=.25,"Females")
+# mtext(outer=T,side=3,adj=.75,"Males")
+# mtext(outer=T,side=1,"Year",line=2)
+# mtext(outer=TRUE,side=2,adj=.1,"New shell immature",line=4)
+# mtext(outer=TRUE,side=2,adj=.5,"New shell mature",line=4)
+# mtext(outer=TRUE,side=2,adj=.9,"Old shell mature",line=4)
+# legend("bottomright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
 ```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Model fits to retained catch proportion at length data"}
+#==this sucks, butwriting a function to do this has too many moving parts....
+inPred<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+  inPred[[x]]<-snowad.rep[[x]]$"Predicted proportion fishery retained new male" + snowad.rep[[x]]$"Predicted proportion fishery retained old male"
+
+inPred2<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+  inPred2[[x]]<-snowad.rep[[x]]$"Predicted proportion fishery retained old male" 
+
+PlotLenProps(obs =(snowad.rep[[1]]$"Observed proportion fishery retained new male" +snowad.rep[[1]]$"Observed proportion fishery retained old male")[,-1],
+             #obs2=snowad.rep[[1]]$"Observed proportion fishery retained old male"[,-1],
+             pred =inPred,
+             #pred2=inPred2,
+             inYears = SurveyYrs,
+             xquant = LengthBins,
+             chopX = 140,
+             chopY = 0.25,
+             pointsize = .7,
+             XaxisN = 7,
+             YaxisN = 7)
+             plot.new()
+             legend("center",pch=c(NA,15,16),col=c(NA,1,2),legend=c("Males","New shell","Old shell"),bty='n')
+             plot.new()
+             legend("center",lty=seq(1,length(Scenarios)),legend=Scenarios,bty='n')
+ 
+#==these are fit added together, but when split, the fit is really crummy             
+# inPred<-rep(list(list()),length(Scenarios))
+# for(x in 1:length(Scenarios))
+#   inPred[[x]]<-snowad.rep[[x]]$"Predicted proportion fishery retained new male" 
+# 
+# inPred2<-rep(list(list()),length(Scenarios))
+# for(x in 1:length(Scenarios))
+#   inPred2[[x]]<-snowad.rep[[x]]$"Predicted proportion fishery retained old male" 
+# 
+# PlotLenProps(obs =snowad.rep[[1]]$"Observed proportion fishery retained new male" [,-1],
+#              obs2=snowad.rep[[1]]$"Observed proportion fishery retained old male"[,-1],
+#              pred =inPred,
+#              pred2=inPred2,
+#              inYears = SurveyYrs,
+#              xquant = LengthBins,
+#              chopX = 140,
+#              chopY = 0.25,
+#              pointsize = .7,
+#              XaxisN = 7,
+#              YaxisN = 7)
+#              plot.new()
+#              legend("center",pch=c(NA,15,16),col=c(NA,1,2),legend=c("Males","New shell","Old shell"),bty='n')
+#              plot.new()
+#              legend("center",lty=seq(1,length(Scenarios)),legend=Scenarios,bty='n')            
+
+```
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8.5,fig.height=10,fig.cap="Model fits to retained catch proportion at length data"}
+
+#==these are fit added together, but when split, the fit is really crummy             
+inPred<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+  inPred[[x]]<-snowad.rep[[x]]$"Predicted proportion trawl male"
+
+inPred2<-rep(list(list()),length(Scenarios))
+for(x in 1:length(Scenarios))
+  inPred2[[x]]<-snowad.rep[[x]]$"Predicted proportion trawl female"
+
+PlotLenProps(obs =snowad.rep[[1]]$"Observed proportion trawl male" [,-1],
+             obs2=snowad.rep[[1]]$"Observed proportion trawl female"[,-1],
+             pred =inPred,
+             pred2=inPred2,
+             inYears = SurveyYrs,
+             xquant = LengthBins,
+             chopX = 140,
+             chopY = 0.25,
+             pointsize = .7,
+             XaxisN = 7,
+             YaxisN = 7,
+             addRow = 1)
+             plot.new()
+             legend("center",pch=c(NA,15,16),col=c(NA,1,2),legend=c("Males","New shell","Old shell"),bty='n')
+             plot.new()
+             legend("center",lty=seq(1,length(Scenarios)),legend=Scenarios,bty='n')
+```
+
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=7,fig.height=7,fig.cap="Residuals for fits to immature male survey proportion at length data"}
+par(mfrow=c(1,1),mar=c(4,4,1,1),oma=c(0,0,0,0))
+tempInObs<-snowad.rep[[1]]$"Observed proportion survey immature new male" + snowad.rep[[1]]$"Observed proportion survey immature old male"
+tempInPred<-snowad.rep[[1]]$"Predicted proportion survey immature new male" + snowad.rep[[1]]$"Predicted proportion survey immature old male"
+tempInObs[,1]<-tempInObs[,1]/2
+tempInPred[,1]<-tempInPred[,1]/2
+plot.bubble.fun(datao=,tempInObs,datap=tempInPred,nlen=22,sampsize=rep(200,12),maxres=10)
+```
+
+\newpage
 
 \newpage
 
@@ -1054,7 +2145,7 @@ plot(snowad.rep[[1]]$"selectivity trawl female"~LengthBins,type='l',yaxt='n',xax
 for(x in 2:length(Scenarios))
   lines(snowad.rep[[x]]$"selectivity trawl female"~LengthBins,lty=x)
 axis(side=4,las=1)
-legend("topright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
+legend("topleft",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
 
 plot(snowad.rep[[1]]$"estimated annual fishing mortality females pot"~RetCatchYrs, type="l",las=1,xlim=c(min(RetCatchYrs),max(RetCatchYrs)))
 for(x in 2:length(Scenarios))
@@ -1110,6 +2201,78 @@ legend("topleft",legend=c("1989-present"),bty='n')
 mtext(side=1,"Length (mm)",line=2)
 mtext(side=2,"Survey selectivity",line=2.5,outer=T)
 
+
+
+# observed numbers experimental surveys
+SurveyExpmntData09<-matrix(ncol=length(LengthBins),nrow=8)
+TakeSeq<-c(2,4,6,8,11,13,15,17)
+tmp<-grep("BSFRF",DATfile)[2]
+for(t in 1:length(TakeSeq))
+  SurveyExpmntData09[t,]<-as.numeric(unlist(strsplit(DATfile[(tmp+TakeSeq[t])],split="\t")))
+
+SurveyExpmntData10<-matrix(ncol=length(LengthBins),nrow=8)
+tmp<-grep("BSFRF",DATfile)[5]
+for(t in 1:length(TakeSeq))
+  SurveyExpmntData10[t,]<-as.numeric(unlist(strsplit(DATfile[(tmp+TakeSeq[t])],split="\t")))
+
+DatNames<-c("FemImmInd","FemMatInd","MalImmInd","MalMatInd","FemImmNmfs","FemMatNmfs","MalImmNmfs","MalMatNmfs")
+
+points((SurveyExpmntData09[5:6,]/(SurveyExpmntData09[1:2,]+SurveyExpmntData09[5:6,]))~matrix(rep(LengthBins,2),nrow=2,byrow=T),pch=16,col="#ff000088")
+points((SurveyExpmntData09[7:8,]/(SurveyExpmntData09[3:4,]+SurveyExpmntData09[7:8,]))~matrix(rep(LengthBins,2),nrow=2,byrow=T),pch=16,col="#0000ff88")
+points((SurveyExpmntData10[5:6,]/(SurveyExpmntData10[1:2,]+SurveyExpmntData10[5:6,]))~matrix(rep(LengthBins,2),nrow=2,byrow=T),pch=16,col="#ff000088")
+points((SurveyExpmntData10[7:8,]/(SurveyExpmntData10[3:4,]+SurveyExpmntData10[7:8,]))~matrix(rep(LengthBins,2),nrow=2,byrow=T),pch=16,col="#0000ff88")
+
+in09<-SurveyExpmntData10[5:8,]/(SurveyExpmntData10[1:4,]+SurveyExpmntData10[5:8,])
+in10<-SurveyExpmntData09[5:8,]/(SurveyExpmntData09[1:4,]+SurveyExpmntData09[5:8,])
+in09[in09=="NaN"]<- -1
+in10[in10=="NaN"]<- -1
+#write.csv(in10,"C:/Users/Cody/Desktop/10dat.csv")
+#write.csv(in09,"C:/Users/Cody/Desktop/09dat.csv")
+
+
+```
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8,fig.height=10,fig.cap="Estimated experimental survey selectivity"}
+#=========================================================
+# BSFRF survey selectivities, molting probability, weight at length
+#=======================================================
+par(mfrow=c(2,2),mar=c(.1,.1,.3,.1),oma=c(4,4,1,1))
+plot(snowad.rep[[1]]$"selectivity industry survey females 2009"~LengthBins,type='l',ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n')
+for(x in 1:length(Scenarios))
+{
+lines(snowad.rep[[x]]$"selectivity industry survey females 2009"~LengthBins,col=2,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+lines(snowad.rep[[x]]$"selectivity industry survey males 2009"~LengthBins,col=4,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+}
+legend("topleft",col=c(4,2),legend=c("Male","Female"),bty='n',lty=1)
+# points((SurveyExpmntData09[5:8,]/(SurveyExpmntData09[1:4,]+SurveyExpmntData09[5:8,]))~matrix(rep(LengthBins,4),nrow=4,byrow=T),pch=16,col="#cfcfcf88")
+
+plot(snowad.rep[[1]]$"selectivity industry survey females 2010"~LengthBins,type='l',ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n', yaxt='n')
+for(x in 1:length(Scenarios))
+{
+lines(snowad.rep[[x]]$"selectivity industry survey females 2010"~LengthBins,col=2,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+lines(snowad.rep[[x]]$"selectivity industry survey males 2010"~LengthBins,col=4,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+}
+# points((SurveyExpmntData10[5:8,]/(SurveyExpmntData10[1:4,]+SurveyExpmntData10[5:8,]))~matrix(rep(LengthBins,4),nrow=4,byrow=T),pch=16,col="#cfcfcf88")
+
+plot(snowad.rep[[1]]$"selectivity nmfs industry survey females 2009"~LengthBins,type='l',ylim=c(0,1),ylab='',las=1,xlab="")
+for(x in 1:length(Scenarios))
+{
+lines(snowad.rep[[x]]$"selectivity nmfs industry survey females 2009"~LengthBins,col=2,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+lines(snowad.rep[[x]]$"selectivity nmfs industry survey males 2009"~LengthBins,col=4,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+}
+# points((SurveyExpmntData09[5:8,]/(SurveyExpmntData09[1:4,]+SurveyExpmntData09[5:8,]))~matrix(rep(LengthBins,4),nrow=4,byrow=T),pch=16,col="#cfcfcf88")
+
+plot(snowad.rep[[1]]$"selectivity nmfs industry survey females 2010"~LengthBins,type='l',ylim=c(0,1),ylab='',las=1,xlab="",yaxt='n')
+for(x in 1:length(Scenarios))
+{
+lines(snowad.rep[[x]]$"selectivity nmfs industry survey females 2010" ~LengthBins,col=2,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+lines(snowad.rep[[x]]$"selectivity nmfs industry survey males 2010"~LengthBins,col=4,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+}
+# points((SurveyExpmntData10[5:8,]/(SurveyExpmntData10[1:4,]+SurveyExpmntData10[5:8,]))~matrix(rep(LengthBins,4),nrow=4,byrow=T),pch=16,col="#cfcfcf88")
+mtext(outer=t,side=2,adj=.2,"NMFS",line=2.5)
+mtext(outer=t,side=2,adj=.8,"Industry",line=2.5)
+mtext(outer=t,side=3,adj=.2,2009)
+mtext(outer=t,side=3,adj=.8,2010)
 ```
 
 \newpage
@@ -1123,9 +2286,9 @@ plot(snowad.rep[[1]]$"Predicted probability of maturing female"~LengthBins,type=
 for(x in 1:length(Scenarios))
 {
 lines(snowad.rep[[x]]$"Predicted probability of maturing female"~LengthBins, col=2,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
-lines(snowad.rep[[x]]$"Predicted probability of maturing male"~LengthBins,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
+lines(snowad.rep[[x]]$"Predicted probability of maturing male"~LengthBins,col=4,ylim=c(0,1),ylab='',las=1,xlab="",xaxt='n',lty=x)
 }
-legend("topleft",col=c(1,2),legend=c("Female","Male"),bty='n',pch=16)
+legend("topleft",col=c(4,2),legend=c("Female","Male"),bty='n',pch=16)
 legend("bottomright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
 
 
@@ -1152,8 +2315,8 @@ plot(-100000,type="l",las=1,
 text(labels=RetCatchYrs, y=snowad.rep[[1]]$"estimated annual total fishing mortality",x=snowad.rep[[1]]$"Mature male biomass at mating"[1:CatchYrN],cex=.5)
 mtext(side=1,"Mature male biomass at mating (t)",line=2)
 mtext(side=2,"Fully-selected fishing mortality",line=2.3)
-abline(h=F35,lty=2)
-abline(v=B35,lty=2)
+# abline(h=F35,lty=2)
+# abline(v=B35,lty=2)
 ```
 
 \newpage
@@ -1255,163 +2418,310 @@ lines(snowad.rep[[x]]$"estimated retained catch div by male spawning biomass at 
 legend("topleft",bty='n',"Retained catch")
 mtext(outer=T,side=2,"Proportion",line=2.5)
 ```
-                                                          
+  
+  
+  
 ```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8,fig.height=6,fig.cap="Retrospective pattern in MMB for chosen model"}
+retro<-0
+Chosen<-"Model 2a MatPrior_200"
 
- RetroN<-4
- Chosen<-"Model 3a SmoothMat_Weight"
- # pull out MMB (or other quantities)
- RetroMMB<-matrix(ncol=length(SurveyYrs)-1,nrow=RetroN+1)
- REPfile <-readLines(paste(TakeDir,Chosen,"/2016sc.REP",sep=""))
- tmp<-grep("male spawning biomass at matetime",REPfile)[2]
- tmpMMB<-as.numeric(unlist(strsplit(REPfile[tmp+1]," ")))
- RetroMMB[1,]<-tmpMMB[!is.na(tmpMMB)]
- for(x in 1:RetroN)
- { 
-  REPfile <-readLines(paste(TakeDir,Chosen,"/Retro_",x,"/2016sc.REP",sep=""))
+if(retro==1)
+{
+  RetroN<-4
+
+  # pull out MMB (or other quantities)
+  RetroMMB<-matrix(ncol=length(SurveyYrs)-1,nrow=RetroN+1)
+  REPfile <-readLines(paste(TakeDir,Chosen,"/2016sc.REP",sep=""))
   tmp<-grep("male spawning biomass at matetime",REPfile)[2]
   tmpMMB<-as.numeric(unlist(strsplit(REPfile[tmp+1]," ")))
-  tmpMMB<-tmpMMB[!is.na(tmpMMB)]
-  for(y in 1:(length(tmpMMB)-x))
-   RetroMMB[x+1,y]<-tmpMMB[y]
- }
-
- # plot quantities
-plot(RetroMMB[1,]~SurveyYrs[-length(SurveyYrs)],type="l",las=1,ylab='MMB (t)',xlab="Year")
-for(x in 2:nrow(RetroMMB))
- lines(RetroMMB[x,]~SurveyYrs[-length(SurveyYrs)],col=x)
-
-
-#  DO ALL OF THE MCMC AND THE RETROSPECTIVE PATTERN PLOTS HERE
-# sdfile      <-read.table(paste(TakeDir,"2016sc.std",sep=""))
-# corfile     <-readLines(paste(TakeDir,"2016sc.cor",sep=""),skip=1)
-# recruitsd   <-sdfile[sdfile[,2]=="recm_sd",]
-
-#==MCMC stuff==========================
-
-#PSV <- file(paste(TakeDir,"/2016sc.psv",sep=""), "rb")
-#nopar1 <- readBin(PSV, what=integer(), n=1)
-#mcmc1 <- readBin(PSV, what=numeric(), n=nopar1 * 10000)
-#mcmc1 <- matrix(mcmc1, byrow=TRUE, ncol=nopar1)
-
-# VariableNames<-rep(0,nopar1)
-# for(x in 1:nopar1)
-# {
-#  temp<-unlist(strsplit((corfile[x+2]),split=" "))
-#  if(x<10)
-#  VariableNames[x]<-temp[9]
-#  if(x>=10&x<100)
-#   VariableNames[x]<-temp[8]
-#  if(x>100)
-#   VariableNames[x]<-temp[7]
-# }
-# 
-# colnames(mcmc1)<-VariableNames
-
-PlotTrace<-function(input)
-{
-Trace<-rep(0,length(input))
-for(x in 1:length(Trace))
-  Trace[x]<-as.numeric(unlist(strsplit(as.character(input[[x]][1]),split=" "))[1])
-return(Trace[!is.na(Trace)])
+  RetroMMB[1,]<-tmpMMB[!is.na(tmpMMB)]
+  for(x in 1:RetroN)
+  { 
+    REPfile <-readLines(paste(TakeDir,Chosen,"/Retro_",x,"/2016sc.REP",sep=""))
+    tmp<-grep("male spawning biomass at matetime",REPfile)[2]
+    tmpMMB<-as.numeric(unlist(strsplit(REPfile[tmp+1]," ")))
+    tmpMMB<-tmpMMB[!is.na(tmpMMB)]
+    for(y in 1:(length(tmpMMB)-x))
+      RetroMMB[x+1,y]<-tmpMMB[y]
+  }
+  
+  # plot quantities
+  plot(RetroMMB[1,]~SurveyYrs[-length(SurveyYrs)],type="l",las=1,ylab='MMB (t)',xlab="Year")
+  for(x in 2:nrow(RetroMMB))
+    lines(RetroMMB[x,]~SurveyYrs[-length(SurveyYrs)],col=x)
 }
-
-REPfileEnd      <-readLines(paste("C:/SnowCrab/",Chosen,"/2016sc.REP",sep=""))
-MgmtQuants      <-as.numeric(unlist(strsplit(as.character(REPfileEnd[1]),split=" ")))
-names(MgmtQuants)<-c("F","BMSY","Surv_MMB","Fish_MMB","Mate_MMB","F35","FOFL","OFL")
-
-mcEval      <-readLines(paste("C:/SnowCrab/",Chosen,"/eval.csv",sep=""))
-EvalOuts    <-rep(list(list()),4000)
-EvalCounter <-seq(1,length(mcEval),17)
-
-for(x in 1:length(EvalOuts))
- for(y in 0:16)
-  EvalOuts[[x]][y+1]<-mcEval[EvalCounter[x]+y]
-
-par(mfrow=c(2,1),mar=c(2,2,.1,.1))
-plot(PlotTrace(EvalOuts))
-acf(PlotTrace(EvalOuts))
-
-inChop<-8
-outChop<-2900
-useEval<-EvalOuts[inChop:outChop]
-
-par(mfrow=c(2,1),mar=c(2,2,.1,.1))
-plot(PlotTrace(useEval))
-acf(PlotTrace(useEval))
-
-Thin<-14
-inSeq<-c(seq(1,length(useEval),Thin))
-useEval<-useEval[inSeq]
-
-par(mfrow=c(2,1),mar=c(2,2,.1,.1))
-plot(PlotTrace(useEval))
-acf(PlotTrace(useEval))
-
-
-
-#==B35 posterior==
-B35<-rep(0,length(inSeq))
-for(x in 1:length(useEval))
-  B35[x]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][1]),split=" "))[2])
-
-#==F35 posterior==
-F35<-rep(0,length(inSeq))
-for(x in 1:length(useEval))
-  F35[x]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][1]),split=" "))[3])
-
-
-#==FOFL posterior==
-FOFL<-rep(0,length(inSeq))
-for(x in 1:length(useEval))
-  FOFL[x]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][1]),split=" "))[4])
-
-#==OFL posterior==
-OFL<-rep(0,length(inSeq))
-for(x in 1:length(useEval))
-  OFL[x]<-as.numeric(unlist(strsplit(as.character(useEval[[x]][1]),split=" "))[5])
-
-
-par(mfrow=c(2,2),mar=c(3,.1,.1,.1),oma=c(2,2,1,1))
-hist(B35,main="",las=1,ylab="",xlab="",yaxt='n',col="lightgrey")
-abline(v=median(B35),lty=2,col=2)
-abline(v=MgmtQuants[2],col=4,lty=2)
-legend("topleft","B35",bty='n')
-
-hist(F35,main="",las=1,ylab="",xlab="",yaxt='n',col="lightgrey")
-abline(v=median(F35),lty=2,col=2)
-abline(v=MgmtQuants[6],col=4,lty=2)
-legend("topleft","F35",bty='n')
-
-hist(FOFL,main="",las=1,ylab="",xlab="",yaxt='n',col="lightgrey")
-abline(v=median(FOFL),lty=2,col=2)
-abline(v=MgmtQuants[7],col=4,lty=2)
-legend("topleft","FOFL",bty='n')
-
-hist(OFL,main="",las=1,ylab="",xlab="",yaxt='n',col="lightgrey")
-abline(v=median(OFL),lty=2,col=2)
-abline(v=MgmtQuants[8],col=4,lty=2)
-legend("topleft","OFL",bty='n')
-
-# pdf("C:/SnowCrab/posteriors.pdf")
-# for(x in 1:ncol(mcmc1))
-#  hist(mcmc1[,x],main=colnames(mcmc1)[x])
-# dev.off()
-
-#parameters
-#time series of catch divided by biomass
- 
-# marginal distributions for fits to the compositional data
-# time series of implied effective sample sizes
-# RMSE for indices
-# q q plots and historgrams of residuals to justify sampling distributions for the data
-
-
-# 
-# retrospective analysis
-
 ```
 
+\newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8,fig.height=6,fig.cap="Posterior densities for management quantities by scenario"}
+
+  PlotMCMC<-function(input,inputY=1,colrep=10,inLabel=NA,inLegend=0,transp=1,inPoly=0)
+  {
+   Densities<-lapply(input,density)
+   xlim <- range(input)
+   ylim <- range(0,inputY)
+   inCol<-rep(topo.colors(colrep,alpha=transp),ceiling(length(input)/colrep))
+   plot(Densities[[1]], xlim = xlim, ylim = ylim, xlab='inLabel',
+     main = '',col=inCol[1],las=1,yaxt='n',bty='n') 
+   for(x in 2:length(Densities))
+    lines(Densities[[x]],col=inCol[x]) 
+
+   if(inPoly>0)
+   {
+     for(x in 1:length(Densities))
+        polygon(Densities[[x]], density = -1, col = inCol[x],border=F)  
+   }
+
+   medians<-lapply(input,median)
+   for(x in 1:length(medians))
+    abline(v=unlist(medians)[[x]],col=inCol[x])
+   if(inLegend>0)
+    legend('topright',legend=ScenarioNames,col = inCol, bty = 'n', pch=15)
+   legend("topleft",bty='n',inLabel)
+  }
+
+  par(mfrow=c(3,2),mar=c(3,.1,.1,.1),oma=c(2,2,1,1))
+  chooseCol<-6
+  PlotMCMC(OFL,inputY=0.22,colrep=chooseCol,inLabel="OFL",inPoly=1,trans=.3)
+  PlotMCMC(MMB,inputY=0.12,colrep=chooseCol,inLabel="MMB",inPoly=1,trans=.3)
+  PlotMCMC(B35,inputY=0.12,colrep=chooseCol,inLabel=expression(B[35]),inPoly=1,trans=.3)
+  PlotMCMC(Status,inputY=15,colrep=chooseCol,inLabel="Status",inPoly=1,trans=.3)
+  PlotMCMC(F35,inputY=2,colrep=chooseCol,inLabel=expression(F[35]),inPoly=1,trans=.3)
+  PlotMCMC(FOFL,inputY=3,colrep=chooseCol,inLabel=expression(F[OFL]),inPoly=1,trans=.3,inLegend=1)  
+  
+```
+  
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=6.5,fig.height=6,fig.cap="Model fits to the observed mature biomass at survey"}
+  # ##=======FITS TO THE DATA SOURCES=========================
+  # #==mature male biomass==============
+  # mcmcMMBsrv<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+  # mcmcMFBsrv<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+  # 
+  # for(x in 1:length(useEval))
+  # {
+  #   mcmcMFBsrv[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][2]),split=" ")))[2:(SurvYrN+1)]
+  #   mcmcMMBsrv[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][3]),split=" ")))[2:(SurvYrN+1)]
+  # }
+  # 
+  # par(mfrow=c(2,1),mar=c(.1,.1,.3,.1),oma=c(4,4,1,1))
+  # plot(as.numeric(unlist(snowad.rep[[1]]$"Observed survey male spawning biomass"))[1:SurvYrN]~SurveyYrs,
+  #      pch=20,ylab="Mature Male Biomass (1000 t)",
+  #      xlab="Year",las=1,ylim=c(0,600),
+  #      xaxt='n');
+  # 
+  # sortQuant<-apply(mcmcMMBsrv,2,sort)
+  # TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+  # 
+  # polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+  # polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+  # points(as.numeric(unlist(snowad.rep[[1]]$"Observed survey male spawning biomass"))[1:SurvYrN]~SurveyYrs,pch=20)
+  # 
+  # for(j in 1:length(SurveyYrs))
+  # {
+  #   segments(x0=SurveyYrs[j],x1=SurveyYrs[j],
+  #            y0=as.numeric(unlist(snowad.rep[[1]]$"Observed survey male spawning biomass"))[j]  /   exp(1.96*sqrt(log(1+snowad.rep[[1]]$"survey CV"[2,]^2)))[j],
+  #            y1=as.numeric(unlist(snowad.rep[[1]]$"Observed survey male spawning biomass"))[j] * exp(1.96*sqrt(log(1+snowad.rep[[1]]$"survey CV"[2,]^2)))[j])
+  # }
+  # 
+  # #==mature female biomass==============
+  # plot(as.numeric(unlist(snowad.rep[[1]]$"Observed survey female spawning biomass"))[1:SurvYrN]~SurveyYrs,pch=20,ylab="Mature Female Biomass (1000 t)",xlab="Year",las=1,ylim=c(0,700));
+  # 
+  # sortQuant<-apply(mcmcMFBsrv,2,sort)
+  # TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+  # 
+  # polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+  # polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+  # points(as.numeric(unlist(snowad.rep[[1]]$"Observed survey female spawning biomass"))[1:SurvYrN]~SurveyYrs,pch=20)
+  # for(j in 1:length(SurveyYrs))
+  # {
+  #   segments(x0=SurveyYrs[j],x1=SurveyYrs[j],
+  #            y0=as.numeric(unlist(snowad.rep[[1]]$"Observed survey female spawning biomass"))[j]  /   exp(1.96*sqrt(log(1+snowad.rep[[1]]$"survey CV"[1,]^2)))[j],
+  #            y1=as.numeric(unlist(snowad.rep[[1]]$"Observed survey female spawning biomass"))[j] * exp(1.96*sqrt(log(1+snowad.rep[[1]]$"survey CV"[1,]^2)))[j])
+  # }
+  
+  
+```
+  
+  \newpage
+  
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=7,fig.height=8,fig.cap="Model fits to the growth data"}
+  
+  # #==mature male biomass==============
+  # femGrowth<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+  # maleGrowth<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+  # 
+  # for(x in 1:length(useEval))
+  # {
+  #   mcmcMFBsrv[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][2]),split=" ")))[2:(SurvYrN+1)]
+  #   mcmcMMBsrv[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][3]),split=" ")))[2:(SurvYrN+1)]
+  # }
+  # 
+  # par(mfrow=c(2,1),mar=c(.1,.1,.3,.1),oma=c(4,4,1,1))
+  # plot(as.numeric(unlist(snowad.rep[[1]]$"Observed survey male spawning biomass"))[1:SurvYrN]~SurveyYrs,
+  #      pch=20,ylab="Mature Male Biomass (1000 t)",
+  #      xlab="Year",las=1,ylim=c(0,600),
+  #      xaxt='n');
+  # 
+  # sortQuant<-apply(mcmcMMBsrv,2,sort)
+  # TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+  # 
+  # polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+  # polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+  # points(as.numeric(unlist(snowad.rep[[1]]$"Observed survey male spawning biomass"))[1:SurvYrN]~SurveyYrs,pch=20)
+  # 
+  # #==Growth data
+  # flength <- (snowad.rep[[1]]$"af"+snowad.rep[[1]]$"bf"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[1]]$"delta male")/snowad.rep[[1]]$"st_gr"))+
+  #   (snowad.rep[[1]]$"af2"+snowad.rep[[1]]$"bf1"*(20:135))*pnorm(((20:135)-snowad.rep[[1]]$"delta male")/snowad.rep[[1]]$"st_gr");
+  # mlength <- (snowad.rep[[1]]$"am"+snowad.rep[[1]]$"bm"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[1]]$"delta male")/snowad.rep[[1]]$"st_gr"))+
+  #   (snowad.rep[[1]]$"am2"+snowad.rep[[1]]$"b1"*(20:135))*pnorm(((20:135)-snowad.rep[[1]]$"delta male")/snowad.rep[[1]]$"st_gr");
+  # 
+  # flength<-rep(list(list()),length(Scenarios))
+  # mlength<-rep(list(list()),length(Scenarios))
+  # for(x in 1:length(Scenarios))
+  # {
+  #   tempF<-(snowad.rep[[x]]$"af"+snowad.rep[[x]]$"bf"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[x]]$"delta male") / snowad.rep[[x]]$"st_gr")) + (snowad.rep[[x]]$"af2"+snowad.rep[[x]]$"bf1"*(20:135))*pnorm(((20:135) -snowad.rep[[x]]$"delta male")/snowad.rep[[x]]$"st_gr")
+  #   flength[[x]]<-tempF
+  #   tempM<-(snowad.rep[[1]]$"am"+snowad.rep[[1]]$"bm"*(20:135))*(1-pnorm(((20:135)-snowad.rep[[1]]$"delta male") / snowad.rep[[1]]$"st_gr"))+ (snowad.rep[[1]]$"am2"+snowad.rep[[1]]$"b1"*(20:135))*pnorm(((20:135) -snowad.rep[[1]]$"delta male")/snowad.rep[[1]]$"st_gr")
+  #   mlength[[x]]<-tempM
+  #   
+  # }
+  # 
+  # par(mfrow=c(2,1),mar=c(.1,.1,.1,.1),oma=c(4,4,1,1))
+  # Finc<-GrowthData[,2]-GrowthData[,1]
+  # plot(Finc~GrowthData[,1],ylim=c(0,20),xlim=c(20,90),pch=16,col='grey',xaxt='n')
+  # legend(bty='n',"topleft","Female")
+  # 
+  # for(x in 1:length(Scenarios))
+  #   lines(flength[[x]]-c(20:135)~c(20:135),lty=x)
+  # 
+  # Minc<-GrowthData[,4]-GrowthData[,3]
+  # plot(Minc~GrowthData[,3],ylim=c(0,20),xlim=c(20,90),pch=16,col='grey')
+  # legend(bty='n',"topleft","Male")
+  # mtext(side=2,"Growth increment (mm)",outer=T,line=2)
+  # mtext(side=1,"Premolt length (mm)",outer=T,line=2)
+  # for(x in 1:length(Scenarios))
+  #   lines(mlength[[x]]-c(20:135)~c(20:135),lty=x)
+  # legend("bottomright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
+```
+  
+  \newpage
+
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=8,fig.height=10,fig.cap="Model fits to catch data"}
+#==mature male biomass==============
+#   mcmcRetCat<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+#   mcmcTotCat<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+#   mcmcDiscCat<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+#   mcmcTrawlCat<-matrix(nrow=length(useEval),ncol=(SurvYrN))
+#   
+#   for(x in 1:length(useEval))
+#   {
+#     mcmcRetCat[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][16]),split=" ")))[2:(SurvYrN+1)]
+#     mcmcTotCat[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][13]),split=" ")))[2:(SurvYrN+1)]
+#     mcmcDiscCat[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][14]),split=" ")))[2:(SurvYrN+1)]
+#     mcmcTrawlCat[x,]<-as.numeric(unlist(strsplit(unlist(useEval[[x]][17]),split=" ")))[2:(SurvYrN+1)]
+#   }
+#   
+#   mcmcDiscMCat<-mcmcTotCat-mcmcRetCat
+# 
+#   #==retained catch biomass
+#   par(mfrow=c(4,1),mar=c(.1,.1,.3,.1),oma=c(4,4.5,1,1))
+#   plot(snowad.rep[[1]]$"Observed retained catch biomass"~RetCatchYrs,las=1,ylab="Retained catch biomass (t)", xaxt="n",pch=20,ylim=c(0,175))
+#   legend("topright",bty='n',pch=c(NA,20),lty=c(1,NA),legend=c("Predicted","Observed"))
+#   legend("topleft",bty='n',"Retained")
+#   
+#   sortQuant<-apply(mcmcRetCat,2,sort)
+#   TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+#   
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+#   points(snowad.rep[[1]]$"Observed retained catch biomass"~RetCatchYrs,pch=20)
+# 
+# for(j in 1:length(RetCatchYrs))
+# {
+#  segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+# 		y0=as.numeric(unlist(snowad.rep[[1]]$"Observed retained catch biomass"))[j]  +   1.96*sdRetCat,
+# 		y1=as.numeric(unlist(snowad.rep[[1]]$"Observed retained catch biomass"))[j] - 1.96*sdRetCat)
+# }
+# 
+# 
+#     #===discard female biomass
+#   plot(snowad.rep[[1]]$"observed female discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xaxt="n",pch=20,ylim=c(0,0.2))
+#   legend("topleft",bty='n',"Discard (female)")
+#   
+#   sortQuant<-apply(mcmcDiscCat,2,sort)
+#   TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+#   
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+#   points(snowad.rep[[1]]$"observed female discard mortality biomass"~RetCatchYrs,pch=20)
+# for(j in 1:length(RetCatchYrs))
+# {
+#  segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+# 		y0=as.numeric(unlist(snowad.rep[[1]]$"observed female discard mortality biomass"))[j]  +   1.96*sdFemDisc,
+# 		y1=as.numeric(unlist(snowad.rep[[1]]$"observed female discard mortality biomass"))[j] - 1.96*sdFemDisc)
+# }
+# 
+#   
+#   #===discard male biomass
+#   plot(snowad.rep[[1]]$"observed male discard mortality biomass"~RetCatchYrs,las=1,ylab="Female discard (t)",xaxt="n",ylim=c(0,30),pch=20)
+#   legend("topleft",bty='n',"Discard (male)")
+# 
+#   sortQuant<-apply(mcmcDiscMCat,2,sort)
+#   TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+#   
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+#   points(snowad.rep[[1]]$"observed male discard mortality biomass"~RetCatchYrs,pch=20)
+# 
+#   for(j in 1:length(RetCatchYrs))
+# {
+#  segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+# 		y0=as.numeric(unlist(snowad.rep[[1]]$"observed male discard mortality biomass"))[j]  +   1.96*sdTotCat,
+# 		y1=as.numeric(unlist(snowad.rep[[1]]$"observed male discard mortality biomass"))[j] - 1.96*sdTotCat)
+# }
+# 
+#   
+#   #===trawl catch biomass
+#   plot(snowad.rep[[1]]$"observed trawl catch biomass"[1:CatchYrN]~RetCatchYrs,las=1,ylab="Trawl bycatch (t)",xlab="Year",pch=20,ylim=c(0,5))
+#   mtext(side=2,outer=T,line=3,"Biomass (t)")
+#   mtext(side=1,outer=T,line=2.5,"Year")
+# 
+#   sortQuant<-apply(mcmcTrawlCat,2,sort)
+#   TakeInd<-round(nrow(sortQuant)*c(0.05,.25,.75,.95))
+#   
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[1],],rev(sortQuant[TakeInd[4],])),col='light grey',border=F)
+#   polygon(x=c(SurveyYrs,rev(SurveyYrs)),y=c(sortQuant[TakeInd[2],],rev(sortQuant[TakeInd[3],])),col='grey',border=F)
+#   points(snowad.rep[[1]]$"observed trawl catch biomass"[1:CatchYrN]~RetCatchYrs,pch=20)
+#     legend("topleft",bty='n',"Trawl")
+#     
+# for(j in 1:length(RetCatchYrs))
+# {
+#  segments(x0=RetCatchYrs[j],x1=RetCatchYrs[j],
+# 		y0=as.numeric(unlist(snowad.rep[[1]]$"observed trawl catch biomass"))[j]  +   1.96*sdRetCat,
+# 		y1=as.numeric(unlist(snowad.rep[[1]]$"observed trawl catch biomass"))[j] - 1.96*sdRetCat)
+# }
+  
+```
+  
+```{r,echo=FALSE,warning=FALSE,message=F,fig.width=7,fig.height=6,fig.cap="Model fits to pot CPUE data"}
+  # plot(snowad.rep[[1]]$"observed pot fishery cpue"~ SurveyYrs[1:(length(SurveyYrs)-1)],ylim=c(0,450),las=1,ylab="",xlab="")
+  # for(x in 1:length(Scenarios))
+  #   lines(snowad.rep[[x]]$"predicted pot fishery cpue"~SurveyYrs[1:(length(SurveyYrs)-1)],lty=x)
+  # legend("topright",bty='n',lty=seq(1,length(Scenarios)),legend=Scenarios)
+  # 
+  # for(j in 1:length(SurveyYrs))
+  # {
+  #   segments(x0=SurveyYrs[j],x1=SurveyYrs[j],
+  #            y0=as.numeric(unlist(snowad.rep[[1]]$"observed pot fishery cpue"))[j]  +   1.96*5,
+  #            y1=as.numeric(unlist(snowad.rep[[1]]$"observed pot fishery cpue"))[j] - 1.96*5)
+  # }
+  # 
+  # mtext(side=1,"Year",line=2)
+  # mtext(side=2,"CPUE",line=2)
+  
+```
+  
 
 
 
